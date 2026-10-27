@@ -48,7 +48,9 @@ export default defineConfig({
     }),
   ],
   test: {
-    include: ['src/**/*.test.ts'],
+    // Les tests d'écrans (*.test.tsx) commencent par « // @vitest-environment jsdom ».
+    include: ['src/**/*.test.{ts,tsx}'],
     environment: 'node',
+    setupFiles: ['src/test/setup.ts'],
   },
 })

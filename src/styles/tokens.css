@@ -21,6 +21,10 @@
   --wash: #0a6c86;
   --solid: #1c1a33;
   --on-solid: #ffffff;
+  /* Contour et semelle des silhouettes de pièces */
+  --edge: rgba(28, 26, 51, 0.35);
+  --sole: #9a99b3;
+  --scrim: rgba(10, 12, 14, 0.55);
   /* Pastels de vignette, un par pièce */
   --t0: #d5f3e6;
   --t1: #e3dcff;
@@ -57,6 +61,8 @@
     --wash: #7fd6ee;
     --solid: #f2f0ff;
     --on-solid: #1c1a33;
+    --edge: rgba(242, 240, 255, 0.5);
+    --sole: #b8b6d4;
     --t0: #1f4a3e;
     --t1: #35306a;
     --t2: #5a3328;
@@ -88,6 +94,8 @@
   --wash: #7fd6ee;
   --solid: #f2f0ff;
   --on-solid: #1c1a33;
+  --edge: rgba(242, 240, 255, 0.5);
+  --sole: #b8b6d4;
   --t0: #1f4a3e;
   --t1: #35306a;
   --t2: #5a3328;

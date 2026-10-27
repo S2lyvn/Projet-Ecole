@@ -16,7 +16,7 @@ npm install
 npm run dev
 ```
 
-Puis ouvre l'adresse affichée (http://localhost:5173). Pour voir la version mobile, ouvre les outils de développement du navigateur et choisis un écran de téléphone.
+Puis ouvre l'adresse affichée (http://localhost:5173). Pour avoir le panneau de démo (avancer d'un jour, mode miroir), crée un fichier `.env.local` contenant `VITE_DEMO_MODE=true`. Pour voir la version mobile, ouvre les outils de développement du navigateur et choisis un écran de téléphone.
 
 ## Commandes
 
@@ -35,6 +35,7 @@ Puis ouvre l'adresse affichée (http://localhost:5173). Pour voir la version mob
 | `docs/` | Dossier de conception : contexte, produit, échange, données, technique, design, feuille de route |
 | `reference/` | Prototype interactif HTML (référence visuelle) |
 | `src/domain/` | Règles métier pures et testées |
+| `src/data/` | Accès aux données : interface commune et version locale (données d'exemple) |
 | `src/screens/` | Un dossier par écran |
 | `src/components/` | Composants partagés (barre d'onglets, en-têtes…) |
 | `src/styles/tokens.css` | Couleurs du design, thème clair et sombre |
@@ -42,7 +43,7 @@ Puis ouvre l'adresse affichée (http://localhost:5173). Pour voir la version mob
 
 ## Avancement
 
-Voir `docs/07-feuille-de-route.md`. Étape 0 (mise en place) faite.
+Voir `docs/07-feuille-de-route.md`. Étapes 0 (mise en place), 1 (règles métier et données d'exemple) et 2 (écrans du cœur en mode démo) faites.
 
 ## Configuration
 

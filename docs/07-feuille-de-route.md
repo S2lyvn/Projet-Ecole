@@ -13,14 +13,14 @@ Conseil : démarrer chaque étape en **mode plan** (Maj+Tab dans Claude Code), r
 
 **C'est fini quand :** `npm run dev` affiche l'appli avec les 5 onglets, les bonnes polices et couleurs, en clair et en sombre ; `npm run test` passe.
 
-## ☐ Étape 1 — Règles métier et données d'exemple
+## ☑ Étape 1 — Règles métier et données d'exemple
 
 **Prompt :**
 > Étape 1 de la feuille de route. Écris src/domain/ selon les règles de docs/02-produit.md (lavage, dormance, tenue du jour, indicateur) et docs/03-communaute-echange.md (barème de crédits, solde). Reprends l'algorithme de la tenue du jour du prototype reference/prototype-e-mirror.html. Ajoute des tests Vitest pour chaque règle. Crée src/data/repository.ts et une implémentation locale avec les pièces d'exemple du prototype.
 
 **C'est fini quand :** tous les tests passent et couvrent les cas limites (tout au lavage, pas de chaussures, robe orpheline, pièce jamais portée).
 
-## ☐ Étape 2 — Écrans du cœur (sans serveur)
+## ☑ Étape 2 — Écrans du cœur (sans serveur)
 
 **Prompt :**
 > Étape 2. Construis les écrans Aujourd'hui, Dressing (avec la feuille d'actions), Confirmation du lendemain, Achats détectés, À sortir, Vendre et Bilan, en reprenant le prototype. Ils lisent et écrivent via repository.ts en mode démo. Ajoute un petit panneau de démonstration (avancer d'un jour, mode miroir, réinitialiser), visible seulement si VITE_DEMO_MODE=true.

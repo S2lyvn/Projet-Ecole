@@ -8,6 +8,14 @@ const PATHS = {
   bars: '<path d="M5 20V11M12 20V4M19 20v-6"/>',
   moon: '<path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/>',
   contrast: '<circle cx="12" cy="12" r="8"/><path d="M12 4v16a8 8 0 0 0 0-16z" fill="currentColor"/>',
+  chev: '<path d="M9 6l6 6-6 6"/>',
+  back: '<path d="M15 6l-6 6 6 6"/>',
+  close: '<path d="M6 6l12 12M18 6L6 18"/>',
+  check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+  mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>',
+  mirror: '<rect x="6" y="3" width="12" height="18" rx="6"/><path d="M10 8c1-1 3-1 4 0"/>',
+  copy: '<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/>',
+  play: '<path d="M8 5v14l11-7z"/>',
 } as const
 
 export type IconName = keyof typeof PATHS
@@ -25,6 +33,7 @@ export function Icon({ name, size = 24, strokeWidth = 1.8 }: { name: IconName; s
       strokeLinejoin="round"
       aria-hidden="true"
       focusable="false"
+      className="flex-none"
       dangerouslySetInnerHTML={{ __html: PATHS[name] }}
     />
   )
