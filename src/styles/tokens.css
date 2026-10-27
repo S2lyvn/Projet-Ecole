@@ -1,0 +1,98 @@
+/* Variables de couleur de docs/06-design.md.
+   Le thème suit le système ; data-theme="light" ou "dark" sur <html> force un thème. */
+:root {
+  --stage: #ddf3e8;
+  --app: #f4fbf7;
+  --surface: #ffffff;
+  --ink: #1c1a33;
+  --muted: #5a5878;
+  --line: #d8e6de;
+  --tile: #e6f0eb;
+  --outline: #7c7b96;
+  --accent: #6247f5;
+  --on-accent: #ffffff;
+  --accent-ink: #4a31cf;
+  --accent-tint: #ece8ff;
+  --amber: #ff9e7d;
+  --on-amber: #1c1a33;
+  --amber-ink: #b4360f;
+  --fresh: #7be0b8;
+  --on-fresh: #10302a;
+  --wash: #0a6c86;
+  --solid: #1c1a33;
+  --on-solid: #ffffff;
+  /* Pastels de vignette, un par pièce */
+  --t0: #d5f3e6;
+  --t1: #e3dcff;
+  --t2: #ffe0d3;
+  --t3: #d3ebff;
+  --t4: #fff1bf;
+  --t5: #ffd9e8;
+
+  --font-display-stack: 'Bricolage Grotesque', 'Helvetica Neue', Arial, sans-serif;
+  --font-body-stack: 'DM Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --stage: #0e0d1a;
+    --app: #16142a;
+    --surface: #201e3a;
+    --ink: #f2f0ff;
+    --muted: #b0aed0;
+    --line: #35325a;
+    --tile: #2a2850;
+    --outline: #7c7aa5;
+    --accent: #6a52f0;
+    --on-accent: #ffffff;
+    --accent-ink: #c5baff;
+    --accent-tint: #2e2a66;
+    --amber: #ff9e7d;
+    --on-amber: #1c1a33;
+    --amber-ink: #ffb59b;
+    --fresh: #7be0b8;
+    --on-fresh: #10302a;
+    --wash: #7fd6ee;
+    --solid: #f2f0ff;
+    --on-solid: #1c1a33;
+    --t0: #1f4a3e;
+    --t1: #35306a;
+    --t2: #5a3328;
+    --t3: #1f3f5c;
+    --t4: #55481c;
+    --t5: #5a2a42;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  --stage: #0e0d1a;
+  --app: #16142a;
+  --surface: #201e3a;
+  --ink: #f2f0ff;
+  --muted: #b0aed0;
+  --line: #35325a;
+  --tile: #2a2850;
+  --outline: #7c7aa5;
+  --accent: #6a52f0;
+  --on-accent: #ffffff;
+  --accent-ink: #c5baff;
+  --accent-tint: #2e2a66;
+  --amber: #ff9e7d;
+  --on-amber: #1c1a33;
+  --amber-ink: #ffb59b;
+  --fresh: #7be0b8;
+  --on-fresh: #10302a;
+  --wash: #7fd6ee;
+  --solid: #f2f0ff;
+  --on-solid: #1c1a33;
+  --t0: #1f4a3e;
+  --t1: #35306a;
+  --t2: #5a3328;
+  --t3: #1f3f5c;
+  --t4: #55481c;
+  --t5: #5a2a42;
+  color-scheme: dark;
+}

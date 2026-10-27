@@ -1,0 +1,37 @@
+# Dépendances (réinstallées avec « npm install »)
+node_modules/
+
+# Builds (régénérés par « npm run build » ou par GitHub Actions)
+dist/
+dist-ssr/
+dev-dist/
+*.tsbuildinfo
+coverage/
+
+# Secrets : seul .env.example est versionné
+.env
+.env.*
+!.env.example
+
+# Supabase (fichiers locaux de la CLI)
+supabase/.temp/
+supabase/.branches/
+
+# Hébergeurs
+.vercel/
+.netlify/
+
+# Réglages personnels Claude Code
+.claude/settings.local.json
+
+# Éditeurs et système
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Journaux
+*.log
+npm-debug.log*
