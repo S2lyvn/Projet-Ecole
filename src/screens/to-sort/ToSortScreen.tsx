@@ -1,10 +1,10 @@
 // Onglet « À sortir » : pièces qui dorment au-delà du seuil choisi (outScreen() du prototype).
+import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useActiveGarments, useWardrobe } from '../../app/WardrobeProvider'
 import { useGarmentActions } from '../../app/useGarmentActions'
 import { Button } from '../../components/Button'
 import { Card } from '../../components/Card'
-import { Chip } from '../../components/Chip'
 import { EmptyState } from '../../components/EmptyState'
 import { GarmentTile } from '../../components/GarmentTile'
 import { Pills } from '../../components/Pills'
@@ -12,6 +12,7 @@ import { ScreenHeader } from '../../components/ScreenHeader'
 import { daysSinceLastWear, listDormant } from '../../domain/dormancy'
 import type { DormancyThreshold } from '../../domain/dormancy'
 import { buildOutfit } from '../../domain/outfit'
+import { listedGarmentIds } from '../../domain/swaps'
 import type { Garment } from '../../domain/types'
 import { agree, notWornSince } from '../../domain/wording'
 
@@ -36,6 +37,11 @@ export function ToSortScreen() {
   const { today, settings, dailyOutfit } = data
   const threshold = settings.dormancyDays
 
+  // Pièces déjà dans la bourse d'échange.
+  const listedIds = useMemo(
+    () => listedGarmentIds(data.swaps.listings),
+    [data.swaps.listings],
+  )
   const dormant = useMemo(() => listDormant(garments, today, threshold), [garments, today, threshold])
 
   // Pièce proposée dans la tenue du jour (sauf après « Pas aujourd'hui »).
@@ -97,8 +103,16 @@ export function ToSortScreen() {
       ) : (
         <>
           <ul className="m-0 flex list-none flex-col gap-2.5 p-0" aria-label="Pièces à sortir">
+            <AnimatePresence initial={false}>
             {dormant.map((garment) => (
-              <li key={garment.id}>
+              <motion.li
+                key={garment.id}
+                layout
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, x: -80, transition: { duration: 0.22 } }}
+                transition={{ type: 'spring', stiffness: 420, damping: 36 }}
+              >
                 <Card as="article" tight aria-labelledby={nameId(garment)}>
                   <div className="flex min-w-0 items-center gap-3">
                     <GarmentTile garment={garment} size="med" />
@@ -124,18 +138,13 @@ export function ToSortScreen() {
                     >
                       Remettre en jeu
                     </Button>
-                    {/* La bourse d'échange arrive à l'étape 4 : visible, inactif, comme dans le Dressing. */}
                     <Button
                       size="sm"
                       className={COMPACT}
-                      aria-disabled="true"
-                      aria-describedby={`${nameId(garment)} to-sort-swap-soon`}
-                      onClick={(event) => event.preventDefault()}
+                      aria-describedby={nameId(garment)}
+                      onClick={() => actions.exchange(garment)}
                     >
-                      Échanger{' '}
-                      <span className="flex">
-                        <Chip tone="accent">Bientôt</Chip>
-                      </span>
+                      {listedIds.has(garment.id) ? 'Voir l’annonce' : 'Échanger'}
                     </Button>
                     <Button
                       size="sm"
@@ -155,15 +164,14 @@ export function ToSortScreen() {
                     </Button>
                   </div>
                 </Card>
-              </li>
+              </motion.li>
             ))}
+            </AnimatePresence>
           </ul>
           <p className="m-0 text-center text-[13px] leading-[1.4] text-pretty text-muted">
             Dès que tu portes une pièce, elle quitte cette liste d’elle-même.
           </p>
-          <p id="to-sort-swap-soon" className="sr-only">
-            La bourse d’échange arrive bientôt dans l’appli.
-          </p>
+
         </>
       )}
     </>

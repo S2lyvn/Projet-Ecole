@@ -60,6 +60,17 @@
   h1:focus {
     outline: none;
   }
+
+  /* Fond grisé des feuilles du bas : fondu à l'ouverture. */
+  dialog[open]::backdrop {
+    animation: backdrop-in 220ms ease-out;
+  }
+}
+
+@keyframes backdrop-in {
+  from {
+    opacity: 0;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

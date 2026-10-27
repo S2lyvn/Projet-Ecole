@@ -76,3 +76,8 @@ export function objectPronoun(agreement: Agreement): string {
 export function verb(agreement: Agreement, singular: string, pluralForm: string): string {
   return agreement.endsWith('p') ? pluralForm : singular
 }
+
+/** « de » élidé devant une voyelle : de('Inès') → « d’Inès », de('Léo') → « de Léo ». */
+export function de(word: string): string {
+  return /^[aeiouyàâäéèêëîïôöùûü]/i.test(word) ? `d’${word}` : `de ${word}`
+}

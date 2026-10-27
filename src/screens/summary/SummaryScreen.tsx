@@ -3,7 +3,7 @@ import { ButtonLink } from '../../components/Button'
 import { Icon } from '../../components/Icon'
 import { Pills } from '../../components/Pills'
 import { ScreenHeader } from '../../components/ScreenHeader'
-import { computeUsage, countSwapCirculation, formatUsagePercent } from '../../domain/usage'
+import { computeUsage, formatUsagePercent } from '../../domain/usage'
 import type { UsagePeriod } from '../../domain/usage'
 import { plural } from '../../domain/wording'
 import { UsageRing } from './UsageRing'
@@ -17,7 +17,7 @@ const PERIOD_MONTHS: Record<UsagePeriod, number> = { 90: 3, 365: 12 }
 
 /** Ligne de l'échange (docs/02-produit.md) ; à 0, une formule qui n'accuse personne. */
 function swapLine(count: number): string {
-  if (count === 0) return 'Aucune pièce échangée pour l’instant. La bourse arrive bientôt.'
+  if (count === 0) return 'Aucune pièce échangée pour l’instant.'
   return `${count} ${plural(count, 'pièce remise', 'pièces remises')} en circulation par l’échange`
 }
 
@@ -25,7 +25,8 @@ export function SummaryScreen() {
   const { data, run } = useWardrobe()
   const period = data.settings.usagePeriod
   const usage = computeUsage(data.garments, data.today, period)
-  const swap = countSwapCirculation(data.garments)
+  // Pièces données ou reçues par la bourse : un échange terminé = une pièce remise en circulation.
+  const swapCount = data.swaps.swaps.filter((s) => s.status === 'completed').length
   const months = PERIOD_MONTHS[period]
   const ringLabel = `${usage.worn} ${plural(usage.worn, 'pièce portée', 'pièces portées')} sur ${usage.total} ces ${months} derniers mois`
 
@@ -70,7 +71,7 @@ export function SummaryScreen() {
         >
           <Icon name="swap" size={22} />
         </span>
-        <span className="min-w-0">{swapLine(swap.given + swap.received)}</span>
+        <span className="min-w-0">{swapLine(swapCount)}</span>
       </p>
 
       <ButtonLink to="/a-sortir" variant="solid" size="lg">

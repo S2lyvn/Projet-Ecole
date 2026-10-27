@@ -2,6 +2,8 @@
 // Grand écran : panneau à côté du cadre de l'appli. Petit écran : bouton flottant « Démo » et feuille du bas.
 import { useId, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import { useLocation, useNavigate } from 'react-router'
+import { isSecondaryPath } from '../app/navigation'
+import { ME } from '../domain/swaps'
 import { formatLongDate } from '../app/format'
 import { useActiveGarments, useWardrobe } from '../app/WardrobeProvider'
 import { BottomSheet } from '../components/BottomSheet'
@@ -27,10 +29,6 @@ function isWide(): boolean {
   return typeof window.matchMedia !== 'function' || window.matchMedia(WIDE_QUERY).matches
 }
 
-/** Écrans sans barre d'onglets : on revient à Aujourd'hui quand le jour change. */
-function isSecondaryPath(path: string): boolean {
-  return path === '/confirmer' || path === '/achats' || path.startsWith('/vendre/')
-}
 
 export function DemoPanel() {
   const { demo } = useWardrobe()
@@ -52,18 +50,16 @@ export function DemoPanel() {
     )
   }
 
-  // Onglets : bas à droite, au-dessus de la barre (AppLayout réserve la place sous le contenu).
-  // Écrans secondaires : en haut à droite, en face du bouton retour, pour ne pas cacher l'action principale.
-  const position = isSecondaryPath(pathname)
-    ? 'top-[max(28px,env(safe-area-inset-top))] right-5'
-    : 'right-3 bottom-[calc(104px+env(safe-area-inset-bottom))]'
+  // Petit écran : bouton flottant en bas à droite, au-dessus de la barre d'onglets (AppLayout réserve la place).
+  // Masqué sur les écrans secondaires, où il passerait par-dessus le contenu qui défile : la démo reste à un retour.
+  if (isSecondaryPath(pathname)) return null
   return (
     <>
       <button
         type="button"
         aria-haspopup="dialog"
         onClick={() => setOpen(true)}
-        className={`fixed ${position} z-10 inline-flex min-h-11 items-center gap-1.5 rounded-full border border-outline bg-surface px-4 text-sm font-bold text-ink`}
+        className={`fixed right-3 bottom-[calc(104px+env(safe-area-inset-bottom))] z-10 inline-flex min-h-11 items-center gap-1.5 rounded-full border border-outline bg-surface px-4 text-sm font-bold text-ink`}
       >
         <Icon name="play" size={16} />
         Démo
@@ -158,6 +154,22 @@ function DemoContent({ titleId, onClose }: { titleId: string; onClose?: () => vo
       showToast('Démo réinitialisée.')
     })
 
+  // Bourse simulée : un membre fictif réserve la première annonce ouverte de l'utilisateur.
+  const myOpenListings = data.swaps.listings.filter((l) => l.ownerId === ME && l.status === 'open').length
+  const simulateReservation = () =>
+    guarded(async () => {
+      if (!demo) return
+      try {
+        const swap = await run(() => demo.simulateIncomingReservation())
+        onClose?.()
+        const member = data.swaps.members.find((m) => m.id === swap.receiverId)
+        navigate(`/echanges/echange/${swap.id}`)
+        showToast(`${member?.displayName ?? 'Un membre'} veut ta pièce !`)
+      } catch (e) {
+        showToast(e instanceof Error ? e.message : 'Impossible pour le moment.')
+      }
+    })
+
   const toggleMirror = () =>
     guarded(async () => {
       const mirrorMode = !settings.mirrorMode
@@ -170,6 +182,7 @@ function DemoContent({ titleId, onClose }: { titleId: string; onClose?: () => vo
   const mirrorLabelId = `${ids}-mirror-label`
   const mirrorNoteId = `${ids}-mirror-note`
   const nextId = `${ids}-next`
+  const swapId = `${ids}-swap`
 
   return (
     <>
@@ -236,6 +249,20 @@ function DemoContent({ titleId, onClose }: { titleId: string; onClose?: () => vo
         </button>
         <p id={mirrorNoteId} className={SMALL_CLASSES}>
           Activé, le miroir repère les pièces portées&nbsp;: plus aucune confirmation le lendemain.
+        </p>
+      </section>
+
+      <section className={BLOCK_CLASSES} aria-labelledby={swapId}>
+        <h3 id={swapId} className={BLOCK_TITLE_CLASSES}>
+          Bourse d’échange
+        </h3>
+        <Button fullWidth onClick={() => void simulateReservation()}>
+          Un membre réserve mon annonce
+        </Button>
+        <p className={SMALL_CLASSES}>
+          {myOpenListings > 0
+            ? 'Joue l’autre côté de l’échange : un membre fictif réserve ta pièce et te propose un rendez-vous.'
+            : 'Propose d’abord une pièce à l’échange (bouton Échanger dans À sortir ou le Dressing).'}
         </p>
       </section>
 

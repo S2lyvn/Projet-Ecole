@@ -5,9 +5,11 @@ import { DEFAULT_DORMANCY_DAYS } from '../domain/dormancy'
 import { DEFAULT_USAGE_PERIOD } from '../domain/usage'
 import type { Agreement, Garment, GarmentCategory, IsoDate, Wear } from '../domain/types'
 import type { DailyOutfitState, PendingConfirmation, PurchaseCandidate, UserSettings } from './repository'
+import { createSampleCommunity } from './sampleCommunity'
+import type { CommunityState } from './sampleCommunity'
 
-// Version 2 : ajout de validatedGarmentIds (un état v1 enregistré repart des données d'exemple).
-export const STATE_VERSION = 2
+// Version 3 : ajout de la bourse simulée (un état plus ancien repart des données d'exemple).
+export const STATE_VERSION = 3
 
 /** État complet de la démo locale, sérialisé tel quel en JSON. */
 export interface LocalState {
@@ -23,6 +25,8 @@ export interface LocalState {
   settings: UserSettings
   /** Compteur des nouvelles pièces (ids déterministes). */
   nextGarmentNumber: number
+  /** Bourse d'échange simulée : membres fictifs, annonces, échanges, registre des crédits. */
+  community: CommunityState
 }
 
 interface SampleGarment {
@@ -129,5 +133,6 @@ export function createSampleState(today: IsoDate): LocalState {
     purchases,
     settings: { ...DEFAULT_SETTINGS },
     nextGarmentNumber: SAMPLE_GARMENTS.length + 1,
+    community: createSampleCommunity(today),
   }
 }

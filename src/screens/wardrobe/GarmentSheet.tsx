@@ -5,12 +5,12 @@ import { useGarmentActions } from '../../app/useGarmentActions'
 import { useWardrobe } from '../../app/WardrobeProvider'
 import { BottomSheet } from '../../components/BottomSheet'
 import { Button, IconButton } from '../../components/Button'
-import { Chip } from '../../components/Chip'
 import { GarmentTile } from '../../components/GarmentTile'
 import { Icon } from '../../components/Icon'
 import { useToast } from '../../components/Toast'
 import { daysSinceLastWear, garmentState } from '../../domain/dormancy'
 import { isInLaundry } from '../../domain/laundry'
+import { activeListingFor } from '../../domain/swaps'
 import type { Garment, IsoDate } from '../../domain/types'
 import { formatDuration, objectPronoun, participle, verb, wornAgo } from '../../domain/wording'
 
@@ -50,7 +50,6 @@ export function GarmentSheet({
   const { showToast } = useToast()
   const [busy, setBusy] = useState(false)
   const titleId = useId()
-  const soonId = useId()
 
   // Pas de fermeture pendant une action : la feuille se ferme d'elle-même à la fin.
   function close() {
@@ -75,6 +74,7 @@ export function GarmentSheet({
 
   const inLaundry = garment ? isInLaundry(garment, data.today) : false
   const status = garment ? statusText(garment, data.today, data.settings.dormancyDays) : ''
+  const listed = garment ? activeListingFor(data.swaps.listings, garment.id) !== null : false
   const dormant = garment ? garmentState(garment, data.today, data.settings.dormancyDays).kind === 'dormant' : false
 
   return (
@@ -115,16 +115,10 @@ export function GarmentSheet({
               </>
             )}
 
-            {/* La bourse d'échange arrive à l'étape 4 : bouton visible, mais inactif et expliqué. */}
-            <Button aria-disabled="true" aria-describedby={soonId} onClick={(event) => event.preventDefault()}>
-              Échanger{' '}
-              <span className="flex">
-                <Chip tone="accent">Bientôt</Chip>
-              </span>
+            <Button disabled={busy} onClick={() => act(actions.exchange, false)}>
+              <Icon name="swap" size={20} />
+              {listed ? 'Voir son annonce d’échange' : 'Échanger'}
             </Button>
-            <p id={soonId} className="m-0 text-xs text-muted">
-              La bourse d’échange arrive bientôt dans l’appli.
-            </p>
 
             <div className="grid grid-cols-2 gap-2.5">
               <Button disabled={busy} onClick={() => act(actions.sell, false)}>

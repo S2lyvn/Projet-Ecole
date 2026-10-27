@@ -1,4 +1,5 @@
 // Achats détectés : ajouter ou ignorer d'un geste les achats trouvés (e-mails, tickets). Simulé dans le MVP.
+import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router'
 import { useWardrobe } from '../../app/WardrobeProvider'
@@ -128,10 +129,17 @@ export function PurchasesScreen() {
             <h2 className="m-0 text-[13px] font-bold tracking-[0.04em] text-muted uppercase">
               À ajouter · {count}
             </h2>
+            <AnimatePresence initial={false} mode="popLayout">
             {purchases.map((p) => {
               const days = Math.max(0, daysBetween(p.detectedAt, data.today))
               return (
-                <Card as="article" tight key={p.id}>
+                <motion.div
+                  key={p.id}
+                  layout
+                  exit={{ opacity: 0, x: 60, transition: { duration: 0.2 } }}
+                  transition={{ type: 'spring', stiffness: 420, damping: 36 }}
+                >
+                <Card as="article" tight>
                   <div className="flex min-w-0 items-center gap-3">
                     <GarmentTile garment={p} size="sm" />
                     <div className="flex min-w-0 flex-col gap-0.5">
@@ -162,8 +170,10 @@ export function PurchasesScreen() {
                     </Button>
                   </div>
                 </Card>
+                </motion.div>
               )
             })}
+            </AnimatePresence>
           </div>
 
           <div className="mt-auto flex flex-col gap-2.5">

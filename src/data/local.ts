@@ -13,9 +13,12 @@ import type {
   DemoControls,
   NewGarment,
   PendingConfirmation,
+  SwapRepository,
   UserSettings,
   WardrobeRepository,
 } from './repository'
+import * as swaps from './localSwaps'
+import type { SwapWorld } from './localSwaps'
 import { STATE_VERSION, createSampleState } from './sampleData'
 import type { LocalState } from './sampleData'
 
@@ -100,6 +103,13 @@ const SETTINGS_SHAPE: Record<string, Check> = {
 
 const isIdList: Check = (v) => Array.isArray(v) && v.every(isString)
 
+/** Contrôle de forme léger de la bourse simulée (listes et compteurs présents). */
+function isCommunity(value: unknown): boolean {
+  if (!isRecord(value)) return false
+  const lists = ['members', 'listings', 'swaps', 'ledger'].every((k) => Array.isArray(value[k]))
+  return lists && Number.isInteger(value.clock) && Number.isInteger(value.nextNumber) && isRecord(value.sizes)
+}
+
 /** Vérifie tout l'état relu : au moindre doute (champ manquant, date invalide, id orphelin), données d'exemple. */
 function isLocalState(value: unknown): value is LocalState {
   if (!isRecord(value) || value.version !== STATE_VERSION || !isDate(value.today)) return false
@@ -109,6 +119,7 @@ function isLocalState(value: unknown): value is LocalState {
   if (!Array.isArray(purchases) || !purchases.every((p) => hasShape(p, PURCHASE_SHAPE))) return false
   if (!hasShape(value.dailyOutfit, OUTFIT_SHAPE) || !hasShape(value.settings, SETTINGS_SHAPE)) return false
   if (!Number.isInteger(nextGarmentNumber)) return false
+  if (!isCommunity(value.community)) return false
   const ids = new Set((garments as Garment[]).map((g) => g.id))
   if (ids.size !== garments.length) return false
   const known = (list: unknown): boolean => isIdList(list) && (list as string[]).every((id) => ids.has(id))
@@ -166,7 +177,9 @@ function applyWears(state: LocalState, ids: string[], wornOn: IsoDate, source: W
   return cleanLaundry({ ...state, garments, wears })
 }
 
-export function createLocalRepository(options: LocalRepositoryOptions = {}): WardrobeRepository & DemoControls {
+export function createLocalRepository(
+  options: LocalRepositoryOptions = {},
+): WardrobeRepository & SwapRepository & DemoControls {
   const storage = options.storage ?? null
   const key = options.key ?? DEFAULT_STORAGE_KEY
 
@@ -216,6 +229,14 @@ export function createLocalRepository(options: LocalRepositoryOptions = {}): War
     return ids.map((id) => structuredClone(clearExpiredLaundry(findGarment(id), state.today)))
   }
 
+  function world(): SwapWorld {
+    return { community: state.community, garments: state.garments, today: state.today }
+  }
+
+  function commitWorld(next: SwapWorld, extra: Partial<LocalState> = {}): void {
+    commit({ ...state, community: next.community, garments: next.garments, ...extra })
+  }
+
   function currentOutfit(): DailyOutfitState {
     return state.dailyOutfit.day === state.today ? state.dailyOutfit : freshOutfit(state.today)
   }
@@ -245,7 +266,10 @@ export function createLocalRepository(options: LocalRepositoryOptions = {}): War
     },
 
     async setGarmentStatus(id: string, status: GarmentStatus) {
-      return replaceGarment({ ...findGarment(id), status })
+      const updated = replaceGarment({ ...findGarment(id), status })
+      // Donnée ou vendue : son annonce d'échange encore ouverte est retirée.
+      commitWorld(swaps.withdrawListingsOfInactive(world()))
+      return updated
     },
 
     async washGarment(id) {
@@ -357,12 +381,81 @@ export function createLocalRepository(options: LocalRepositoryOptions = {}): War
       }
       // (c), (d), (e) Jour suivant, lavages expirés nettoyés, nouvelle tenue à proposer.
       const tomorrow = addDays(today, 1)
-      commit(cleanLaundry({ ...next, today: tomorrow, dailyOutfit: freshOutfit(tomorrow), validatedGarmentIds: null }))
+      next = cleanLaundry({ ...next, today: tomorrow, dailyOutfit: freshOutfit(tomorrow), validatedGarmentIds: null })
+      // Bourse : nouvelle journée, réservations de plus de 72 h sans rendez-vous annulées.
+      const expired = swaps.expireReservations({
+        community: { ...next.community, clock: 0 },
+        garments: next.garments,
+        today: tomorrow,
+      })
+      commit({ ...next, community: expired.community, garments: expired.garments })
       return tomorrow
     },
 
     async reset() {
       commit(initialState())
+    },
+
+    async simulateIncomingReservation() {
+      const change = swaps.simulateIncomingReservation(world())
+      commitWorld(change.world)
+      return structuredClone(change.value)
+    },
+
+    async getSwapState() {
+      const { members, listings, swaps: list, ledger, sizes, city, isAdult, rulesAccepted } = state.community
+      return structuredClone({ members, listings, swaps: list, ledger, sizes, city, isAdult, rulesAccepted })
+    },
+
+    async acceptCommunityRules() {
+      commit({ ...state, community: { ...state.community, rulesAccepted: true } })
+    },
+
+    async publishListing(input) {
+      const change = swaps.publishListing(world(), input)
+      commitWorld(change.world)
+      return structuredClone(change.value)
+    },
+
+    async withdrawListing(listingId) {
+      commitWorld(swaps.withdrawListing(world(), listingId))
+    },
+
+    async reserveListing(listingId) {
+      const change = swaps.reserveListing(world(), listingId)
+      commitWorld(change.world)
+      return structuredClone(change.value)
+    },
+
+    async scheduleSwap(swapId, place, slot) {
+      const change = swaps.scheduleSwap(world(), swapId, place, slot)
+      commitWorld(change.world)
+      return structuredClone(change.value)
+    },
+
+    async sendSwapMessage(swapId, body) {
+      const change = swaps.sendSwapMessage(world(), swapId, body)
+      commitWorld(change.world)
+      return structuredClone(change.value)
+    },
+
+    async completeSwap(swapId, handoverCode) {
+      const change = swaps.completeSwap(world(), swapId, handoverCode, nextGarmentId())
+      const received = change.value.receivedGarment !== null
+      commitWorld(change.world, received ? { nextGarmentNumber: state.nextGarmentNumber + 1 } : {})
+      return structuredClone(change.value)
+    },
+
+    async cancelSwap(swapId) {
+      const change = swaps.cancelSwap(world(), swapId)
+      commitWorld(change.world)
+      return structuredClone(change.value)
+    },
+
+    async rateSwap(swapId, rating) {
+      const change = swaps.rateSwap(world(), swapId, rating)
+      commitWorld(change.world)
+      return structuredClone(change.value)
     },
   }
 }

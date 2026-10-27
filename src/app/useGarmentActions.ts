@@ -5,6 +5,7 @@ import { formatWeekday } from './format'
 import { useWardrobe } from './WardrobeProvider'
 import type { Garment } from '../domain/types'
 import { agree, pronoun } from '../domain/wording'
+import { activeListingFor } from '../domain/swaps'
 
 export function useGarmentActions() {
   const { run, data } = useWardrobe()
@@ -39,6 +40,11 @@ export function useGarmentActions() {
       showToast(`${garment.name} : ${agree(garment.agreement, 'donné')}. ${subject.charAt(0).toUpperCase()}${subject.slice(1)} ${leaves} ton dressing.`, {
         undo: () => run((r) => r.setGarmentStatus(garment.id, 'active')).then(() => undefined),
       })
+    },
+    /** Échanger : ouvre l'annonce si la pièce est déjà dans la bourse, sinon le formulaire prérempli. */
+    exchange(garment: Garment) {
+      const listing = activeListingFor(data.swaps.listings, garment.id)
+      navigate(listing ? `/echanges/annonce/${listing.id}` : `/echanges/proposer/${garment.id}`)
     },
     /** Vendre : ouvre l'annonce préremplie. */
     sell(garment: Garment) {

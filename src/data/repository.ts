@@ -1,6 +1,7 @@
 // Interface d'accès aux données : les écrans parlent à ce contrat, jamais directement à Supabase (docs/05-technique.md).
 // Tout est asynchrone pour que l'implémentation Supabase (étape 3) s'y branche sans toucher aux écrans.
 import type { DormancyThreshold } from '../domain/dormancy'
+import type { Member, MySizes, Swap, SwapListing } from '../domain/swaps'
 import type { UsagePeriod } from '../domain/usage'
 import type {
   Agreement,
@@ -9,6 +10,8 @@ import type {
   GarmentSource,
   GarmentStatus,
   IsoDate,
+  ItemCondition,
+  LedgerEntry,
   Wear,
   WearSource,
 } from '../domain/types'
@@ -101,14 +104,63 @@ export interface WardrobeRepository {
   updateSettings(patch: Partial<UserSettings>): Promise<UserSettings>
 }
 
+/** Ce que la bourse montre à l'utilisateur. */
+export interface SwapState {
+  members: Member[]
+  /** Annonces de la ville et des cercles de l'utilisateur, plus les siennes (toutes statuts). */
+  listings: SwapListing[]
+  /** Échanges où l'utilisateur est donneur ou receveur. */
+  swaps: Swap[]
+  /** Registre des crédits de l'utilisateur : le solde en est la somme (lecture seule). */
+  ledger: LedgerEntry[]
+  sizes: MySizes
+  city: string
+  isAdult: boolean
+  rulesAccepted: boolean
+}
+
+export interface PublishListingInput {
+  garmentId: string
+  condition: ItemCondition
+  note: string | null
+  /** Cercle privé, ou null pour toute la ville. */
+  circle: string | null
+}
+
+/**
+ * Bourse d'échange (docs/03). Toutes les écritures de crédits se font derrière cette interface :
+ * dans le simulateur local aujourd'hui, dans les fonctions RPC Supabase à l'étape 4 (CLAUDE.md, règle 4).
+ */
+export interface SwapRepository {
+  getSwapState(): Promise<SwapState>
+  acceptCommunityRules(): Promise<void>
+  /** Met une pièce active du dressing en ligne ; elle reste dans le dressing jusqu'à la remise. */
+  publishListing(input: PublishListingInput): Promise<SwapListing>
+  /** Retire une annonce encore ouverte. */
+  withdrawListing(listingId: string): Promise<void>
+  /** « Je la veux » : bloque les crédits (refus : RESERVE_REFUSAL_MESSAGES de domain/credits). */
+  reserveListing(listingId: string): Promise<Swap>
+  scheduleSwap(swapId: string, place: string, slot: string): Promise<Swap>
+  sendSwapMessage(swapId: string, body: string): Promise<Swap>
+  /** Remise confirmée par le code du QR : crédits transférés, pièce sortie ou reçue avec sa fiche. */
+  completeSwap(swapId: string, handoverCode: string): Promise<{ swap: Swap; receivedGarment: Garment | null }>
+  /** Annulation avant la remise : crédits débloqués, annonce remise en ligne. */
+  cancelSwap(swapId: string): Promise<Swap>
+  rateSwap(swapId: string, rating: number): Promise<Swap>
+}
+
 /** Commandes réservées au mode démo (soutenance). */
 export interface DemoControls {
   /** Passe au jour suivant, comme nextDay() du prototype ; renvoie le nouveau jour. */
   advanceDay(): Promise<IsoDate>
   /** Repart des données d'exemple. */
   reset(): Promise<void>
+  /** Bourse simulée : un membre fictif réserve la première annonce ouverte de l'utilisateur. */
+  simulateIncomingReservation(): Promise<Swap>
 }
 
 export const NOT_FOUND_MESSAGE = 'Pièce introuvable'
 export const NOTHING_TO_CONFIRM_MESSAGE = 'Aucune pièce à confirmer'
 export const FUTURE_WEAR_MESSAGE = 'Impossible d’enregistrer un port dans le futur'
+export const LISTING_NOT_FOUND_MESSAGE = 'Annonce introuvable'
+export const SWAP_NOT_FOUND_MESSAGE = 'Échange introuvable'

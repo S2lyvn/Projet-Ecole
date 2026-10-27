@@ -37,7 +37,7 @@ describe('Dressing', () => {
     await user.click(piece)
     const sheet = await screen.findByRole('dialog', { name: 'T-shirt blanc' })
     expect(within(sheet).getByText(/Disponible · porté il y a 11 jours/)).toBeInTheDocument()
-    expect(within(sheet).getByRole('button', { name: /Échanger/ })).toHaveAttribute('aria-disabled', 'true')
+    expect(within(sheet).getByRole('button', { name: /Échanger/ })).toBeEnabled()
     expect(within(sheet).getByRole('button', { name: 'Le proposer aujourd’hui' })).toBeInTheDocument()
 
     await user.click(within(sheet).getByRole('button', { name: 'Mettre au lavage' }))

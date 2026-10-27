@@ -16,6 +16,7 @@ const PATHS = {
   mirror: '<rect x="6" y="3" width="12" height="18" rx="6"/><path d="M10 8c1-1 3-1 4 0"/>',
   copy: '<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/>',
   play: '<path d="M8 5v14l11-7z"/>',
+  scan: '<path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><path d="M7 12h10"/>',
 } as const
 
 export type IconName = keyof typeof PATHS

@@ -1,7 +1,7 @@
 import type { Garment } from '../domain/types'
 
 type TileGarment = Pick<Garment, 'name' | 'category' | 'color'>
-export type TileSize = 'big' | 'lg' | 'med' | 'sm' | 'xs' | 'grid'
+export type TileSize = 'hero' | 'big' | 'lg' | 'med' | 'sm' | 'xs' | 'grid'
 
 // Silhouettes du prototype (viewBox 64), plus le manteau et « autre » (un sac).
 const PATHS: Record<Exclude<Garment['category'], 'shoes'>, string> = {
@@ -23,6 +23,7 @@ export function pastelClass(name: string): string {
 }
 
 const SIZES: Record<TileSize, { box: string; glyph: number }> = {
+  hero: { box: 'h-[220px] w-full rounded-3xl', glyph: 150 },
   big: { box: 'h-[132px] w-[120px] rounded-[18px]', glyph: 92 },
   lg: { box: 'size-[72px] rounded-2xl', glyph: 50 },
   med: { box: 'size-14 rounded-2xl', glyph: 40 },

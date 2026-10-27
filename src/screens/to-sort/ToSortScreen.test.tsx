@@ -27,7 +27,7 @@ describe('À sortir', () => {
     expect(within(card('Pull col rond gris')).getByText('Pas porté depuis 11 mois')).toBeInTheDocument()
     // La plus oubliée est l'orpheline proposée par défaut.
     expect(within(card('Robe grise en maille')).getByText(/· proposée aujourd’hui/)).toBeInTheDocument()
-    expect(within(card('T-shirt sable')).getByRole('button', { name: /Échanger/ })).toHaveAttribute('aria-disabled', 'true')
+    expect(within(card('T-shirt sable')).getByRole('button', { name: /Échanger/ })).toBeEnabled()
   })
 
   it('change le seuil de dormance et l’enregistre', async () => {

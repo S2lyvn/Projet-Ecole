@@ -1,3 +1,4 @@
+import { motion } from 'motion/react'
 import { NavLink } from 'react-router'
 import { Icon, type IconName } from './Icon'
 
@@ -24,13 +25,31 @@ export function TabBar() {
           end={tab.to === '/'}
           className={({ isActive }) =>
             [
-              'flex min-h-14 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-[14px] text-[11px] leading-none tracking-[-0.01em]',
-              isActive ? 'bg-accent-tint font-bold text-accent-ink' : 'font-medium text-muted',
+              'relative flex min-h-14 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-[14px] text-[11px] leading-none tracking-[-0.01em] transition-colors',
+              isActive ? 'font-bold text-accent-ink' : 'font-medium text-muted',
             ].join(' ')
           }
         >
-          <Icon name={tab.icon} />
-          <span className="max-w-full truncate">{tab.label}</span>
+          {({ isActive }) => (
+            <>
+              {/* La pastille de l'onglet actif glisse d'un onglet à l'autre. */}
+              {isActive && (
+                <motion.span
+                  layoutId="tab-pill"
+                  transition={{ type: 'spring', stiffness: 520, damping: 40 }}
+                  className="absolute inset-0 rounded-[14px] bg-accent-tint"
+                />
+              )}
+              <motion.span
+                className="relative"
+                animate={{ y: isActive ? -1 : 0, scale: isActive ? 1.08 : 1 }}
+                transition={{ type: 'spring', stiffness: 500, damping: 26 }}
+              >
+                <Icon name={tab.icon} />
+              </motion.span>
+              <span className="relative max-w-full truncate">{tab.label}</span>
+            </>
+          )}
         </NavLink>
       ))}
     </nav>

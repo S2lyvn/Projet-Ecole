@@ -25,6 +25,10 @@
   --edge: rgba(28, 26, 51, 0.35);
   --sole: #9a99b3;
   --scrim: rgba(10, 12, 14, 0.55);
+  /* Ombres douces (cartes, feuilles, pastilles actives) */
+  --shadow-sm: 0 1px 2px rgba(28, 26, 51, 0.06), 0 2px 6px rgba(28, 26, 51, 0.05);
+  --shadow-md: 0 2px 4px rgba(28, 26, 51, 0.04), 0 10px 28px -6px rgba(28, 26, 51, 0.14);
+  --shadow-accent: 0 8px 22px -8px rgba(98, 71, 245, 0.55);
   /* Pastels de vignette, un par pièce */
   --t0: #d5f3e6;
   --t1: #e3dcff;
@@ -63,6 +67,9 @@
     --on-solid: #1c1a33;
     --edge: rgba(242, 240, 255, 0.5);
     --sole: #b8b6d4;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.25), 0 12px 30px -8px rgba(0, 0, 0, 0.55);
+    --shadow-accent: 0 8px 24px -8px rgba(106, 82, 240, 0.7);
     --t0: #1f4a3e;
     --t1: #35306a;
     --t2: #5a3328;
@@ -96,6 +103,9 @@
   --on-solid: #1c1a33;
   --edge: rgba(242, 240, 255, 0.5);
   --sole: #b8b6d4;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.25), 0 12px 30px -8px rgba(0, 0, 0, 0.55);
+  --shadow-accent: 0 8px 24px -8px rgba(106, 82, 240, 0.7);
   --t0: #1f4a3e;
   --t1: #35306a;
   --t2: #5a3328;

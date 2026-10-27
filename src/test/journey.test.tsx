@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 // Critère de fin de l'étape 2 : refaire le parcours conseillé du prototype dans la vraie appli.
-import { render, screen, within } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router'
 import { describe, expect, it, vi } from 'vitest'
@@ -65,7 +65,7 @@ describe('parcours conseillé', () => {
     const first = within(list).getAllByRole('article')[0]
     const name = within(first).getByRole('heading', { level: 2 }).textContent ?? ''
     await user.click(within(first).getByRole('button', { name: /^Donner/ }))
-    expect(within(list).queryByRole('heading', { level: 2, name })).not.toBeInTheDocument()
+    await waitFor(() => expect(within(list).queryByRole('heading', { level: 2, name })).not.toBeInTheDocument())
     await user.click(await screen.findByRole('button', { name: 'Annuler' }))
     expect(await within(list).findByRole('heading', { level: 2, name })).toBeInTheDocument()
 

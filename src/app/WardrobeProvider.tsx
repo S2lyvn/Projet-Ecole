@@ -7,6 +7,8 @@ import type {
   DemoControls,
   PendingConfirmation,
   PurchaseCandidate,
+  SwapRepository,
+  SwapState,
   UserSettings,
   WardrobeRepository,
 } from '../data/repository'
@@ -21,9 +23,11 @@ export interface WardrobeSnapshot {
   pending: PendingConfirmation | null
   purchases: PurchaseCandidate[]
   settings: UserSettings
+  /** Bourse d'échange (simulée en démo). */
+  swaps: SwapState
 }
 
-export type Repository = WardrobeRepository & Partial<DemoControls>
+export type Repository = WardrobeRepository & SwapRepository & Partial<DemoControls>
 
 interface WardrobeContextValue {
   data: WardrobeSnapshot
@@ -37,7 +41,7 @@ interface WardrobeContextValue {
 const WardrobeContext = createContext<WardrobeContextValue | null>(null)
 
 async function loadSnapshot(repository: Repository): Promise<WardrobeSnapshot> {
-  const [today, garments, wears, dailyOutfit, pending, purchases, settings] = await Promise.all([
+  const [today, garments, wears, dailyOutfit, pending, purchases, settings, swaps] = await Promise.all([
     repository.today(),
     repository.listGarments(),
     repository.listWears(),
@@ -45,8 +49,9 @@ async function loadSnapshot(repository: Repository): Promise<WardrobeSnapshot> {
     repository.getPendingConfirmation(),
     repository.listPurchaseCandidates(),
     repository.getSettings(),
+    repository.getSwapState(),
   ])
-  return { today, garments, wears, dailyOutfit, pending, purchases, settings }
+  return { today, garments, wears, dailyOutfit, pending, purchases, settings, swaps }
 }
 
 export function WardrobeProvider({ repository, children }: { repository: Repository; children: ReactNode }) {
@@ -77,8 +82,12 @@ export function WardrobeProvider({ repository, children }: { repository: Reposit
 
   const demo = useMemo<DemoControls | null>(
     () =>
-      repository.advanceDay && repository.reset
-        ? { advanceDay: repository.advanceDay.bind(repository), reset: repository.reset.bind(repository) }
+      repository.advanceDay && repository.reset && repository.simulateIncomingReservation
+        ? {
+            advanceDay: repository.advanceDay.bind(repository),
+            reset: repository.reset.bind(repository),
+            simulateIncomingReservation: repository.simulateIncomingReservation.bind(repository),
+          }
         : null,
     [repository],
   )

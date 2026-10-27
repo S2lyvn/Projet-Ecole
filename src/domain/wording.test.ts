@@ -3,6 +3,7 @@ import { GARMENT_CATEGORIES, ITEM_CONDITIONS } from './types'
 import type { Agreement, Garment } from './types'
 import {
   agree,
+  de,
   objectPronoun,
   pronoun,
   verb,
@@ -132,5 +133,13 @@ describe('pronoms et verbes', () => {
   it('accorde le verbe au pluriel', () => {
     expect(verb('f', 'dort', 'dorment')).toBe('dort')
     expect(verb('mp', 'dort', 'dorment')).toBe('dorment')
+  })
+})
+
+describe('élision', () => {
+  it('élide « de » devant une voyelle', () => {
+    expect(de('Inès')).toBe('d’Inès')
+    expect(de('Élise')).toBe('d’Élise')
+    expect(de('Léo')).toBe('de Léo')
   })
 })

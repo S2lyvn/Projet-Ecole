@@ -36,7 +36,8 @@ describe('Achats détectés', () => {
 
     expect(await screen.findByText('Robe chemise bleu nuit : ajoutée au dressing.')).toBeInTheDocument()
     expect(screen.getByRole('heading', { level: 2, name: 'À ajouter · 2' })).toBeInTheDocument()
-    expect(screen.queryByRole('heading', { name: 'Robe chemise bleu nuit' })).not.toBeInTheDocument()
+    // La carte sort avec une animation : elle disparaît juste après.
+    await waitFor(() => expect(screen.queryByRole('heading', { name: 'Robe chemise bleu nuit' })).not.toBeInTheDocument())
 
     const added = (await repository.listGarments()).find((g) => g.name === 'Robe chemise bleu nuit')
     expect(added).toMatchObject({ source: 'purchase', status: 'active', category: 'dress', agreement: 'f' })

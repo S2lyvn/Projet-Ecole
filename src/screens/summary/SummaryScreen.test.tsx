@@ -43,17 +43,12 @@ describe('Bilan', () => {
     expect((await repository.getSettings()).usagePeriod).toBe(90)
   })
 
-  it('reste sobre quand aucune pièce n’a encore été échangée', async () => {
-    renderApp('/bilan')
-    expect(
-      await screen.findByText('Aucune pièce échangée pour l’instant. La bourse arrive bientôt.'),
-    ).toBeInTheDocument()
-  })
-
-  it('compte les pièces sorties par l’échange', async () => {
+  it('compte les échanges terminés de la bourse', async () => {
     const repository = createLocalRepository({ storage: null, startDate: TEST_TODAY })
-    await repository.setGarmentStatus('g10', 'swapped_out')
-    await repository.setGarmentStatus('g17', 'swapped_out')
+    // Les données d'exemple ont déjà un échange terminé ; on en termine un deuxième.
+    const swap = await repository.reserveListing('l6')
+    await repository.scheduleSwap(swap.id, 'Place de Jaude', 'Demain, 18 h')
+    await repository.completeSwap(swap.id, swap.handoverCode)
     render(
       <MemoryRouter initialEntries={['/bilan']}>
         <WardrobeProvider repository={repository}>
@@ -64,8 +59,8 @@ describe('Bilan', () => {
       </MemoryRouter>,
     )
     expect(await screen.findByText('2 pièces remises en circulation par l’échange')).toBeInTheDocument()
-    // Les pièces sorties ne comptent plus dans le dressing : 15 actives, dont 10 portées sur 3 mois.
-    expect(screen.getByRole('img', { name: '10 pièces portées sur 15 ces 3 derniers mois' })).toBeInTheDocument()
+    // La pièce reçue entre dans le dressing (18 actives) mais n'a pas encore été portée.
+    expect(screen.getByRole('img', { name: '10 pièces portées sur 18 ces 3 derniers mois' })).toBeInTheDocument()
   })
 
   it('mène aux pièces à sortir', async () => {

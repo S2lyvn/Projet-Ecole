@@ -1,11 +1,11 @@
 // Écran Aujourd'hui : la tenue du jour, construite autour d'une pièce oubliée (todayScreen() du prototype).
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { AnimatePresence, motion } from 'motion/react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { formatLongDate } from '../../app/format'
 import { useActiveGarments, useWardrobe } from '../../app/WardrobeProvider'
 import { Banner } from '../../components/Banner'
 import { Button, ButtonLink, buttonClasses } from '../../components/Button'
 import { Card } from '../../components/Card'
-import { Icon } from '../../components/Icon'
 import { ScreenHeader } from '../../components/ScreenHeader'
 import { useToast } from '../../components/Toast'
 import type { DailyOutfitState } from '../../data/repository'
@@ -13,6 +13,14 @@ import { isInLaundry } from '../../domain/laundry'
 import { buildOutfit, nextOrphanId } from '../../domain/outfit'
 import { plural } from '../../domain/wording'
 import { OutfitCard } from './OutfitCard'
+
+/** Bascule entre « proposée » et « validée » : fondu et léger glissement. */
+const swapIn = {
+  initial: { opacity: 0, y: 8 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -6 },
+  transition: { duration: 0.18 },
+}
 
 /** Bouton qui reçoit le focus après une bascule (data-fk, comme S._focus du prototype). */
 type FocusKey = 'validate' | 'unvalidate' | 'other' | 'undismiss'
@@ -43,13 +51,20 @@ export function TodayScreen() {
   const [announce, setAnnounce] = useState('')
   const busy = useRef(false)
 
-  // Après le rechargement des données, le focus va sur le bouton logique du nouvel état.
-  useEffect(() => {
+  // Après le rechargement des données, le focus va sur le bouton logique du nouvel état. Si ce bouton arrive
+  // avec une animation (bloc « validée » ↔ « proposée »), on réessaie quand son bloc est monté (blockRef).
+  const tryFocus = useCallback(() => {
     const key = focusNext.current
     if (!key) return
+    const target = document.querySelector<HTMLElement>(`[data-fk="${key}"]`)
+    if (!target) return
     focusNext.current = null
-    document.querySelector<HTMLElement>(`[data-fk="${key}"]`)?.focus()
-  }, [dailyOutfit])
+    target.focus()
+  }, [])
+  useEffect(tryFocus, [dailyOutfit, tryFocus])
+  const blockRef = useCallback((el: HTMLDivElement | null) => {
+    if (el) tryFocus()
+  }, [tryFocus])
 
   async function save(patch: Partial<DailyOutfitState>, focus: FocusKey, message?: string, spoken = '') {
     if (busy.current) return
@@ -135,13 +150,20 @@ export function TodayScreen() {
   return (
     <>
       {header}
-      <OutfitCard outfit={outfit} today={today} />
+      <OutfitCard outfit={outfit} today={today} validated={dailyOutfit.status === 'validated'} />
+      <AnimatePresence mode="wait" initial={false}>
       {dailyOutfit.status === 'validated' ? (
-        <div className="flex flex-col gap-2.5">
-          <div className={buttonClasses('done', 'lg')}>
-            <Icon name="check" size={22} strokeWidth={2.2} />
+        <motion.div key="validated" ref={blockRef} {...swapIn} className="flex flex-col gap-2.5">
+          <motion.div
+            initial={{ scale: 0.9 }}
+            animate={{ scale: 1, transition: { type: 'spring', stiffness: 420, damping: 14 } }}
+            className={buttonClasses('done', 'lg')}
+          >
+            <svg viewBox="0 0 24 24" width={22} height={22} fill="none" stroke="currentColor" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <motion.path d="M5 12.5l4.5 4.5L19 7.5" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: 0.12, duration: 0.35 }} />
+            </svg>
             Tenue validée
-          </div>
+          </motion.div>
           <Button data-fk="unvalidate" onClick={() => void save({ status: 'proposed' }, 'validate')}>
             Changer de tenue
           </Button>
@@ -150,9 +172,9 @@ export function TodayScreen() {
               ? 'Le miroir détectera la tenue demain\u00a0: rien à confirmer.'
               : 'Demain matin, tu confirmeras ces pièces d’un geste.'}
           </p>
-        </div>
+        </motion.div>
       ) : (
-        <div className="flex flex-col gap-2.5">
+        <motion.div key="proposed" ref={blockRef} {...swapIn} className="flex flex-col gap-2.5">
           <Button
             data-fk="validate"
             variant="primary"
@@ -170,8 +192,9 @@ export function TodayScreen() {
             </Button>
           </div>
           <p className={NOTE_CLASSES}>Un geste suffit&nbsp;: en validant la tenue, ton dressing se met à jour.</p>
-        </div>
+        </motion.div>
       )}
+      </AnimatePresence>
     </>
   )
 }

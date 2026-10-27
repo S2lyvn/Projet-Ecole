@@ -1,4 +1,5 @@
 // Message bref en bas de l'écran, avec « Annuler » pour les actions destructrices (donner, vendre…).
+import { AnimatePresence, motion } from 'motion/react'
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 
@@ -50,8 +51,15 @@ export function ToastHost({ withTabs }: { withTabs: boolean }) {
       aria-live="polite"
       className={['pointer-events-none absolute inset-x-4 z-20', withTabs ? 'bottom-24' : 'bottom-5'].join(' ')}
     >
+      <AnimatePresence>
       {toast && (
-        <div className="pointer-events-auto flex items-center justify-between gap-3 rounded-[14px] bg-solid px-3.5 py-3 text-sm font-medium text-on-solid">
+        <motion.div
+          key={toast.id}
+          initial={{ opacity: 0, y: 24, scale: 0.96 }}
+          animate={{ opacity: 1, y: 0, scale: 1, transition: { type: 'spring', stiffness: 520, damping: 32 } }}
+          exit={{ opacity: 0, y: 12, scale: 0.98, transition: { duration: 0.15 } }}
+          className="pointer-events-auto flex items-center justify-between gap-3 rounded-2xl bg-solid px-4 py-3 text-sm font-medium text-on-solid shadow-[var(--shadow-md)]"
+        >
           <span>{toast.message}</span>
           {toast.undo && (
             <button
@@ -68,8 +76,9 @@ export function ToastHost({ withTabs }: { withTabs: boolean }) {
               Annuler
             </button>
           )}
-        </div>
+        </motion.div>
       )}
+      </AnimatePresence>
     </div>
   )
 }

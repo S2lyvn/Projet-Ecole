@@ -45,6 +45,8 @@ Puis ouvre l'adresse affichée (http://localhost:5173). Pour avoir le panneau de
 
 Voir `docs/07-feuille-de-route.md`. Étapes 0 (mise en place), 1 (règles métier et données d'exemple) et 2 (écrans du cœur en mode démo) faites.
 
+En plus, un **simulateur de la bourse d'échange** fonctionne hors ligne avec des membres fictifs : annonces, réservation avec crédits, rendez-vous, QR code de remise, pièce reçue dans le dressing, avis. Il sera remplacé par la vraie bourse (Supabase) à l'étape 4, sans changer les écrans.
+
 ## Configuration
 
 Copie `.env.example` en `.env.local` et remplis les valeurs. `.env.local` n'est jamais envoyé sur GitHub.

@@ -1,8 +1,10 @@
 // Dressing (stockScreen() du prototype) : grille des pièces, filtres, et feuille d'actions d'une pièce.
+import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useActiveGarments, useWardrobe } from '../../app/WardrobeProvider'
 import { Banner } from '../../components/Banner'
-import { GarmentStateChip } from '../../components/Chip'
+import { Chip, GarmentStateChip } from '../../components/Chip'
+import { listedGarmentIds } from '../../domain/swaps'
 import { GarmentTile } from '../../components/GarmentTile'
 import { Pills } from '../../components/Pills'
 import { ScreenHeader } from '../../components/ScreenHeader'
@@ -27,6 +29,7 @@ export function WardrobeScreen() {
   const [focusAfterClose, setFocusAfterClose] = useState<{ id: string; ids: string[] } | null>(null)
   const buttons = useRef(new Map<string, HTMLButtonElement>())
 
+  const listedIds = useMemo(() => listedGarmentIds(data.swaps.listings), [data.swaps.listings])
   const list = useMemo(
     () =>
       garments.filter((g) => {
@@ -77,8 +80,17 @@ export function WardrobeScreen() {
         <p className="m-0 text-[15px] text-muted">Aucune pièce dans cette vue.</p>
       ) : (
         <ul className="m-0 grid list-none grid-cols-3 gap-x-2.5 gap-y-3 p-0">
+          <AnimatePresence initial={false} mode="popLayout">
           {list.map((g) => (
-            <li key={g.id} className="min-w-0">
+            <motion.li
+              key={g.id}
+              layout
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.85, transition: { duration: 0.16 } }}
+              transition={{ type: 'spring', stiffness: 460, damping: 34 }}
+              className="min-w-0"
+            >
               <button
                 type="button"
                 ref={(el) => {
@@ -87,17 +99,22 @@ export function WardrobeScreen() {
                 }}
                 aria-label={`${g.name}, ${statusText(g, data.today, data.settings.dormancyDays)}`}
                 onClick={() => setSheetId(g.id)}
-                className="flex w-full min-w-0 cursor-pointer flex-col gap-1.5 rounded-2xl border-0 bg-transparent p-0 text-left text-ink"
+                className="group flex w-full min-w-0 cursor-pointer flex-col gap-1.5 rounded-2xl border-0 bg-transparent p-0 text-left text-ink transition-transform active:scale-[0.96]"
               >
                 <GarmentTile garment={g} size="grid" washed={isInLaundry(g, data.today)} />
                 <span className="block w-full truncate text-[13px] font-medium">{g.name}</span>
                 {/* À 360 px, « Dort · 14 mois » peut dépasser la colonne : la puce passe alors à la ligne. */}
                 <span className="flex max-w-full [&>span]:max-w-full [&>span]:whitespace-normal">
-                  <GarmentStateChip garment={g} today={data.today} dormancyDays={data.settings.dormancyDays} />
+                  {listedIds.has(g.id) ? (
+                    <Chip tone="accent">À l’échange</Chip>
+                  ) : (
+                    <GarmentStateChip garment={g} today={data.today} dormancyDays={data.settings.dormancyDays} />
+                  )}
                 </span>
               </button>
-            </li>
+            </motion.li>
           ))}
+          </AnimatePresence>
         </ul>
       )}
 
