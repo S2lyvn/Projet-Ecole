@@ -31,7 +31,7 @@ Reprendre l'identité du prototype (`reference/prototype-e-mirror.html`), valid�
 Pastels de vignette (une couleur par pièce, choisie à partir du nom) :
 clair `#D5F3E6 #E3DCFF #FFE0D3 #D3EBFF #FFF1BF #FFD9E8` ; sombre `#1F4A3E #35306A #5A3328 #1F3F5C #55481C #5A2A42`.
 
-**Nouveau pour l'échange** : puce « Proposée à l'échange » et solde de crédits en `--accent-tint` / `--accent-ink`. Ne pas ajouter de nouvelle couleur vive sans raison.
+**Nouveau pour l'échange** : puce « Proposée à l'échange » et jetons de réclamation en `--accent-tint` / `--accent-ink`. Ne pas ajouter de nouvelle couleur vive sans raison.
 
 ## Composants
 

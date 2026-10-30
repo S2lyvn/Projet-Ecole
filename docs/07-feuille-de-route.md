@@ -34,12 +34,12 @@ Conseil : démarrer chaque étape en **mode plan** (Maj+Tab dans Claude Code), r
 
 **C'est fini quand :** deux comptes de test ont chacun leur dressing, et aucun ne voit les pièces de l'autre.
 
-## ☐ Étape 4 — Bourse d'échange : annonces, réservation, crédits
+## ☐ Étape 4 — Bourse d'échange : annonces, réservation, jetons
 
 **Prompt :**
-> Étape 4. Implémente la bourse d'échange selon docs/03-communaute-echange.md et docs/04-donnees.md : tables swap_listings, swaps, credit_ledger, credit_rates, vues, RLS et fonctions RPC reserve_listing, schedule_swap, complete_swap, cancel_swap. Ajoute le bouton Échanger dans À sortir et dans la fiche d'une pièce, l'onglet Échanges (Bourse, Mes échanges, Mes annonces, solde) et le QR code de remise. Le client ne doit jamais écrire dans credit_ledger.
+> Étape 4. Implémente la bourse d'échange selon docs/03-communaute-echange.md et docs/04-donnees.md : tables swap_listings, swaps, token_ledger, vues, RLS et fonctions RPC reserve_listing, schedule_swap, complete_swap, cancel_swap. Ajoute le bouton Échanger dans À sortir et dans la fiche d'une pièce, l'onglet Échanges (Bourse, Mes échanges, Mes annonces, jetons) et le QR code de remise. Le client ne doit jamais écrire dans token_ledger. Les écrans existent déjà avec le simulateur local (src/data/localSwaps.ts) : il s'agit de brancher Supabase derrière SwapRepository.
 
-**C'est fini quand :** le compte A propose une pièce, le compte B la réserve (crédits bloqués), la remise est confirmée par QR code, A gagne les crédits, B voit la pièce apparaître dans son dressing avec sa fiche.
+**C'est fini quand :** le compte A propose une pièce, le compte B la réclame (1 jeton bloqué), la remise est confirmée par QR code, A gagne 1 jeton, B voit la pièce apparaître dans son dressing avec sa fiche.
 
 ## ☐ Étape 5 — Messages, avis, sécurité, cercles
 
@@ -61,7 +61,7 @@ Conseil : démarrer chaque étape en **mode plan** (Maj+Tab dans Claude Code), r
 
 - Import réel des achats (e-mails, tickets) : cadrage RGPD d'abord.
 - Météo et agenda dans la tenue du jour.
-- Troc direct 1 contre 1, en plus des crédits.
+- Troc direct 1 contre 1, en plus des jetons.
 - Envoi postal des échanges (point relais).
 - Événements de troc avec des associations de Clermont-Ferrand.
 - Mode miroir réel, capteurs RFID ou NFC.

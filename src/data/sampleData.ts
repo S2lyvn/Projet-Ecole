@@ -8,8 +8,8 @@ import type { DailyOutfitState, PendingConfirmation, PurchaseCandidate, UserSett
 import { createSampleCommunity } from './sampleCommunity'
 import type { CommunityState } from './sampleCommunity'
 
-// Version 3 : ajout de la bourse simulée (un état plus ancien repart des données d'exemple).
-export const STATE_VERSION = 3
+// Version 4 : crédits remplacés par des jetons (un état plus ancien repart des données d'exemple).
+export const STATE_VERSION = 4
 
 /** État complet de la démo locale, sérialisé tel quel en JSON. */
 export interface LocalState {
@@ -25,7 +25,7 @@ export interface LocalState {
   settings: UserSettings
   /** Compteur des nouvelles pièces (ids déterministes). */
   nextGarmentNumber: number
-  /** Bourse d'échange simulée : membres fictifs, annonces, échanges, registre des crédits. */
+  /** Bourse d'échange simulée : membres fictifs, annonces, échanges, registre des jetons. */
   community: CommunityState
 }
 

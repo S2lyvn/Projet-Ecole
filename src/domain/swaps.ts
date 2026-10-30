@@ -1,5 +1,5 @@
 // Bourse d'échange entre membres (docs/03-communaute-echange.md) : types et règles d'affichage.
-// Les écritures (réserver, remettre, crédits) sont faites par le « serveur » : le simulateur local aujourd'hui,
+// Les écritures (réclamer, remettre, jetons) sont faites par le « serveur » : le simulateur local aujourd'hui,
 // les fonctions RPC Supabase à l'étape 4. Rien ici ne modifie un solde.
 import type { Agreement, GarmentCategory, IsoDateTime, ItemCondition } from './types'
 
@@ -35,7 +35,6 @@ export interface SwapListing {
   /** Pièce du dressing de l'utilisateur quand c'est son annonce ; null pour les autres membres. */
   garmentId: string | null
   item: ListingItem
-  credits: number
   condition: ItemCondition
   note: string | null
   city: string
@@ -59,7 +58,6 @@ export interface Swap {
   listingId: string
   giverId: string
   receiverId: string
-  credits: number
   status: SwapStatus
   meetingPlace: string | null
   /** Créneau choisi (« Demain, 18 h ») ; meeting_at en base à l'étape 4. */
@@ -100,7 +98,7 @@ export const SWAP_STATUS_LABELS: Record<SwapStatus, string> = {
   refused: 'Refusée à la remise',
 }
 
-/** Échange encore en cours (crédits bloqués côté receveur). */
+/** Échange encore en cours (jeton bloqué côté receveur). */
 export function isSwapOpen(swap: Pick<Swap, 'status'>): boolean {
   return swap.status === 'reserved' || swap.status === 'scheduled'
 }

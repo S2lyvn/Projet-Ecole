@@ -10,7 +10,7 @@ Barre du bas, 5 onglets :
 |---|---|---|
 | Aujourd'hui | Tenue du jour, bannière « Hier : X pièces à confirmer » | Proposer |
 | Dressing | Stock réel : disponible, au lavage ; achats détectés | Capturer, Mettre à jour |
-| Échanges | La bourse : pièces proposées par les membres, mes échanges en cours, mes crédits | Faire sortir (et entrer) |
+| Échanges | La bourse : pièces proposées par les membres, mes échanges en cours, mes jetons de réclamation | Faire sortir (et entrer) |
 | À sortir | Pièces dormantes : remettre en jeu, échanger, vendre, donner | Faire sortir |
 | Bilan | Un seul chiffre : la part du dressing portée | Mesurer |
 

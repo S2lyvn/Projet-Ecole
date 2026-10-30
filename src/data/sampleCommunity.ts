@@ -1,7 +1,7 @@
 // DONNÉES D'EXEMPLE (CLAUDE.md, règle 6) : membres, annonces et échange passé FICTIFS, pour simuler la bourse.
 // Aucun de ces membres n'existe. Les lieux de rendez-vous sont des lieux publics réels de Clermont-Ferrand.
-import { creditsFor } from '../domain/credits'
 import { ME, handoverCodeFor } from '../domain/swaps'
+import { TOKENS_PER_GARMENT } from '../domain/tokens'
 import type { ListingItem, Member, MySizes, Swap, SwapListing } from '../domain/swaps'
 import type { IsoDate, IsoDateTime, ItemCondition, LedgerEntry } from '../domain/types'
 
@@ -136,7 +136,6 @@ export function createSampleCommunity(today: IsoDate): CommunityState {
     ownerId: l.ownerId,
     garmentId: null,
     item: l.item,
-    credits: creditsFor(l.item.category),
     condition: l.condition,
     note: l.note,
     city: DEMO_CITY,
@@ -145,14 +144,13 @@ export function createSampleCommunity(today: IsoDate): CommunityState {
     createdAt: stamp(minusDays(today, l.age), 0),
   }))
 
-  // Échange passé d'exemple : l'utilisateur a donné un sweat à Inès et gagné 2 crédits.
+  // Échange passé d'exemple : l'utilisateur a donné un sweat à Inès et gagné 1 jeton.
   const pastDay = minusDays(today, 12)
   const pastListing: SwapListing = {
     id: 'l0',
     ownerId: ME,
     garmentId: null,
     item: { name: 'Sweat à capuche gris', category: 'long', color: '#9AA3B8', size: 'M', brand: null, agreement: 'm' },
-    credits: 2,
     condition: 'good',
     note: null,
     city: DEMO_CITY,
@@ -165,7 +163,6 @@ export function createSampleCommunity(today: IsoDate): CommunityState {
     listingId: 'l0',
     giverId: ME,
     receiverId: 'm1',
-    credits: 2,
     status: 'completed',
     meetingPlace: 'Place de Jaude, devant la statue de Vercingétorix',
     meetingSlot: null,
@@ -181,7 +178,7 @@ export function createSampleCommunity(today: IsoDate): CommunityState {
     members: MEMBERS.map((m) => ({ ...m })),
     listings: [pastListing, ...listings],
     swaps: [pastSwap],
-    ledger: [{ amount: 2, reason: 'earn', swapId: 's0', createdAt: stamp(pastDay, 0) }],
+    ledger: [{ amount: TOKENS_PER_GARMENT, reason: 'earn', swapId: 's0', createdAt: stamp(pastDay, 0) }],
     sizes: { ...DEMO_SIZES },
     city: DEMO_CITY,
     isAdult: true,

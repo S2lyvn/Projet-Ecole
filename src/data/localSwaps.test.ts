@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { balanceOf, heldCredits } from '../domain/credits'
 import { ME } from '../domain/swaps'
+import { balanceOf, heldTokens } from '../domain/tokens'
 import { createLocalRepository } from './local'
 
 const TODAY = '2026-10-27'
@@ -9,51 +9,51 @@ function setup() {
   return createLocalRepository({ storage: null, startDate: TODAY })
 }
 
-async function credits(repository: ReturnType<typeof setup>) {
+async function tokens(repository: ReturnType<typeof setup>) {
   const { ledger } = await repository.getSwapState()
-  return { balance: balanceOf(ledger), held: heldCredits(ledger) }
+  return { available: balanceOf(ledger), held: heldTokens(ledger) }
 }
 
-describe('bourse simulée : recevoir une pièce', () => {
-  it('démarre avec 2 crédits gagnés lors d’un échange passé', async () => {
+describe('bourse simulée : réclamer une pièce', () => {
+  it('démarre avec 1 jeton gagné en donnant une pièce lors d’un échange passé', async () => {
     const repository = setup()
     const state = await repository.getSwapState()
-    expect(await credits(repository)).toEqual({ balance: 2, held: 0 })
+    expect(await tokens(repository)).toEqual({ available: 1, held: 0 })
     expect(state.listings.filter((l) => l.ownerId !== ME && l.status === 'open')).toHaveLength(10)
     expect(state.swaps.filter((s) => s.status === 'completed')).toHaveLength(1)
   })
 
-  it('réserver bloque les crédits, puis la remise fait entrer la pièce avec sa fiche', async () => {
+  it('réclamer bloque 1 jeton, puis la remise fait entrer la pièce avec sa fiche', async () => {
     const repository = setup()
-    // l1 : Pull marin rayé, 2 crédits.
-    const swap = await repository.reserveListing('l1')
-    expect(await credits(repository)).toEqual({ balance: 0, held: 2 })
-    expect((await repository.getSwapState()).listings.find((l) => l.id === 'l1')?.status).toBe('reserved')
+    // l4 : doudoune. Avec les jetons, un manteau coûte 1 jeton comme un t-shirt.
+    const swap = await repository.reserveListing('l4')
+    expect(await tokens(repository)).toEqual({ available: 0, held: 1 })
+    expect((await repository.getSwapState()).listings.find((l) => l.id === 'l4')?.status).toBe('reserved')
 
     await repository.scheduleSwap(swap.id, 'Place de Jaude', 'Demain, 18 h')
     await expect(repository.completeSwap(swap.id, 'MAUVAIS')).rejects.toThrow('ne correspond pas')
     const { receivedGarment } = await repository.completeSwap(swap.id, swap.handoverCode)
 
-    expect(await credits(repository)).toEqual({ balance: 0, held: 0 })
-    expect(receivedGarment).toMatchObject({ name: 'Pull marin rayé', category: 'long', size: 'M', source: 'swap' })
+    expect(await tokens(repository)).toEqual({ available: 0, held: 0 })
+    expect(receivedGarment).toMatchObject({ name: 'Doudoune légère kaki', category: 'outerwear', source: 'swap' })
     const garments = await repository.listGarments()
     expect(garments.find((g) => g.id === receivedGarment?.id)?.status).toBe('active')
     const done = (await repository.getSwapState()).swaps.find((s) => s.id === swap.id)
     expect(done?.status).toBe('completed')
   })
 
-  it('refuse sans assez de crédits, avec un message clair', async () => {
+  it('refuse sans jeton disponible, avec un message clair', async () => {
     const repository = setup()
-    // l4 : doudoune, 3 crédits pour un solde de 2.
-    await expect(repository.reserveListing('l4')).rejects.toThrow('Il te manque des crédits')
-    expect(await credits(repository)).toEqual({ balance: 2, held: 0 })
+    await repository.reserveListing('l1')
+    await expect(repository.reserveListing('l2')).rejects.toThrow('Il te faut un jeton')
+    expect(await tokens(repository)).toEqual({ available: 0, held: 1 })
   })
 
-  it('annuler débloque les crédits et remet l’annonce en ligne', async () => {
+  it('annuler rend le jeton et remet l’annonce en ligne', async () => {
     const repository = setup()
     const swap = await repository.reserveListing('l6')
     await repository.cancelSwap(swap.id)
-    expect(await credits(repository)).toEqual({ balance: 2, held: 0 })
+    expect(await tokens(repository)).toEqual({ available: 1, held: 0 })
     expect((await repository.getSwapState()).listings.find((l) => l.id === 'l6')?.status).toBe('open')
   })
 
@@ -65,19 +65,25 @@ describe('bourse simulée : recevoir une pièce', () => {
     await expect(repository.sendSwapMessage(swap.id, '   ')).rejects.toThrow('Écris un message')
   })
 
-  it('une réservation sans rendez-vous expire après 72 h', async () => {
+  it('une réclamation sans rendez-vous expire après 72 h et rend le jeton', async () => {
     const repository = setup()
     await repository.reserveListing('l6')
     await repository.advanceDay()
     await repository.advanceDay()
-    expect(await credits(repository)).toEqual({ balance: 1, held: 1 })
+    expect(await tokens(repository)).toEqual({ available: 0, held: 1 })
     await repository.advanceDay()
     await repository.advanceDay()
-    expect(await credits(repository)).toEqual({ balance: 2, held: 0 })
+    expect(await tokens(repository)).toEqual({ available: 1, held: 0 })
+  })
+
+  it('le jeton n’expire pas', async () => {
+    const repository = setup()
+    for (let i = 0; i < 40; i++) await repository.advanceDay()
+    expect(await tokens(repository)).toEqual({ available: 1, held: 0 })
   })
 })
 
-describe('bourse simulée : donner une pièce', () => {
+describe('bourse simulée : fournir une pièce', () => {
   it('demande d’accepter les règles avant la première annonce', async () => {
     const repository = setup()
     await expect(
@@ -85,12 +91,14 @@ describe('bourse simulée : donner une pièce', () => {
     ).rejects.toThrow('règles')
   })
 
-  it('publier, se faire réserver, remettre : crédits gagnés et pièce sortie du dressing', async () => {
+  it('publier ne donne rien ; la remise donne 1 jeton et la pièce sort du dressing', async () => {
     const repository = setup()
     await repository.acceptCommunityRules()
-    // g10 : Pull col rond gris (long, 2 crédits).
+    // g10 : Pull col rond gris.
     const listing = await repository.publishListing({ garmentId: 'g10', condition: 'good', note: '  Très doux. ', circle: null })
-    expect(listing).toMatchObject({ credits: 2, note: 'Très doux.', ownerId: ME, status: 'open' })
+    expect(listing).toMatchObject({ note: 'Très doux.', ownerId: ME, status: 'open' })
+    // Pas de jeton à la mise en ligne : on ne gagne rien avec une annonce fictive.
+    expect(await tokens(repository)).toEqual({ available: 1, held: 0 })
     await expect(
       repository.publishListing({ garmentId: 'g10', condition: 'good', note: null, circle: null }),
     ).rejects.toThrow('déjà proposée')
@@ -99,10 +107,10 @@ describe('bourse simulée : donner une pièce', () => {
     expect(swap.giverId).toBe(ME)
     expect(swap.messages).toHaveLength(1)
     // Le donneur ne bloque rien.
-    expect(await credits(repository)).toEqual({ balance: 2, held: 0 })
+    expect(await tokens(repository)).toEqual({ available: 1, held: 0 })
 
     await repository.completeSwap(swap.id, swap.handoverCode)
-    expect(await credits(repository)).toEqual({ balance: 4, held: 0 })
+    expect(await tokens(repository)).toEqual({ available: 2, held: 0 })
     expect((await repository.getGarment('g10'))?.status).toBe('swapped_out')
   })
 

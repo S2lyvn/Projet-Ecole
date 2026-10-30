@@ -111,7 +111,7 @@ export interface SwapState {
   listings: SwapListing[]
   /** Échanges où l'utilisateur est donneur ou receveur. */
   swaps: Swap[]
-  /** Registre des crédits de l'utilisateur : le solde en est la somme (lecture seule). */
+  /** Registre des jetons de l'utilisateur : le solde en est la somme (lecture seule). */
   ledger: LedgerEntry[]
   sizes: MySizes
   city: string
@@ -128,7 +128,7 @@ export interface PublishListingInput {
 }
 
 /**
- * Bourse d'échange (docs/03). Toutes les écritures de crédits se font derrière cette interface :
+ * Bourse d'échange (docs/03). Toutes les écritures de jetons se font derrière cette interface :
  * dans le simulateur local aujourd'hui, dans les fonctions RPC Supabase à l'étape 4 (CLAUDE.md, règle 4).
  */
 export interface SwapRepository {
@@ -138,13 +138,13 @@ export interface SwapRepository {
   publishListing(input: PublishListingInput): Promise<SwapListing>
   /** Retire une annonce encore ouverte. */
   withdrawListing(listingId: string): Promise<void>
-  /** « Je la veux » : bloque les crédits (refus : RESERVE_REFUSAL_MESSAGES de domain/credits). */
+  /** « Réclamer » : bloque 1 jeton (refus : RESERVE_REFUSAL_MESSAGES de domain/tokens). */
   reserveListing(listingId: string): Promise<Swap>
   scheduleSwap(swapId: string, place: string, slot: string): Promise<Swap>
   sendSwapMessage(swapId: string, body: string): Promise<Swap>
-  /** Remise confirmée par le code du QR : crédits transférés, pièce sortie ou reçue avec sa fiche. */
+  /** Remise confirmée par le code du QR : jeton dépensé par le receveur et gagné par le donneur, pièce sortie ou reçue avec sa fiche. */
   completeSwap(swapId: string, handoverCode: string): Promise<{ swap: Swap; receivedGarment: Garment | null }>
-  /** Annulation avant la remise : crédits débloqués, annonce remise en ligne. */
+  /** Annulation avant la remise : jeton débloqué, annonce remise en ligne. */
   cancelSwap(swapId: string): Promise<Swap>
   rateSwap(swapId: string, rating: number): Promise<Swap>
 }

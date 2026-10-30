@@ -1,7 +1,7 @@
 // Simulateur de la bourse d'échange : joue le rôle du serveur (fonctions RPC de docs/04-donnees.md).
 // Chaque fonction prend l'état et renvoie le nouvel état, sans rien modifier en place. C'est ici, et seulement ici,
-// que le registre des crédits change : les écrans passent par SwapRepository (CLAUDE.md, règle 4).
-import { RESERVE_REFUSAL_MESSAGES, balanceOf, canReserve, creditsFor, reservationExpiresAt } from '../domain/credits'
+// que le registre des jetons change : les écrans passent par SwapRepository (CLAUDE.md, règle 4).
+import { RESERVE_REFUSAL_MESSAGES, TOKENS_PER_GARMENT, balanceOf, canReserve, reservationExpiresAt } from '../domain/tokens'
 import { ME, activeListingFor, handoverCodeFor, isSwapOpen, openReservationsOf } from '../domain/swaps'
 import type { Swap, SwapListing } from '../domain/swaps'
 import type { Garment, IsoDate, LedgerEntry } from '../domain/types'
@@ -86,7 +86,6 @@ export function publishListing(world: SwapWorld, input: PublishListingInput): Ch
       brand: garment.brand,
       agreement: garment.agreement,
     },
-    credits: creditsFor(garment.category),
     condition: input.condition,
     note,
     city: w.community.city,
@@ -105,7 +104,7 @@ export function withdrawListing(world: SwapWorld, listingId: string): SwapWorld 
   return withListing(world, { ...listing, status: 'cancelled' })
 }
 
-/** reserve_listing : contrôles, blocage des crédits, annonce réservée. */
+/** reserve_listing : contrôles, blocage d'1 jeton, annonce réservée. */
 export function reserveListing(world: SwapWorld, listingId: string, receiverId = ME): Change<Swap> {
   const listing = findListing(world, listingId)
   if (listing.status !== 'open') throw new Error('Cette pièce vient d’être réservée par quelqu’un d’autre.')
@@ -115,7 +114,7 @@ export function reserveListing(world: SwapWorld, listingId: string, receiverId =
       isOwner: listing.ownerId === ME,
       openReservations: openReservationsOf(world.community.swaps, ME),
       balance: balanceOf(world.community.ledger),
-      cost: listing.credits,
+      cost: TOKENS_PER_GARMENT,
     })
     if (!check.ok) throw new Error(RESERVE_REFUSAL_MESSAGES[check.reason])
   }
@@ -129,7 +128,6 @@ export function reserveListing(world: SwapWorld, listingId: string, receiverId =
     listingId: listing.id,
     giverId: listing.ownerId,
     receiverId,
-    credits: listing.credits,
     status: 'reserved',
     meetingPlace: null,
     meetingSlot: null,
@@ -142,7 +140,7 @@ export function reserveListing(world: SwapWorld, listingId: string, receiverId =
   }
   w = withListing(w, { ...listing, status: 'reserved' })
   w = withSwap(w, swap)
-  if (receiverId === ME) w = addLedger(w, [{ amount: -swap.credits, reason: 'hold', swapId: swap.id }], time.at)
+  if (receiverId === ME) w = addLedger(w, [{ amount: -TOKENS_PER_GARMENT, reason: 'hold', swapId: swap.id }], time.at)
   return { world: w, value: swap }
 }
 
@@ -221,8 +219,8 @@ export function completeSwap(
     w = addLedger(
       w,
       [
-        { amount: swap.credits, reason: 'release', swapId: swap.id },
-        { amount: -swap.credits, reason: 'spend', swapId: swap.id },
+        { amount: TOKENS_PER_GARMENT, reason: 'release', swapId: swap.id },
+        { amount: -TOKENS_PER_GARMENT, reason: 'spend', swapId: swap.id },
       ],
       time.at,
     )
@@ -245,13 +243,13 @@ export function completeSwap(
     }
     w = { ...w, garments: [...w.garments, receivedGarment] }
   } else {
-    w = addLedger(w, [{ amount: swap.credits, reason: 'earn', swapId: swap.id }], time.at)
+    w = addLedger(w, [{ amount: TOKENS_PER_GARMENT, reason: 'earn', swapId: swap.id }], time.at)
     w = { ...w, garments: w.garments.map((g) => (g.id === listing.garmentId ? { ...g, status: 'swapped_out' } : g)) }
   }
   return { world: w, value: { swap: completed, receivedGarment } }
 }
 
-/** cancel_swap : crédits débloqués, annonce remise en ligne. */
+/** cancel_swap : jeton débloqué, annonce remise en ligne. */
 export function cancelSwap(world: SwapWorld, swapId: string): Change<Swap> {
   const swap = findSwap(world, swapId)
   assertOpen(swap)
@@ -262,7 +260,7 @@ export function cancelSwap(world: SwapWorld, swapId: string): Change<Swap> {
   w = withSwap(w, cancelled)
   const listing = findListing(w, swap.listingId)
   w = withListing(w, { ...listing, status: 'open' })
-  if (swap.receiverId === ME) w = addLedger(w, [{ amount: swap.credits, reason: 'release', swapId: swap.id }], time.at)
+  if (swap.receiverId === ME) w = addLedger(w, [{ amount: TOKENS_PER_GARMENT, reason: 'release', swapId: swap.id }], time.at)
   return { world: w, value: cancelled }
 }
 
@@ -298,7 +296,7 @@ export function simulateIncomingReservation(world: SwapWorld): Change<Swap> {
   return { world: withSwap(w, swap), value: swap }
 }
 
-/** expire_swaps : réservations sans rendez-vous depuis 72 h annulées, crédits débloqués (appelé chaque jour). */
+/** expire_swaps : réservations sans rendez-vous depuis 72 h annulées, jeton débloqué (appelé chaque jour). */
 export function expireReservations(world: SwapWorld): SwapWorld {
   const now = stamp(world.today, 0)
   let w = world

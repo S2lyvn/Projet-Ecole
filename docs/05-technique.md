@@ -31,7 +31,7 @@ Alternative si l'équipe veut une vraie appli native : Expo (React Native) avec 
 │   │   ├── dormancy.ts
 │   │   ├── outfit.ts
 │   │   ├── usage.ts         # indicateur « part portée »
-│   │   ├── credits.ts       # barème, solde, contrôles côté client (affichage)
+│   │   ├── tokens.ts        # jetons de réclamation : solde, contrôles côté client (affichage)
 │   │   └── *.test.ts
 │   ├── data/
 │   │   ├── repository.ts    # interface d'accès aux données
@@ -66,11 +66,11 @@ La clé `service_role` ne doit **jamais** apparaître dans le code de l'interfac
 ## Sécurité et vie privée (rappel)
 
 - RLS activée partout ; tests manuels avec deux comptes pour vérifier qu'un membre ne voit pas le dressing de l'autre.
-- Crédits modifiés uniquement par les fonctions RPC.
+- Jetons modifiés uniquement par les fonctions RPC.
 - Photos privées, URL signées.
 - Pas de GPS : ville et quartier saisis.
 - Bourse réservée aux adultes (case à cocher à l'inscription dans le MVP).
-- Suppression de compte : supprime le profil, les pièces, les photos ; les échanges terminés restent anonymisés pour l'historique des crédits de l'autre membre.
+- Suppression de compte : supprime le profil, les pièces, les photos ; les échanges terminés restent anonymisés pour l'historique des jetons de l'autre membre.
 - Mentions légales et politique de confidentialité à rédiger avant tout test avec de vrais utilisateurs.
 
 ## Qualité

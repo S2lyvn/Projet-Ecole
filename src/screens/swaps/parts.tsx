@@ -7,16 +7,24 @@ import { SWAP_STATUS_LABELS } from '../../domain/swaps'
 import type { ListingItem, Member, Swap } from '../../domain/swaps'
 import { plural } from '../../domain/wording'
 
-export function creditsLabel(n: number): string {
-  return `${n} ${plural(n, 'crédit', 'crédits')}`
+export function tokensLabel(n: number): string {
+  return `${n} ${plural(n, 'jeton', 'jetons')}`
 }
 
-/** Pastille de crédits (violet doux). */
-export function CreditsBadge({ credits }: { credits: number }) {
+/** Un jeton de réclamation : pièce violette frappée d'un cintre. Décoratif. */
+export function TokenCoin({ size = 28, muted = false }: { size?: number; muted?: boolean }) {
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-accent-tint px-2.5 py-1 text-xs font-bold whitespace-nowrap text-accent-ink">
-      <Icon name="swap" size={14} strokeWidth={2.2} />
-      {creditsLabel(credits)}
+    <span
+      aria-hidden="true"
+      style={{ width: size, height: size }}
+      className={[
+        'grid flex-none place-items-center rounded-full border-2',
+        muted
+          ? 'border-dashed border-accent-ink/50 text-accent-ink/60'
+          : 'border-accent-ink/25 bg-accent text-on-accent shadow-[var(--shadow-accent)]',
+      ].join(' ')}
+    >
+      <Icon name="hanger" size={Math.round(size * 0.58)} strokeWidth={2.2} />
     </span>
   )
 }

@@ -1,4 +1,4 @@
-// Onglet Échanges (docs/03-communaute-echange.md) : solde de crédits, Bourse, Mes échanges, Mes annonces.
+// Onglet Échanges (docs/03-communaute-echange.md) : jetons de réclamation, Bourse, Mes échanges, Mes annonces.
 import { AnimatePresence, motion } from 'motion/react'
 import { useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
@@ -11,11 +11,11 @@ import { Icon } from '../../components/Icon'
 import { ScreenHeader } from '../../components/ScreenHeader'
 import { Segmented } from '../../components/Segmented'
 import { Switch } from '../../components/Switch'
-import { balanceOf, heldCredits } from '../../domain/credits'
+import { balanceOf, heldTokens } from '../../domain/tokens'
 import { ME, filterListings, isSwapOpen, swapRole } from '../../domain/swaps'
 import type { ListingCategoryFilter, Member, SwapListing } from '../../domain/swaps'
-import { CONDITION_LABELS } from '../../domain/wording'
-import { CreditsBadge, ItemTile, SimulationNote, SwapStatusChip, creditsLabel } from './parts'
+import { CONDITION_LABELS, plural } from '../../domain/wording'
+import { ItemTile, SimulationNote, SwapStatusChip, TokenCoin, tokensLabel } from './parts'
 
 const CATEGORY_FILTERS: { value: ListingCategoryFilter; label: string }[] = [
   { value: 'all', label: 'Tout' },
@@ -51,7 +51,7 @@ export function SwapsScreen() {
   const view = (['bourse', 'echanges', 'annonces'] as const).find((v) => v === params.get('vue')) ?? 'bourse'
 
   const balance = balanceOf(community.ledger)
-  const held = heldCredits(community.ledger)
+  const held = heldTokens(community.ledger)
   const openSwaps = community.swaps.filter(isSwapOpen).length
   const myOpenListings = community.listings.filter(
     (l) => l.ownerId === ME && (l.status === 'open' || l.status === 'reserved'),
@@ -61,21 +61,48 @@ export function SwapsScreen() {
     <>
       <ScreenHeader title="Échanges" subtitle="Troque tes pièces qui dorment contre celles des autres membres." />
 
-      <Card tone="tint" className="flex-row! items-center justify-between gap-3">
-        <div className="flex flex-col gap-1">
-          <span className="text-[13px] font-bold tracking-[0.04em] text-accent-ink uppercase">Mes crédits</span>
-          <motion.span
-            key={balance}
-            initial={{ y: -8, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            className="font-display text-[40px] leading-none font-bold tracking-[-0.02em] text-accent-ink tabular-nums"
-          >
-            {balance}
-          </motion.span>
-          {held > 0 && <span className="text-[13px] text-accent-ink">{creditsLabel(held)} bloqués</span>}
+      <Card tone="tint" className="gap-3!">
+        <div className="flex items-end justify-between gap-3">
+          <div className="flex flex-col gap-1">
+            <span className="text-[13px] font-bold tracking-[0.04em] text-accent-ink uppercase">Mes jetons</span>
+            <motion.span
+              key={balance}
+              initial={{ y: -10, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              className="font-display text-[40px] leading-none font-bold tracking-[-0.02em] text-accent-ink tabular-nums"
+            >
+              {balance}
+            </motion.span>
+          </div>
+          {/* Un jeton par pièce : les nouveaux tombent dans la rangée avec un rebond. */}
+          <div className="flex flex-wrap justify-end gap-1.5" aria-hidden="true">
+            <AnimatePresence initial={false}>
+              {Array.from({ length: Math.min(balance, 6) }, (_, i) => (
+                <motion.span
+                  key={`coin-${i}`}
+                  initial={{ y: -36, rotate: -90, opacity: 0 }}
+                  animate={{ y: 0, rotate: 0, opacity: 1, transition: { type: 'spring', stiffness: 380, damping: 14 } }}
+                  exit={{ scale: 0, opacity: 0 }}
+                >
+                  <TokenCoin />
+                </motion.span>
+              ))}
+              {Array.from({ length: Math.min(held, 3) }, (_, i) => (
+                <motion.span key={`held-${i}`} initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}>
+                  <TokenCoin muted />
+                </motion.span>
+              ))}
+            </AnimatePresence>
+          </div>
         </div>
-        <p className="m-0 max-w-[160px] text-right text-xs leading-snug text-accent-ink">
-          Tu gagnes des crédits en donnant. Ils ne s’achètent pas et ne valent pas d’euros.
+        {held > 0 && (
+          <span className="text-[13px] text-accent-ink">
+            {tokensLabel(held)} {plural(held, 'bloqué', 'bloqués')} par {plural(held, 'ta réclamation', 'tes réclamations')} en cours
+          </span>
+        )}
+        <p className="m-0 text-[13px] leading-snug text-accent-ink">
+          <strong>1 habit donné = 1 jeton = 1 habit à réclamer</strong> chez n’importe quel membre, quand tu veux. Les
+          jetons n’expirent pas, ne s’achètent pas et ne valent pas d’euros.
         </p>
       </Card>
 
@@ -175,12 +202,7 @@ function ListingCard({ listing, member }: { listing: SwapListing; member: Member
       to={`/echanges/annonce/${listing.id}`}
       className="flex h-full flex-col gap-2 rounded-[20px] border border-line bg-surface p-2.5 text-ink no-underline shadow-[var(--shadow-sm)] transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)] active:scale-[0.98]"
     >
-      <span className="relative">
-        <ItemTile item={listing.item} size="grid" />
-        <span className="absolute top-1.5 right-1.5">
-          <CreditsBadge credits={listing.credits} />
-        </span>
-      </span>
+      <ItemTile item={listing.item} size="grid" />
       <span className="line-clamp-2 text-sm leading-tight font-bold">{listing.item.name}</span>
       <span className="text-xs text-muted">
         {listing.item.size ? `Taille ${listing.item.size} · ` : ''}
@@ -252,7 +274,7 @@ function MyListings() {
     <>
       {mine.length === 0 ? (
         <EmptyState title="Aucune annonce">
-          Une pièce qui dort chez toi peut vivre chez quelqu’un d’autre. Tu gagnes des crédits à la remise.
+          Une pièce qui dort chez toi peut vivre chez quelqu’un d’autre. Tu gagnes 1 jeton à la remise.
         </EmptyState>
       ) : (
         <motion.ul
@@ -269,7 +291,8 @@ function MyListings() {
                 <span className="flex min-w-0 flex-1 flex-col gap-1">
                   <span className="truncate text-[15px] font-bold">{l.item.name}</span>
                   <span className="text-[13px] text-muted">
-                    {LISTING_STATUS_LABELS[l.status]} · {creditsLabel(l.credits)}
+                    {LISTING_STATUS_LABELS[l.status]}
+                    {l.status === 'completed' ? ' · 1 jeton gagné' : l.status === 'open' || l.status === 'reserved' ? ' · +1 jeton à la remise' : ''}
                   </span>
                 </span>
                 <Icon name="chev" size={20} />

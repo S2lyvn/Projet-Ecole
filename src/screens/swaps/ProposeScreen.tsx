@@ -13,13 +13,12 @@ import { Icon } from '../../components/Icon'
 import { Pills } from '../../components/Pills'
 import { SubScreenHeader } from '../../components/SubScreenHeader'
 import { useToast } from '../../components/Toast'
-import { creditsFor } from '../../domain/credits'
 import { activeListingFor } from '../../domain/swaps'
 import { ITEM_CONDITIONS } from '../../domain/types'
 import type { ItemCondition } from '../../domain/types'
 import { CATEGORY_LABELS, CONDITION_LABELS } from '../../domain/wording'
 import { DEMO_CIRCLE } from '../../data/sampleCommunity'
-import { SimulationNote, creditsLabel } from './parts'
+import { SimulationNote } from './parts'
 
 const RULES = [
   'La pièce est propre et en état d’être portée.',
@@ -63,8 +62,6 @@ export function ProposeScreen() {
     )
   }
 
-  const credits = creditsFor(garment.category)
-
   async function publish() {
     if (!garment || busy || !clean || !honest) return
     setBusy(true)
@@ -78,7 +75,7 @@ export function ProposeScreen() {
         }),
       )
       navigate('/echanges?vue=annonces')
-      showToast(`${garment.name} est dans la bourse. Tu gagneras ${creditsLabel(credits)} à la remise.`)
+      showToast(`${garment.name} est dans la bourse. Tu gagneras 1 jeton à la remise.`)
     } catch (e) {
       showToast(e instanceof Error ? e.message : 'Publication impossible pour le moment.')
       setBusy(false)
@@ -108,7 +105,7 @@ export function ProposeScreen() {
             {garment.size ? ` · taille ${garment.size}` : ''}
           </span>
           <span className="self-start rounded-full bg-accent-tint px-2.5 py-1 text-xs font-bold text-accent-ink">
-            +{creditsLabel(credits)} à la remise
+            +1 jeton à la remise
           </span>
         </div>
       </Card>

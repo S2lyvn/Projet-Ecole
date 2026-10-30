@@ -9,11 +9,10 @@ profiles ─┬─ garments ─┬─ wears
           │            ├─ outfit_items ── outfits
           │            └─ swap_listings ── swaps ─┬─ swap_messages
           │                                       └─ reviews
-          ├─ credit_ledger (lié à swaps)
+          ├─ token_ledger (lié à swaps)
           ├─ circle_members ── circles
           ├─ purchase_candidates
           └─ reports
-credit_rates (barème par catégorie)
 ```
 
 ## Types énumérés
@@ -121,18 +120,10 @@ create table circle_members (
   primary key (circle_id, user_id)
 );
 
-create table credit_rates (
-  category garment_category primary key,
-  credits int not null check (credits > 0)
-);
-insert into credit_rates values
-  ('tee',1),('other',1),('pants',2),('dress',2),('shoes',2),('long',2),('outerwear',3);
-
 create table swap_listings (
   id uuid primary key default gen_random_uuid(),
   garment_id uuid not null references garments on delete cascade,
   owner_id uuid not null references profiles on delete cascade,
-  credits int not null,                         -- recopié depuis credit_rates à la création
   condition item_condition not null,
   note text,
   circle_id uuid references circles,            -- null = visible dans la ville
@@ -148,7 +139,6 @@ create table swaps (
   listing_id uuid not null references swap_listings,
   giver_id uuid not null references profiles,
   receiver_id uuid not null references profiles,
-  credits int not null,
   status swap_status not null default 'reserved',
   meeting_place text,
   meeting_at timestamptz,
@@ -177,11 +167,12 @@ create table reviews (
   primary key (swap_id, author_id)
 );
 
--- Registre des crédits : le solde est la somme de "amount"
-create table credit_ledger (
+-- Registre des jetons de réclamation : le solde est la somme de "amount".
+-- Règle (docs/03) : 1 habit fourni = +1 jeton à la remise ; 1 habit réclamé = 1 jeton bloqué puis dépensé. Pas d'expiration.
+create table token_ledger (
   id bigint generated always as identity primary key,
   user_id uuid not null references profiles on delete cascade,
-  amount int not null,                          -- négatif pour hold et spend
+  amount int not null check (amount in (-1, 1)), -- -1 pour hold et spend, +1 pour release et earn
   reason ledger_reason not null,
   swap_id uuid references swaps,
   created_at timestamptz not null default now()
@@ -207,13 +198,13 @@ create table blocks (
 ## Vues utiles
 
 ```sql
-create view credit_balances as
+create view token_balances as
   select user_id, coalesce(sum(amount),0)::int as balance
-  from credit_ledger group by user_id;
+  from token_ledger group by user_id;
 
 -- Ce que voit la bourse : seulement les champs publics
 create view public_listings as
-  select l.id, l.credits, l.condition, l.note, l.city, l.circle_id, l.created_at,
+  select l.id, l.condition, l.note, l.city, l.circle_id, l.created_at,
          g.name, g.category, g.color, g.size, g.brand, g.photo_path,
          p.display_name, p.neighborhood, l.owner_id
   from swap_listings l
@@ -233,8 +224,7 @@ Activer RLS sur **toutes** les tables.
 | swap_listings | propriétaire ; annonces `open` pour les membres connectés de la même ville ou du même cercle, adultes, non bloqués | propriétaire (création, annulation) |
 | swaps, swap_messages | les deux membres de l'échange | **uniquement via les fonctions RPC** ; messages : les deux membres |
 | reviews | tout membre connecté | auteur, une fois l'échange `completed` |
-| credit_ledger | soi-même | **personne côté client** : seulement les fonctions RPC (`security definer`) |
-| credit_rates | tout le monde | personne côté client |
+| token_ledger | soi-même | **personne côté client** : seulement les fonctions RPC (`security definer`) |
 | circles, circle_members | membres du cercle | créateur ; rejoindre via RPC avec le code |
 | reports, blocks | auteur | auteur |
 
@@ -242,12 +232,12 @@ Activer RLS sur **toutes** les tables.
 
 Toutes en `security definer`, avec `set search_path = public`, vérifiant `auth.uid()`. Chacune dans une transaction.
 
-- `reserve_listing(listing_id)` : vérifie que l'utilisateur est adulte, n'est pas le propriétaire, n'est pas bloqué, a moins de 3 échanges en cours et un solde suffisant. Crée le `swap`, insère `hold` (−crédits), passe l'annonce à `reserved`.
+- `reserve_listing(listing_id)` : vérifie que l'utilisateur est adulte, n'est pas le propriétaire, n'est pas bloqué, a moins de 3 échanges en cours et au moins 1 jeton disponible. Crée le `swap`, insère `hold` (−1), passe l'annonce à `reserved`.
 - `schedule_swap(swap_id, place, at)` : un des deux membres fixe le rendez-vous ; statut `scheduled`.
-- `complete_swap(swap_id, handover_code)` : appelée par le receveur avec le code du QR. Insère `release` (+N) et `spend` (−N) pour le receveur, `earn` (+N) pour le donneur ; passe la pièce du donneur en `swapped_out` ; crée la copie dans le dressing du receveur (`source = 'swap'`, `origin_garment_id`) en copiant aussi la photo dans son dossier ; passe l'annonce à `completed`.
-- `cancel_swap(swap_id)` : insère `release` (+N) pour le receveur, remet l'annonce à `open`.
+- `complete_swap(swap_id, handover_code)` : appelée par le receveur avec le code du QR. Insère `release` (+1) et `spend` (−1) pour le receveur, `earn` (+1) pour le donneur ; passe la pièce du donneur en `swapped_out` ; crée la copie dans le dressing du receveur (`source = 'swap'`, `origin_garment_id`) en copiant aussi la photo dans son dossier ; passe l'annonce à `completed`.
+- `cancel_swap(swap_id)` : insère `release` (+1) pour le receveur, remet l'annonce à `open`.
 - `report_no_show(swap_id)` : comme une annulation, et compte l'absence.
-- `expire_swaps()` : appelée par une tâche planifiée (pg_cron) ; annule les réservations dépassées.
+- `expire_swaps()` : appelée par une tâche planifiée (pg_cron) ; annule les réservations dépassées et rend le jeton.
 - `join_circle(invite_code)`.
 
 ## Stockage des photos

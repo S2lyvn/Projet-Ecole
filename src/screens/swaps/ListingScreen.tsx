@@ -1,4 +1,4 @@
-// Fiche d'une annonce de la bourse : la pièce, le membre, et « Je la veux » (réservation, crédits bloqués).
+// Fiche d'une annonce de la bourse : la pièce, le membre, et « Réclamer cette pièce » (1 jeton bloqué).
 import { motion } from 'motion/react'
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
@@ -9,10 +9,10 @@ import { Chip } from '../../components/Chip'
 import { EmptyState } from '../../components/EmptyState'
 import { SubScreenHeader } from '../../components/SubScreenHeader'
 import { useToast } from '../../components/Toast'
-import { RESERVE_REFUSAL_MESSAGES, balanceOf, canReserve } from '../../domain/credits'
+import { RESERVE_REFUSAL_MESSAGES, TOKENS_PER_GARMENT, balanceOf, canReserve } from '../../domain/tokens'
 import { ME, isSwapOpen, openReservationsOf } from '../../domain/swaps'
-import { CATEGORY_LABELS, CONDITION_LABELS, objectPronoun } from '../../domain/wording'
-import { CreditsBadge, ItemTile, MemberLine, SimulationNote, creditsLabel, memberAvatar } from './parts'
+import { CATEGORY_LABELS, CONDITION_LABELS } from '../../domain/wording'
+import { ItemTile, MemberLine, SimulationNote, TokenCoin, memberAvatar } from './parts'
 
 export function ListingScreen() {
   const { listingId } = useParams()
@@ -40,10 +40,8 @@ export function ListingScreen() {
     isOwner: mine,
     openReservations: openReservationsOf(community.swaps, ME),
     balance: balanceOf(community.ledger),
-    cost: listing.credits,
+    cost: TOKENS_PER_GARMENT,
   })
-  const pronoun = objectPronoun(listing.item.agreement)
-  const wantLabel = `Je ${pronoun === 'les' ? 'les' : pronoun === 'le' ? 'le' : 'la'} veux`
 
   async function reserve() {
     if (busy || !listing) return
@@ -51,7 +49,7 @@ export function ListingScreen() {
     try {
       const created = await run((r) => r.reserveListing(listing.id))
       navigate(`/echanges/echange/${created.id}`)
-      showToast(`Réservée ! ${creditsLabel(created.credits)} bloqués jusqu’à la remise.`)
+      showToast(`Réclamée ! Ton jeton est bloqué jusqu’à la remise.`)
     } catch (e) {
       showToast(e instanceof Error ? e.message : 'Réservation impossible pour le moment.')
       setBusy(false)
@@ -86,9 +84,6 @@ export function ListingScreen() {
         className="relative flex justify-center"
       >
         <ItemTile item={listing.item} size="hero" />
-        <span className="absolute top-3 right-3">
-          <CreditsBadge credits={listing.credits} />
-        </span>
       </motion.div>
 
       <div className="flex flex-wrap gap-2">
@@ -144,7 +139,8 @@ export function ListingScreen() {
               aria-describedby={check.ok ? undefined : 'reserve-refusal'}
               onClick={() => (check.ok ? void reserve() : undefined)}
             >
-              {wantLabel} · {creditsLabel(listing.credits)}
+              <TokenCoin size={24} />
+              Réclamer cette pièce · 1 jeton
             </Button>
             {!check.ok && (
               <p id="reserve-refusal" className="m-0 text-center text-sm text-amber-ink">
@@ -153,7 +149,7 @@ export function ListingScreen() {
             )}
             {check.ok && (
               <p className="m-0 text-center text-[13px] text-muted">
-                Les crédits sont bloqués, puis dépensés quand tu confirmes la remise.
+                Ton jeton est bloqué, puis utilisé quand tu confirmes la remise. Annuler te le rend.
               </p>
             )}
           </>

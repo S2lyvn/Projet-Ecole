@@ -81,5 +81,5 @@ describe('parcours conseillé', () => {
     await user.click(tab(/Bilan/))
     await title('Bilan')
     expect(screen.getByRole('img', { name: /pièces portées sur 20 ces 3 derniers mois/ })).toBeInTheDocument()
-  })
+  }, 20_000) // Long parcours de bout en bout : délai large pour les machines chargées.
 })

@@ -2,7 +2,7 @@
 
 Projet d'école (Clermont School of Business). **Ton dressing se tient à jour tout seul.**
 
-Application web mobile installable (PWA) qui aide à porter ce qu'on possède vraiment : tenue du jour construite autour d'une pièce oubliée, suivi du lavage, pièces dormantes à remettre en jeu, échanger, vendre ou donner, et une bourse d'échange entre membres avec des crédits.
+Application web mobile installable (PWA) qui aide à porter ce qu'on possède vraiment : tenue du jour construite autour d'une pièce oubliée, suivi du lavage, pièces dormantes à remettre en jeu, échanger, vendre ou donner, et une bourse d'échange entre membres avec des jetons de réclamation (1 habit fourni = 1 jeton = 1 habit à réclamer).
 
 « e-mirror » est un nom de code : le nom définitif reste à choisir (voir `docs/08-decisions-ouvertes.md`).
 
@@ -45,7 +45,7 @@ Puis ouvre l'adresse affichée (http://localhost:5173). Pour avoir le panneau de
 
 Voir `docs/07-feuille-de-route.md`. Étapes 0 (mise en place), 1 (règles métier et données d'exemple) et 2 (écrans du cœur en mode démo) faites.
 
-En plus, un **simulateur de la bourse d'échange** fonctionne hors ligne avec des membres fictifs : annonces, réservation avec crédits, rendez-vous, QR code de remise, pièce reçue dans le dressing, avis. Il sera remplacé par la vraie bourse (Supabase) à l'étape 4, sans changer les écrans.
+En plus, un **simulateur de la bourse d'échange** fonctionne hors ligne avec des membres fictifs : annonces, réclamation avec des jetons, rendez-vous, QR code de remise, pièce reçue dans le dressing, avis. Il sera remplacé par la vraie bourse (Supabase) à l'étape 4, sans changer les écrans.
 
 ## Configuration
 

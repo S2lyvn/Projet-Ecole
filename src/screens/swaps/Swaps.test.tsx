@@ -1,14 +1,21 @@
 // @vitest-environment jsdom
-import { screen, waitFor, within } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { MemoryRouter } from 'react-router'
 import { describe, expect, it } from 'vitest'
-import { balanceOf } from '../../domain/credits'
-import { renderApp } from '../../test/renderApp'
+import { balanceOf, heldTokens } from '../../domain/tokens'
+import { AppRoutes } from '../../App'
+import { WardrobeProvider } from '../../app/WardrobeProvider'
+import { ToastProvider } from '../../components/Toast'
+import { createLocalRepository } from '../../data/local'
+import { TEST_TODAY, renderApp } from '../../test/renderApp'
 
 describe('bourse d’échange simulée', () => {
-  it('affiche le solde et les annonces à ma taille', async () => {
+  it('affiche les jetons, la règle et les annonces à ma taille', async () => {
     const { user } = renderApp('/echanges')
     expect(await screen.findByRole('heading', { level: 1, name: 'Échanges' })).toBeInTheDocument()
-    expect(screen.getByText('Mes crédits').parentElement).toHaveTextContent('2')
+    expect(screen.getByText('Mes jetons').parentElement).toHaveTextContent('1')
+    expect(screen.getByText(/1 habit donné = 1 jeton = 1 habit à réclamer/)).toBeInTheDocument()
     const market = screen.getByRole('list', { name: 'Annonces de la bourse' })
     expect(within(market).getByText('Pull marin rayé')).toBeInTheDocument()
     // Doudoune en L : masquée par le filtre « À ma taille » (haut M).
@@ -21,12 +28,14 @@ describe('bourse d’échange simulée', () => {
     expect(screen.getByText('Baskets en toile écrue')).toBeInTheDocument()
   })
 
-  it('réserver, fixer le rendez-vous, scanner : la pièce arrive dans le dressing', async () => {
+  it('réclamer, fixer le rendez-vous, scanner : la pièce arrive dans le dressing', async () => {
     const { user, repository } = renderApp('/echanges/annonce/l1')
-    await user.click(await screen.findByRole('button', { name: /Je le veux · 2 crédits/ }))
+    await user.click(await screen.findByRole('button', { name: 'Réclamer cette pièce · 1 jeton' }))
 
     expect(await screen.findByRole('heading', { name: 'Fixer le rendez-vous' })).toBeInTheDocument()
-    expect(balanceOf((await repository.getSwapState()).ledger)).toBe(0)
+    const { ledger } = await repository.getSwapState()
+    expect(balanceOf(ledger)).toBe(0)
+    expect(heldTokens(ledger)).toBe(1)
     await user.click(screen.getByRole('button', { name: 'Proposer ce rendez-vous' }))
 
     await user.click(await screen.findByRole('button', { name: /Scanner le code d’Inès/ }))
@@ -38,15 +47,21 @@ describe('bourse d’échange simulée', () => {
     expect(await screen.findByText('Merci pour ton avis !')).toBeInTheDocument()
   })
 
-  it('explique pourquoi on ne peut pas réserver sans assez de crédits', async () => {
-    renderApp('/echanges/annonce/l4')
-    expect(await screen.findByText(/Il te manque des crédits/)).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Je la veux · 3 crédits/ })).toHaveAttribute('aria-disabled', 'true')
+  it('sans jeton disponible, explique comment en gagner un', async () => {
+    const { user } = renderApp('/echanges/annonce/l1')
+    await user.click(await screen.findByRole('button', { name: 'Réclamer cette pièce · 1 jeton' }))
+    await screen.findByRole('heading', { name: 'Fixer le rendez-vous' })
+    // Le seul jeton est bloqué : une deuxième réclamation est refusée.
+    await user.click(screen.getByRole('button', { name: 'Retour à mes échanges' }))
+    await user.click(await screen.findByRole('tab', { name: /Bourse/ }))
+    await user.click(await screen.findByText('Jean mom bleu clair'))
+    expect(await screen.findByText(/Il te faut un jeton/)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Réclamer cette pièce · 1 jeton' })).toHaveAttribute('aria-disabled', 'true')
   })
 
   it('le membre répond dans la messagerie', async () => {
     const { user } = renderApp('/echanges/annonce/l6')
-    await user.click(await screen.findByRole('button', { name: /Je le veux/ }))
+    await user.click(await screen.findByRole('button', { name: /Réclamer cette pièce/ }))
     await user.type(await screen.findByLabelText('Écrire à Inès'), 'Bonjour, ça te va demain ?')
     await user.click(screen.getByRole('button', { name: 'Envoyer' }))
     expect(await screen.findByText('Bonjour, ça te va demain ?')).toBeInTheDocument()
@@ -66,7 +81,8 @@ describe('bourse d’échange simulée', () => {
 
     expect(await screen.findByRole('list', { name: 'Mes annonces' })).toHaveTextContent('Pull col rond gris')
     const listing = (await repository.getSwapState()).listings.find((l) => l.garmentId === 'g10')
-    expect(listing).toMatchObject({ status: 'open', credits: 2 })
+    expect(listing).toMatchObject({ status: 'open' })
+    expect(screen.getByRole('list', { name: 'Mes annonces' })).toHaveTextContent('+1 jeton à la remise')
   })
 
   it('le bouton Échanger d’À sortir ouvre le formulaire prérempli', async () => {
@@ -75,5 +91,27 @@ describe('bourse d’échange simulée', () => {
     const card = within(list).getAllByRole('article')[0]
     await user.click(within(card).getByRole('button', { name: /Échanger/ }))
     expect(await screen.findByRole('heading', { level: 1, name: 'Proposer à l’échange' })).toBeInTheDocument()
+  })
+
+  it('donner une pièce rapporte 1 jeton à la remise', async () => {
+    const repository = createLocalRepository({ storage: null, startDate: TEST_TODAY })
+    await repository.acceptCommunityRules()
+    await repository.publishListing({ garmentId: 'g10', condition: 'good', note: null, circle: null })
+    const swap = await repository.simulateIncomingReservation()
+    await repository.scheduleSwap(swap.id, 'Place de Jaude', 'Demain, 18 h')
+    const user = userEvent.setup()
+    render(
+      <MemoryRouter initialEntries={[`/echanges/echange/${swap.id}`]}>
+        <WardrobeProvider repository={repository}>
+          <ToastProvider>
+            <AppRoutes />
+          </ToastProvider>
+        </WardrobeProvider>
+      </MemoryRouter>,
+    )
+    await user.click(await screen.findByRole('button', { name: /a scanné mon code/ }))
+    expect(await screen.findByText(/Tu as gagné 1 jeton/)).toBeInTheDocument()
+    expect(balanceOf((await repository.getSwapState()).ledger)).toBe(2)
+    expect(screen.getByRole('link', { name: 'Réclamer une pièce' })).toHaveAttribute('href', '/echanges')
   })
 })

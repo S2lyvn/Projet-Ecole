@@ -16,7 +16,7 @@ import { useToast } from '../../components/Toast'
 import { MEETING_PLACES, MEETING_SLOTS, ME, isSwapOpen, swapRole } from '../../domain/swaps'
 import type { Member, Swap } from '../../domain/swaps'
 import { de } from '../../domain/wording'
-import { ItemTile, SimulationNote, SwapStatusChip, creditsLabel, memberAvatar } from './parts'
+import { ItemTile, SimulationNote, SwapStatusChip, TokenCoin, memberAvatar } from './parts'
 
 const STEPS = ['Réservée', 'Rendez-vous', 'Remise', 'Avis'] as const
 
@@ -74,7 +74,7 @@ export function SwapScreen() {
       showToast(
         result.receivedGarment
           ? `${result.receivedGarment.name} est dans ton dressing, fiche remplie.`
-          : `+${creditsLabel(swap.credits)} ! Merci d’avoir fait circuler ta pièce.`,
+          : '+1 jeton ! Réclame une pièce quand tu veux, chez n’importe quel membre.',
       )
     })
 
@@ -89,7 +89,7 @@ export function SwapScreen() {
             {role === 'giver' ? 'Tu donnes à' : 'Tu reçois de'} {other?.displayName ?? 'un membre'}
           </span>
           <span className="text-[13px] text-muted">
-            {role === 'giver' ? `+${creditsLabel(swap.credits)} à la remise` : `${creditsLabel(swap.credits)}`}
+            {role === 'giver' ? '+1 jeton à la remise' : swap.status === 'completed' ? '1 jeton utilisé' : '1 jeton bloqué'}
             {other ? ` · ${other.neighborhood}` : ''}
           </span>
           <SwapStatusChip swap={swap} />
@@ -102,7 +102,7 @@ export function SwapScreen() {
         {swap.status === 'cancelled' && (
           <motion.div key="cancelled" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
             <EmptyState title="Échange annulé">
-              {role === 'receiver' ? 'Tes crédits ont été débloqués. ' : ''}L’annonce est de nouveau en ligne.
+              {role === 'receiver' ? 'Ton jeton t’a été rendu. ' : ''}L’annonce est de nouveau en ligne.
             </EmptyState>
           </motion.div>
         )}
@@ -163,7 +163,7 @@ export function SwapScreen() {
               void act(async () => {
                 await run((r) => r.cancelSwap(swap.id))
                 navigate('/echanges?vue=echanges')
-              }, role === 'receiver' ? 'Échange annulé, tes crédits sont débloqués.' : 'Échange annulé.')
+              }, role === 'receiver' ? 'Échange annulé, ton jeton t’est rendu.' : 'Échange annulé.')
             }
           >
             Annuler l’échange
@@ -328,25 +328,41 @@ function Completed({
 }) {
   return (
     <Card className="items-center gap-3! text-center">
-      <motion.span
-        initial={{ scale: 0, rotate: -30 }}
-        animate={{ scale: 1, rotate: 0 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 14, delay: 0.1 }}
-        className="grid size-16 place-items-center rounded-full bg-fresh text-on-fresh shadow-[var(--shadow-md)]"
-      >
-        <svg viewBox="0 0 24 24" width={32} height={32} fill="none" stroke="currentColor" strokeWidth={2.6} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <motion.path d="M5 12.5l4.5 4.5L19 7.5" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: 0.3, duration: 0.4 }} />
-        </svg>
-      </motion.span>
+      {role === 'giver' ? (
+        // Le jeton gagné tombe en tournant, comme une pièce dans une tirelire.
+        <motion.span
+          initial={{ y: -60, rotateY: 0, opacity: 0 }}
+          animate={{ y: 0, rotateY: 720, opacity: 1 }}
+          transition={{ type: 'spring', stiffness: 160, damping: 14, delay: 0.1 }}
+          className="[transform-style:preserve-3d]"
+        >
+          <TokenCoin size={64} />
+        </motion.span>
+      ) : (
+        <motion.span
+          initial={{ scale: 0, rotate: -30 }}
+          animate={{ scale: 1, rotate: 0 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 14, delay: 0.1 }}
+          className="grid size-16 place-items-center rounded-full bg-fresh text-on-fresh shadow-[var(--shadow-md)]"
+        >
+          <svg viewBox="0 0 24 24" width={32} height={32} fill="none" stroke="currentColor" strokeWidth={2.6} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <motion.path d="M5 12.5l4.5 4.5L19 7.5" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: 0.3, duration: 0.4 }} />
+          </svg>
+        </motion.span>
+      )}
       <h2 className="m-0 font-display text-2xl font-bold">Remise faite</h2>
       <p className="m-0 text-sm text-muted">
         {role === 'receiver'
-          ? 'La pièce est dans ton dressing, avec sa fiche déjà remplie. Elle peut être proposée dès demain.'
-          : `Tu as gagné ${creditsLabel(swap.credits)}. Ta pièce vit maintenant chez quelqu’un d’autre.`}
+          ? '1 jeton utilisé. La pièce est dans ton dressing, avec sa fiche déjà remplie. Elle peut être proposée dès demain.'
+          : 'Tu as gagné 1 jeton. Ta pièce vit maintenant chez quelqu’un d’autre ; réclame la tienne chez n’importe quel membre, quand tu veux.'}
       </p>
-      {role === 'receiver' && (
+      {role === 'receiver' ? (
         <ButtonLink to="/dressing" variant="secondary" fullWidth={false}>
           Voir mon dressing
+        </ButtonLink>
+      ) : (
+        <ButtonLink to="/echanges" variant="primary" fullWidth={false}>
+          Réclamer une pièce
         </ButtonLink>
       )}
       {swap.myRating === null ? (
