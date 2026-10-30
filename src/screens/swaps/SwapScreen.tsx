@@ -89,7 +89,9 @@ export function SwapScreen() {
             {role === 'giver' ? 'Tu donnes à' : 'Tu reçois de'} {other?.displayName ?? 'un membre'}
           </span>
           <span className="text-[13px] text-muted">
-            {role === 'giver' ? '+1 jeton à la remise' : swap.status === 'completed' ? '1 jeton utilisé' : '1 jeton bloqué'}
+            {swap.status === 'completed'
+              ? role === 'giver' ? '1 jeton gagné' : '1 jeton utilisé'
+              : role === 'giver' ? '+1 jeton à la remise' : '1 jeton bloqué'}
             {other ? ` · ${other.neighborhood}` : ''}
           </span>
           <SwapStatusChip swap={swap} />
