@@ -37,6 +37,7 @@ Points d'entrée : bouton « Échanger » sur une pièce dormante (À sortir) ou
 
 ### B. Trouver et réserver une pièce
 1. Onglet Échanges → **Bourse** : grille d'annonces filtrée par défaut sur **mes tailles** et **ma ville**. Filtres : catégorie, taille, cercle.
+   - **Près de chez toi** : filtre par distance autour de **mon quartier** (1 km, 3 km par défaut, 5 km, toute la ville), annonces triées de la plus proche à la plus lointaine. La distance est calculée **entre centres de quartiers** et arrondie au demi-kilomètre : l'appli ne connaît jamais la position exacte ni l'adresse (CLAUDE.md, règle 5). Dans le simulateur, les positions des quartiers de Clermont-Ferrand sont des ordres de grandeur d'exemple ; à l'étape 4, une table `neighborhoods` (ville, nom, centre approximatif) les remplacera.
 2. Fiche d'une annonce : photos, état, taille, ville et quartier du membre (jamais l'adresse), note du membre, nombre d'échanges réussis.
 3. « Réclamer cette pièce » → réservation. 1 jeton est bloqué. L'annonce passe « réservée » et disparaît de la bourse.
 4. Limites : 3 réservations en cours maximum par membre ; une réservation expire après **72 heures** sans rendez-vous fixé.

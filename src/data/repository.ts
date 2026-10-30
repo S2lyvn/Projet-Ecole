@@ -115,6 +115,8 @@ export interface SwapState {
   ledger: LedgerEntry[]
   sizes: MySizes
   city: string
+  /** Quartier de l'utilisateur : la seule localisation connue (ville et quartier, jamais de GPS). */
+  neighborhood: string
   isAdult: boolean
   rulesAccepted: boolean
 }
@@ -134,6 +136,8 @@ export interface PublishListingInput {
 export interface SwapRepository {
   getSwapState(): Promise<SwapState>
   acceptCommunityRules(): Promise<void>
+  /** Change le quartier de l'utilisateur (liste fermée de quartiers de sa ville). */
+  setMyNeighborhood(neighborhood: string): Promise<void>
   /** Met une pièce active du dressing en ligne ; elle reste dans le dressing jusqu'à la remise. */
   publishListing(input: PublishListingInput): Promise<SwapListing>
   /** Retire une annonce encore ouverte. */

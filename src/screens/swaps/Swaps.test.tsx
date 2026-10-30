@@ -22,10 +22,29 @@ describe('bourse d’échange simulée', () => {
     expect(within(market).queryByText('Doudoune légère kaki')).not.toBeInTheDocument()
 
     await user.click(screen.getByRole('switch', { name: /À ma taille/ }))
+    await user.click(screen.getByRole('button', { name: 'Toute la ville' }))
     expect(await screen.findByText('Doudoune légère kaki')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Chaussures' }))
     await waitFor(() => expect(screen.queryByText('Pull marin rayé')).not.toBeInTheDocument())
     expect(screen.getByText('Baskets en toile écrue')).toBeInTheDocument()
+  })
+
+  it('filtre par distance autour de mon quartier, les plus proches d’abord', async () => {
+    const { user, repository } = renderApp('/echanges')
+    await user.click(await screen.findByRole('switch', { name: /À ma taille/ }))
+    const market = () => screen.getByRole('list', { name: 'Annonces de la bourse' })
+    // Saint-Jacques, 3 km par défaut : Sarah (même quartier) en premier, Chloé (Chamalières, ~3,5 km) masquée.
+    expect(within(market()).getAllByRole('link')[0]).toHaveTextContent('Ton quartier')
+    expect(within(market()).queryByText('Baskets en toile écrue')).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: '1 km' }))
+    await waitFor(() => expect(within(market()).queryByText('Pull marin rayé')).not.toBeInTheDocument())
+    await user.click(screen.getByRole('button', { name: '5 km' }))
+    expect(await within(market()).findByText('Baskets en toile écrue')).toBeInTheDocument()
+
+    await user.selectOptions(screen.getByRole('combobox', { name: 'Mon quartier' }), 'Chamalières')
+    await waitFor(async () => expect((await repository.getSwapState()).neighborhood).toBe('Chamalières'))
+    expect(await within(market()).findByText('Baskets en toile écrue')).toBeInTheDocument()
   })
 
   it('réclamer, fixer le rendez-vous, scanner : la pièce arrive dans le dressing', async () => {

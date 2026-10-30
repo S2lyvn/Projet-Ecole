@@ -6,6 +6,8 @@ import type { ListingItem, Member, MySizes, Swap, SwapListing } from '../domain/
 import type { IsoDate, IsoDateTime, ItemCondition, LedgerEntry } from '../domain/types'
 
 export const DEMO_CITY = 'Clermont-Ferrand'
+/** Quartier de l'utilisateur de la démo (modifiable dans la Bourse). */
+export const DEMO_NEIGHBORHOOD = 'Saint-Jacques'
 export const DEMO_SIZES: MySizes = { top: 'M', bottom: '38', shoes: '39' }
 /** Cercle privé d'exemple (docs/03 : premier test sur le campus). */
 export const DEMO_CIRCLE = 'Promo CSB (exemple)'
@@ -18,6 +20,8 @@ export interface CommunityState {
   ledger: LedgerEntry[]
   sizes: MySizes
   city: string
+  /** Quartier saisi par l'utilisateur (jamais de GPS). */
+  neighborhood: string
   isAdult: boolean
   rulesAccepted: boolean
   /** Horloge simulée (minutes écoulées dans la journée) et compteur d'ids, pour rester déterministe. */
@@ -181,6 +185,7 @@ export function createSampleCommunity(today: IsoDate): CommunityState {
     ledger: [{ amount: TOKENS_PER_GARMENT, reason: 'earn', swapId: 's0', createdAt: stamp(pastDay, 0) }],
     sizes: { ...DEMO_SIZES },
     city: DEMO_CITY,
+    neighborhood: DEMO_NEIGHBORHOOD,
     isAdult: true,
     rulesAccepted: false,
     clock: 0,

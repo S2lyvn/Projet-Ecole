@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import {
   ME,
+  NEIGHBORHOOD_NAMES,
   activeListingFor,
+  formatDistance,
+  listingsNear,
+  neighborhoodDistanceKm,
   filterListings,
   fitsMySizes,
   handoverCodeFor,
@@ -117,5 +121,41 @@ describe('échanges', () => {
     expect(handoverCodeFor('s1')).toMatch(/^[0-9A-F]{12}$/)
     expect(handoverCodeFor('s1')).toBe(handoverCodeFor('s1'))
     expect(handoverCodeFor('s1')).not.toBe(handoverCodeFor('s2'))
+  })
+})
+
+describe('localisation par quartier', () => {
+  const members = [
+    { id: 'a', displayName: 'A', neighborhood: 'Jaude', rating: null, swapsCount: 0, memberSince: '' },
+    { id: 'b', displayName: 'B', neighborhood: 'Les Cézeaux', rating: null, swapsCount: 0, memberSince: '' },
+    { id: 'c', displayName: 'C', neighborhood: 'Saint-Jacques', rating: null, swapsCount: 0, memberSince: '' },
+    { id: 'd', displayName: 'D', neighborhood: 'Quartier inconnu', rating: null, swapsCount: 0, memberSince: '' },
+  ]
+  const list = [listing({ id: 'lb', ownerId: 'b' }), listing({ id: 'la', ownerId: 'a' }), listing({ id: 'lc', ownerId: 'c' }), listing({ id: 'ld', ownerId: 'd' })]
+
+  it('donne une distance arrondie au demi-kilomètre, symétrique, nulle dans le même quartier', () => {
+    expect(neighborhoodDistanceKm('Jaude', 'Jaude')).toBe(0)
+    expect(neighborhoodDistanceKm('Jaude', 'Saint-Jacques')).toBe(1.5)
+    expect(neighborhoodDistanceKm('Saint-Jacques', 'Jaude')).toBe(1.5)
+    expect(neighborhoodDistanceKm('Jaude', 'Nulle part')).toBeNull()
+  })
+
+  it('formate sans jamais être plus précis que le quartier', () => {
+    expect(formatDistance(0)).toBe('Ton quartier')
+    expect(formatDistance(1.5)).toBe('~1,5 km')
+    expect(formatDistance(null)).toBe('Distance inconnue')
+  })
+
+  it('filtre par rayon et trie du plus proche au plus loin', () => {
+    expect(listingsNear(list, members, 'Jaude', 3).map((n) => n.listing.id)).toEqual(['la', 'lc'])
+    expect(listingsNear(list, members, 'Jaude', 1).map((n) => n.listing.id)).toEqual(['la'])
+    // Toute la ville : la distance inconnue passe en dernier.
+    expect(listingsNear(list, members, 'Jaude', null).map((n) => n.listing.id)).toEqual(['la', 'lc', 'lb', 'ld'])
+  })
+
+  it('connaît le quartier de chaque membre de la démo', () => {
+    for (const name of ['Jaude', 'Les Cézeaux', 'Saint-Jacques', 'Montferrand', 'Chamalières', 'La Gauthière']) {
+      expect(NEIGHBORHOOD_NAMES).toContain(name)
+    }
   })
 })

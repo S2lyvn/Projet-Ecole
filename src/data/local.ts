@@ -4,6 +4,7 @@ import { addDays, isIsoDate, toIsoDate } from '../domain/dates'
 import { DORMANCY_THRESHOLDS } from '../domain/dormancy'
 import { applyWear, clearExpiredLaundry, markClean, washNow } from '../domain/laundry'
 import { buildOutfit, outfitGarmentIds } from '../domain/outfit'
+import { NEIGHBORHOOD_NAMES } from '../domain/swaps'
 import { USAGE_PERIODS } from '../domain/usage'
 import { AGREEMENTS, GARMENT_CATEGORIES, GARMENT_SOURCES, GARMENT_STATUSES, WEAR_SOURCES } from '../domain/types'
 import type { Garment, GarmentStatus, IsoDate, Wear, WearSource } from '../domain/types'
@@ -107,7 +108,7 @@ const isIdList: Check = (v) => Array.isArray(v) && v.every(isString)
 function isCommunity(value: unknown): boolean {
   if (!isRecord(value)) return false
   const lists = ['members', 'listings', 'swaps', 'ledger'].every((k) => Array.isArray(value[k]))
-  return lists && Number.isInteger(value.clock) && Number.isInteger(value.nextNumber) && isRecord(value.sizes)
+  return lists && typeof value.neighborhood === 'string' && Number.isInteger(value.clock) && Number.isInteger(value.nextNumber) && isRecord(value.sizes)
 }
 
 /** Vérifie tout l'état relu : au moindre doute (champ manquant, date invalide, id orphelin), données d'exemple. */
@@ -403,8 +404,13 @@ export function createLocalRepository(
     },
 
     async getSwapState() {
-      const { members, listings, swaps: list, ledger, sizes, city, isAdult, rulesAccepted } = state.community
-      return structuredClone({ members, listings, swaps: list, ledger, sizes, city, isAdult, rulesAccepted })
+      const { members, listings, swaps: list, ledger, sizes, city, neighborhood, isAdult, rulesAccepted } = state.community
+      return structuredClone({ members, listings, swaps: list, ledger, sizes, city, neighborhood, isAdult, rulesAccepted })
+    },
+
+    async setMyNeighborhood(neighborhood) {
+      if (!NEIGHBORHOOD_NAMES.includes(neighborhood)) throw new Error(`Quartier inconnu : « ${neighborhood} »`)
+      commit({ ...state, community: { ...state.community, neighborhood } })
     },
 
     async acceptCommunityRules() {

@@ -183,3 +183,67 @@ export function handoverCodeFor(seed: string): string {
   }
   return (a.toString(16).padStart(8, '0') + b.toString(16).padStart(8, '0')).slice(0, 12).toUpperCase()
 }
+
+// --- Localisation : quartier seulement, jamais de GPS (CLAUDE.md, règle 5) ---
+
+/**
+ * Quartiers de la démo et position approximative de leur centre, en km par rapport à Jaude (est, nord).
+ * DONNÉES D'EXEMPLE : ordres de grandeur pour la démonstration, pas des mesures.
+ */
+export const NEIGHBORHOODS: Record<string, { x: number; y: number }> = {
+  Jaude: { x: 0, y: 0 },
+  'Saint-Jacques': { x: 0.8, y: -1.3 },
+  'Les Cézeaux': { x: 1.6, y: -3.2 },
+  Montferrand: { x: 2.3, y: 2.4 },
+  Chamalières: { x: -2.1, y: 0.3 },
+  'La Gauthière': { x: 0.9, y: 2.9 },
+}
+
+export const NEIGHBORHOOD_NAMES = Object.keys(NEIGHBORHOODS)
+
+/** Rayons proposés dans la Bourse ; null = toute la ville. */
+export const DISTANCE_FILTERS = [1, 3, 5, null] as const
+export type DistanceFilter = (typeof DISTANCE_FILTERS)[number]
+
+/**
+ * Distance approximative entre deux quartiers, arrondie au demi-kilomètre (0 dans le même quartier).
+ * null si un quartier est inconnu : on ne devine jamais une position.
+ */
+export function neighborhoodDistanceKm(from: string, to: string): number | null {
+  const a = NEIGHBORHOODS[from]
+  const b = NEIGHBORHOODS[to]
+  if (!a || !b) return null
+  return Math.round(Math.hypot(a.x - b.x, a.y - b.y) * 2) / 2
+}
+
+/** « Ton quartier », « ~1,5 km » : jamais plus précis que le demi-kilomètre. */
+export function formatDistance(km: number | null): string {
+  if (km === null) return 'Distance inconnue'
+  if (km === 0) return 'Ton quartier'
+  return `~${km.toLocaleString('fr-FR')} km`
+}
+
+export interface NearbyListing {
+  listing: SwapListing
+  distanceKm: number | null
+}
+
+/**
+ * Annonces dans le rayon choisi autour de mon quartier, les plus proches d'abord.
+ * Rayon null : toute la ville (distance inconnue en dernier). Avec un rayon, une distance inconnue est exclue.
+ */
+export function listingsNear(
+  listings: readonly SwapListing[],
+  members: readonly Member[],
+  myNeighborhood: string,
+  maxKm: DistanceFilter,
+): NearbyListing[] {
+  const neighborhoods = new Map(members.map((m) => [m.id, m.neighborhood]))
+  return listings
+    .map((listing) => {
+      const theirs = neighborhoods.get(listing.ownerId)
+      return { listing, distanceKm: theirs === undefined ? null : neighborhoodDistanceKm(myNeighborhood, theirs) }
+    })
+    .filter(({ distanceKm }) => maxKm === null || (distanceKm !== null && distanceKm <= maxKm))
+    .sort((a, b) => (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity))
+}

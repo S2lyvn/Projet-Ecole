@@ -12,8 +12,17 @@ import { ScreenHeader } from '../../components/ScreenHeader'
 import { Segmented } from '../../components/Segmented'
 import { Switch } from '../../components/Switch'
 import { balanceOf, heldTokens } from '../../domain/tokens'
-import { ME, filterListings, isSwapOpen, swapRole } from '../../domain/swaps'
-import type { ListingCategoryFilter, Member, SwapListing } from '../../domain/swaps'
+import {
+  DISTANCE_FILTERS,
+  ME,
+  NEIGHBORHOOD_NAMES,
+  filterListings,
+  formatDistance,
+  isSwapOpen,
+  listingsNear,
+  swapRole,
+} from '../../domain/swaps'
+import type { DistanceFilter, ListingCategoryFilter, Member, SwapListing } from '../../domain/swaps'
 import { CONDITION_LABELS, plural } from '../../domain/wording'
 import { ItemTile, SimulationNote, SwapStatusChip, TokenCoin, tokensLabel } from './parts'
 
@@ -138,13 +147,18 @@ export function SwapsScreen() {
   )
 }
 
+const DISTANCE_LABELS: Record<string, string> = { '1': '1 km', '3': '3 km', '5': '5 km', null: 'Toute la ville' }
+
 function Market() {
-  const { data } = useWardrobe()
+  const { data, run } = useWardrobe()
   const { swaps: community } = data
   const [category, setCategory] = useState<ListingCategoryFilter>('all')
   const [mySizesOnly, setMySizesOnly] = useState(true)
+  // Par défaut 3 km : les remises en main propre restent faciles.
+  const [maxKm, setMaxKm] = useState<DistanceFilter>(3)
   const members = useMemo(() => new Map(community.members.map((m) => [m.id, m])), [community.members])
-  const listings = filterListings(community.listings, { category, mySizesOnly, sizes: community.sizes, memberId: ME })
+  const filtered = filterListings(community.listings, { category, mySizesOnly, sizes: community.sizes, memberId: ME })
+  const nearby = listingsNear(filtered, community.members, community.neighborhood, maxKm)
 
   return (
     <>
@@ -166,6 +180,47 @@ function Market() {
           </button>
         ))}
       </div>
+      <section aria-labelledby="near-title" className="flex flex-col gap-2.5">
+        <div className="flex items-center justify-between gap-3">
+          <h2 id="near-title" className="m-0 flex items-center gap-1.5 text-[15px] font-medium">
+            <Icon name="pin" size={18} />
+            Près de chez toi
+          </h2>
+          <label className="flex items-center gap-1.5 text-[13px] text-muted">
+            <span className="sr-only">Mon quartier</span>
+            <select
+              value={community.neighborhood}
+              onChange={(e) => void run((r) => r.setMyNeighborhood(e.target.value))}
+              className="min-h-11 max-w-[170px] rounded-full border border-outline bg-surface px-3 text-sm font-medium text-ink"
+            >
+              {NEIGHBORHOOD_NAMES.map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+        <div role="group" aria-label="Distance maximale" className="grid grid-cols-4 gap-1.5">
+          {DISTANCE_FILTERS.map((km) => (
+            <button
+              key={String(km)}
+              type="button"
+              aria-pressed={maxKm === km}
+              onClick={() => setMaxKm(km)}
+              className={[
+                'min-h-11 rounded-full border px-1 text-[13px] leading-tight transition-colors',
+                maxKm === km ? 'border-accent bg-accent font-bold text-on-accent' : 'border-outline font-medium text-ink',
+              ].join(' ')}
+            >
+              {DISTANCE_LABELS[String(km)]}
+            </button>
+          ))}
+        </div>
+        <p className="m-0 text-xs text-muted">
+          Distances approximatives entre quartiers (exemple). L’appli ne connaît que ton quartier, jamais ta position.
+        </p>
+      </section>
       <Switch
         checked={mySizesOnly}
         onChange={setMySizesOnly}
@@ -174,20 +229,24 @@ function Market() {
         description={`Haut ${community.sizes.top} · bas ${community.sizes.bottom} · pointure ${community.sizes.shoes} · ${community.city.replace('-', '\u2011')}`}
       />
 
-      {listings.length === 0 ? (
-        <EmptyState title="Rien pour l’instant">Change de catégorie ou retire le filtre de taille.</EmptyState>
+      {nearby.length === 0 ? (
+        <EmptyState title="Rien pour l’instant">
+          {maxKm !== null && filtered.length > 0
+            ? 'Rien dans ce rayon : élargis la distance pour voir les autres quartiers.'
+            : 'Change de catégorie ou retire le filtre de taille.'}
+        </EmptyState>
       ) : (
         <motion.ul
-          key={`${category}-${mySizesOnly}`}
+          key={`${category}-${mySizesOnly}-${maxKm}-${community.neighborhood}`}
           variants={list}
           initial="hidden"
           animate="show"
           className="m-0 grid list-none grid-cols-2 gap-3 p-0"
           aria-label="Annonces de la bourse"
         >
-          {listings.map((l) => (
+          {nearby.map(({ listing: l, distanceKm }) => (
             <motion.li key={l.id} variants={listItem}>
-              <ListingCard listing={l} member={members.get(l.ownerId)} />
+              <ListingCard listing={l} member={members.get(l.ownerId)} distanceKm={distanceKm} />
             </motion.li>
           ))}
         </motion.ul>
@@ -196,7 +255,15 @@ function Market() {
   )
 }
 
-function ListingCard({ listing, member }: { listing: SwapListing; member: Member | undefined }) {
+function ListingCard({
+  listing,
+  member,
+  distanceKm,
+}: {
+  listing: SwapListing
+  member: Member | undefined
+  distanceKm: number | null
+}) {
   return (
     <Link
       to={`/echanges/annonce/${listing.id}`}
@@ -213,6 +280,10 @@ function ListingCard({ listing, member }: { listing: SwapListing; member: Member
           {member.displayName} · {member.neighborhood}
         </span>
       )}
+      <span className="inline-flex items-center gap-1 self-start rounded-full bg-tile px-2 py-0.5 text-xs font-bold text-ink">
+        <Icon name="pin" size={13} strokeWidth={2.2} />
+        {formatDistance(distanceKm)}
+      </span>
       {listing.circle && <Chip tone="accent">{listing.circle}</Chip>}
     </Link>
   )

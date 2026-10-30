@@ -10,7 +10,7 @@ import { EmptyState } from '../../components/EmptyState'
 import { SubScreenHeader } from '../../components/SubScreenHeader'
 import { useToast } from '../../components/Toast'
 import { RESERVE_REFUSAL_MESSAGES, TOKENS_PER_GARMENT, balanceOf, canReserve } from '../../domain/tokens'
-import { ME, isSwapOpen, openReservationsOf } from '../../domain/swaps'
+import { ME, formatDistance, isSwapOpen, neighborhoodDistanceKm, openReservationsOf } from '../../domain/swaps'
 import { CATEGORY_LABELS, CONDITION_LABELS } from '../../domain/wording'
 import { ItemTile, MemberLine, SimulationNote, TokenCoin, memberAvatar } from './parts'
 
@@ -109,6 +109,11 @@ export function ListingScreen() {
       )}
 
       <p className="m-0 text-[13px] text-muted">
+        {owner && !mine
+          ? `${formatDistance(neighborhoodDistanceKm(community.neighborhood, owner.neighborhood))}${
+              owner.neighborhood === community.neighborhood ? '' : ` de ton quartier (${community.neighborhood})`
+            }. `
+          : ''}
         Remise en main propre dans un lieu public de {listing.city}. Jamais d’adresse personnelle.
       </p>
 

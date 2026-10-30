@@ -8,8 +8,8 @@ import type { DailyOutfitState, PendingConfirmation, PurchaseCandidate, UserSett
 import { createSampleCommunity } from './sampleCommunity'
 import type { CommunityState } from './sampleCommunity'
 
-// Version 4 : crédits remplacés par des jetons (un état plus ancien repart des données d'exemple).
-export const STATE_VERSION = 4
+// Version 5 : quartier de l'utilisateur pour le filtre de distance (un état plus ancien repart des données d'exemple).
+export const STATE_VERSION = 5
 
 /** État complet de la démo locale, sérialisé tel quel en JSON. */
 export interface LocalState {

@@ -127,3 +127,13 @@ describe('bourse simulée : fournir une pièce', () => {
     await expect(repository.simulateIncomingReservation()).rejects.toThrow('Propose d’abord une pièce')
   })
 })
+
+describe('bourse simulée : quartier', () => {
+  it('garde le quartier choisi et refuse un quartier inconnu', async () => {
+    const repository = setup()
+    expect((await repository.getSwapState()).neighborhood).toBe('Saint-Jacques')
+    await repository.setMyNeighborhood('Montferrand')
+    expect((await repository.getSwapState()).neighborhood).toBe('Montferrand')
+    await expect(repository.setMyNeighborhood('12 rue des Gras')).rejects.toThrow('Quartier inconnu')
+  })
+})
