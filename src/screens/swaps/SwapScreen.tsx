@@ -304,7 +304,7 @@ function Handover({
             aria-hidden="true"
             animate={{ scale: [1, 1.06, 1] }}
             transition={{ repeat: Infinity, duration: 2.2, ease: 'easeInOut' }}
-            className="grid size-28 place-items-center rounded-3xl border-2 border-dashed border-accent text-accent"
+            className="grid size-28 place-items-center rounded-3xl border-2 border-dashed border-accent-ink text-accent-ink"
           >
             <Icon name="scan" size={44} strokeWidth={1.6} />
           </motion.span>

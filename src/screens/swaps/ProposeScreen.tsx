@@ -117,7 +117,7 @@ export function ProposeScreen() {
             <label
               key={c}
               className={[
-                'relative flex min-h-12 cursor-pointer items-center justify-center rounded-[14px] border px-2 text-center text-sm transition-colors has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-accent',
+                'relative flex min-h-12 cursor-pointer items-center justify-center rounded-[14px] border px-2 text-center text-sm transition-colors has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-focus',
                 condition === c ? 'border-accent bg-accent-tint font-bold text-accent-ink' : 'border-outline text-ink',
               ].join(' ')}
             >

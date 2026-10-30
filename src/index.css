@@ -13,6 +13,7 @@
   --color-tile: var(--tile);
   --color-outline: var(--outline);
   --color-accent: var(--accent);
+  --color-focus: var(--focus);
   --color-on-accent: var(--on-accent);
   --color-accent-ink: var(--accent-ink);
   --color-accent-tint: var(--accent-tint);
@@ -53,7 +54,7 @@
   }
 
   :focus-visible {
-    outline: 3px solid var(--accent);
+    outline: 3px solid var(--focus);
     outline-offset: 2px;
   }
 

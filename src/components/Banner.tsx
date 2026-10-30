@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 import { Icon } from './Icon'
 
-/** Bannière violette cliquable (« Hier : 3 pièces à confirmer », « 3 achats détectés »). */
+/** Bannière miel cliquable (« Hier : 3 pièces à confirmer », « 3 achats détectés »). */
 export function Banner({ to, children }: { to: string; children: ReactNode }) {
   return (
     <Link

@@ -11,7 +11,7 @@ export function tokensLabel(n: number): string {
   return `${n} ${plural(n, 'jeton', 'jetons')}`
 }
 
-/** Un jeton de réclamation : pièce violette frappée d'un cintre. Décoratif. */
+/** Un jeton de réclamation : pièce dorée frappée d'un cintre. Décoratif. */
 export function TokenCoin({ size = 28, muted = false }: { size?: number; muted?: boolean }) {
   return (
     <span
