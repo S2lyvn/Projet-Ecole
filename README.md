@@ -41,6 +41,10 @@ Puis ouvre l'adresse affichée (http://localhost:5173). Pour avoir le panneau de
 | `src/styles/tokens.css` | Couleurs du design, thème clair et sombre |
 | `public/` | Icônes de l'appli installable |
 
+## Test terrain
+
+Le test de la bourse d'échange avec de vrais étudiants se fait sur WhatsApp : voir `docs/mvp-whatsapp.md` et le tableur dans `mvp-whatsapp/`.
+
 ## Avancement
 
 Voir `docs/07-feuille-de-route.md`. Étapes 0 (mise en place), 1 (règles métier et données d'exemple) et 2 (écrans du cœur en mode démo) faites.

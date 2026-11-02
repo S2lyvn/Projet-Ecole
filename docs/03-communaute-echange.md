@@ -20,7 +20,7 @@ Pourquoi des jetons plutôt qu'un troc direct « ma veste contre ton pull » : l
 - **1 habit = 1 jeton**, quelle que soit la pièce : un manteau vaut autant qu'un t-shirt. Simple à expliquer, pas de négociation. Point à observer pendant les tests : voir `08-decisions-ouvertes.md`.
 - **Le jeton est gagné à la remise confirmée** (QR code scanné), jamais à la mise en ligne. Cela empêche de gagner des jetons avec des annonces fictives.
 - **Pas d'expiration** : un jeton reste valable jusqu'à ce que son propriétaire trouve la pièce qui lui plaît.
-- **Jetons de bienvenue : 0.** On commence par donner une pièce. Option à tester : 1 jeton offert après la première remise réussie.
+- **Jetons de bienvenue : 0.** On commence par donner une pièce. **Point à résoudre :** au lancement d'une nouvelle communauté, personne n'a de jeton, donc personne ne peut réclamer la première pièce. Le test WhatsApp (`mvp-whatsapp.md`) essaie 1 jeton de lancement à la première annonce validée. Voir la décision n° 6 de `08-decisions-ouvertes.md`.
 - Quand je réclame une pièce, **1 jeton est bloqué**. S'il y a annulation, ou expiration de la réclamation (72 h sans rendez-vous), il m'est rendu. À la remise, il est dépensé.
 - **Les jetons ne s'achètent pas et ne se convertissent pas en euros.** C'est ce qui distingue la bourse d'une place de marché. Points juridiques à faire vérifier (fiscalité, obligations des plateformes) : voir `08-decisions-ouvertes.md`. Ceci n'est pas un avis juridique.
 - Solde = somme du registre des jetons (`token_ledger`). Aucune colonne « solde » modifiable directement.

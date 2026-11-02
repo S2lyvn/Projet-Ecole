@@ -57,6 +57,12 @@ Conseil : démarrer chaque étape en **mode plan** (Maj+Tab dans Claude Code), r
 
 ---
 
+## Test terrain, en parallèle des étapes
+
+Le test de la bourse d'échange se fait sur WhatsApp dans l'école, sans mettre l'appli en ligne : voir `mvp-whatsapp.md`. Ses résultats décident de la suite des étapes 3 à 6.
+
+---
+
 ## Plus tard (hors MVP)
 
 - Import réel des achats (e-mails, tickets) : cadrage RGPD d'abord.
