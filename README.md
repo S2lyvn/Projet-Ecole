@@ -8,7 +8,7 @@ Application web mobile installable (PWA) qui aide à porter ce qu'on possède vr
 
 ## Tester l'appli
 
-- **En ligne** : https://s2lyvn.github.io/Projet-Ecole/ (mise à jour automatique à chaque push sur `main`).
+- **En ligne** : https://s2lyvn.github.io/Projet-Ecole/ ouvre la page vitrine ; l'appli (mode démo) est sur https://s2lyvn.github.io/Projet-Ecole/app/. Mise à jour automatique à chaque push sur `main`.
 - **Sur ton ordinateur** (Node.js 20.19 ou plus) :
 
 ```bash

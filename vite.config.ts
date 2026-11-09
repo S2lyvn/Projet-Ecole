@@ -1,5 +1,5 @@
 /// <reference types="vitest/config" />
-import { defineConfig } from 'vite'
+import { defineConfig, type Connect, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
@@ -8,19 +8,38 @@ import { fileURLToPath } from 'node:url'
 // BASE_PATH sert au déploiement sur GitHub Pages (/Projet-Ecole/). En local et sur Vercel : « / ».
 const base = process.env.BASE_PATH ?? '/'
 
+// En local (dev et preview), recharger une page de l'appli (/app/dressing…) doit rouvrir l'appli et non la vitrine.
+// En ligne, c'est 404.html qui joue ce rôle (voir .github/workflows/deploy.yml).
+function appFallback(): Plugin {
+  const appPath = new RegExp(`^${base}app(/|$)`)
+  const rewrite: Connect.NextHandleFunction = (req, _res, next) => {
+    const path = (req.url ?? '').split('?')[0]
+    if (appPath.test(path) && !/\.[a-z0-9]+$/i.test(path) && req.headers.accept?.includes('text/html')) {
+      req.url = `${base}app/index.html`
+    }
+    next()
+  }
+  return {
+    name: 'app-fallback',
+    configureServer: (server) => void server.middlewares.use(rewrite),
+    configurePreviewServer: (server) => void server.middlewares.use(rewrite),
+  }
+}
+
 export default defineConfig({
   base,
   build: {
     rollupOptions: {
-      // Deux pages : l'appli (/) et la vitrine (/vitrine/).
+      // Deux pages : la vitrine à la racine du site, l'appli dans /app/.
       input: {
-        app: fileURLToPath(new URL('./index.html', import.meta.url)),
-        vitrine: fileURLToPath(new URL('./vitrine/index.html', import.meta.url)),
+        vitrine: fileURLToPath(new URL('./index.html', import.meta.url)),
+        app: fileURLToPath(new URL('./app/index.html', import.meta.url)),
       },
     },
   },
   plugins: [
     react(),
+    appFallback(),
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
@@ -30,8 +49,8 @@ export default defineConfig({
         short_name: 'e-mirror',
         description: 'Ton dressing se tient à jour tout seul.',
         lang: 'fr',
-        start_url: base,
-        scope: base,
+        start_url: `${base}app/`,
+        scope: `${base}app/`,
         display: 'standalone',
         background_color: '#FFF8EB',
         theme_color: '#F2B705',
@@ -42,9 +61,9 @@ export default defineConfig({
         ],
       },
       workbox: {
-        navigateFallback: `${base}index.html`,
-        // La vitrine n'est pas une route de l'appli : le service worker ne doit pas la remplacer par l'appli.
-        navigateFallbackDenylist: [/\/vitrine\//],
+        navigateFallback: `${base}app/index.html`,
+        // Seules les adresses de l'appli retombent sur l'appli ; la vitrine reste la vitrine.
+        navigateFallbackAllowlist: [new RegExp(`^${base}app(/|$)`)],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.(googleapis|gstatic)\.com\/.*/i,

@@ -31,8 +31,9 @@ jobs:
         env:
           BASE_PATH: /${{ github.event.repository.name }}/
           VITE_DEMO_MODE: 'true'
-      # GitHub Pages ne connaît pas les routes de l'appli : 404.html renvoie vers l'appli.
-      - run: cp dist/index.html dist/404.html
+      # GitHub Pages ne connaît pas les routes de l'appli (/app/dressing…) : 404.html renvoie vers l'appli.
+      # La racine du site (index.html) est la page vitrine.
+      - run: cp dist/app/index.html dist/404.html
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

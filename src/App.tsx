@@ -16,8 +16,9 @@ import { ToSortScreen } from './screens/to-sort/ToSortScreen'
 import { TodayScreen } from './screens/today/TodayScreen'
 import { WardrobeScreen } from './screens/wardrobe/WardrobeScreen'
 
+// L'appli vit dans /app/ : la racine du site est la page vitrine (index.html).
 // BASE_URL vaut « / » en local et « /Projet-Ecole/ » sur GitHub Pages.
-const basename = import.meta.env.BASE_URL.replace(/\/$/, '')
+const basename = `${import.meta.env.BASE_URL}app`
 
 /** Les écrans, sans le routeur ni les données : réutilisé par les tests avec un MemoryRouter. */
 export function AppRoutes() {
