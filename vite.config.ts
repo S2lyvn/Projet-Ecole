@@ -3,12 +3,22 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
+import { fileURLToPath } from 'node:url'
 
 // BASE_PATH sert au déploiement sur GitHub Pages (/Projet-Ecole/). En local et sur Vercel : « / ».
 const base = process.env.BASE_PATH ?? '/'
 
 export default defineConfig({
   base,
+  build: {
+    rollupOptions: {
+      // Deux pages : l'appli (/) et la vitrine (/vitrine/).
+      input: {
+        app: fileURLToPath(new URL('./index.html', import.meta.url)),
+        vitrine: fileURLToPath(new URL('./vitrine/index.html', import.meta.url)),
+      },
+    },
+  },
   plugins: [
     react(),
     tailwindcss(),
@@ -33,6 +43,8 @@ export default defineConfig({
       },
       workbox: {
         navigateFallback: `${base}index.html`,
+        // La vitrine n'est pas une route de l'appli : le service worker ne doit pas la remplacer par l'appli.
+        navigateFallbackDenylist: [/\/vitrine\//],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.(googleapis|gstatic)\.com\/.*/i,
