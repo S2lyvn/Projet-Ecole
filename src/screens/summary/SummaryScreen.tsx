@@ -82,7 +82,7 @@ export function SummaryScreen() {
 
       {/* Message de la marque (charte graphique) */}
       <aside className="flex items-center gap-4 rounded-3xl bg-[color-mix(in_srgb,var(--sun)_26%,transparent)] p-4">
-        <Butterfly size={48} />
+        <Butterfly height={52} />
         <p className="m-0 flex flex-col gap-0.5 text-[15px] leading-snug">
           <span className="font-display text-xl font-bold text-accent-ink italic">Less is more</span>
           Plus de bonheur avec ce que l’on possède déjà&nbsp;!

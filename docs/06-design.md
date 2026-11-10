@@ -52,15 +52,20 @@ Clair `#F7D4DC #D9E9DF #FFE8A6 #EAD5E8 #D2E3E3 #F3DDEB` ; sombre `#4A2535 #2D443
 
 Contrastes vérifiés au calcul (WCAG AA : 4,5:1 pour le texte, 3:1 pour les contours) pour chaque paire texte/fond, en clair et en sombre. Deux exceptions assumées : le jaune sur la crème (anneau du Bilan, 1,5:1), où le chiffre central et le libellé portent aussi l'information, et le « IN » jaune du logo, qui est un logotype.
 
-## Symboles de la marque
+## Logo et symboles de la marque
 
-Dessinés dans `src/components/Brand.tsx` (application) et dans les `<symbol>` de `index.html` (vitrine) :
-- **Cintre-cœur et lien infini** (style, amour de ses pièces ; partage, circularité, continuité) : symbole principal, dégradé violet vers jaune. Il sert aussi d'icône d'application et de favicon.
-- **Maison / communauté** (le foyer, le collectif).
-- **Papillon** (transformation, renouveau) : ailes jaunes, contour violet.
-- **Nom** : « Deep**IN** Armour », avec « IN » en jaune soleil.
+**Le logo n'est jamais redessiné.** Il est découpé tel quel dans la charte graphique et enregistré en PNG à fond transparent dans `public/brand/` :
+- `logo-complet.png` : maison, cintre, lien infini, papillon, nom « DeepIN Armour » et signature « Partager le bonheur dans son armoire » (pied de la vitrine) ;
+- `logo-symbole.png` : la maison avec le cintre-cœur, le lien infini et le papillon, sans le nom (en-têtes de la vitrine et de l'appli, icône d'application, favicon) ;
+- `papillon.png` : le papillon seul (papillons qui volent sur la vitrine, message « Less is more » du Bilan).
 
-Le logo complet de la charte (maison, cintre, infini et papillon réunis) n'est pas redessiné ici : ce sont des versions simplifiées pour l'écran. Pour l'imprimé ou les réseaux sociaux, utiliser les fichiers vectoriels d'origine.
+Les composants sont dans `src/components/Brand.tsx`. Le nom « Deep**IN** Armour » à côté du symbole est écrit en texte (Montserrat 800, « IN » en jaune soleil) pour rester lisible et accessible.
+
+**Limites :** ces PNG viennent de l'image de la charte (environ 550 px de large) : suffisant pour l'écran, pas pour l'impression ni les grands formats. Pour ces usages, utiliser les fichiers vectoriels d'origine, et les placer dans `public/brand/` à la place pour une netteté parfaite (mêmes noms de fichiers : SVG ou PNG plus grand).
+
+**Fond sombre :** les traits du logo sont violets, donc invisibles sur fond sombre. En thème sombre, le logo est posé sur une pastille crème (variable `--logo-bg`, transparente en clair).
+
+**Sens des symboles :** maison / communauté (le foyer, le collectif), lien infini (partage, circularité, continuité), papillon (transformation, renouveau), cintre-cœur (style, amour de ses pièces).
 
 ## Icônes (bibliothèque de la charte)
 

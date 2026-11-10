@@ -45,6 +45,7 @@
   --shadow-md: 0 2px 4px rgba(90, 30, 86, 0.05), 0 10px 28px -6px rgba(90, 30, 86, 0.18);
   --shadow-accent: 0 8px 22px -8px rgba(90, 30, 86, 0.55);
   --t0: #f7d4dc; --t1: #d9e9df; --t2: #ffe8a6; --t3: #ead5e8; --t4: #d2e3e3; --t5: #f3ddeb;
+  --logo-bg: transparent;
   --font-display: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
   --font-body: 'Lato', system-ui, -apple-system, 'Segoe UI', sans-serif;
 }
@@ -53,7 +54,7 @@
     --stage: #120812; --app: #1b0f1b; --screen: #1b0f1b; --surface: #281727; --ink: #fff7e8; --muted: #cdb6cb; --line: #3e2a3d;
     --tile: #331f32; --outline: #8f7390; --accent: #d9a3d3; --on-accent: #1b0f1b; --accent-ink: #ebc2e6; --accent-tint: #3c1f3a;
     --on-sun: #1b0f1b; --gold-deep: #ffc83d; --on-amber: #1b0f1b; --amber-ink: #ffd77a; --wash: #8fd3de; --bezel: #0a050a;
-    --edge: rgba(255, 247, 232, 0.5); --sole: #bfa8bc;
+    --edge: rgba(255, 247, 232, 0.5); --sole: #bfa8bc; --logo-bg: #fff7e8;
     --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.3), 0 12px 30px -8px rgba(0, 0, 0, 0.6);
     --shadow-accent: 0 8px 24px -8px rgba(217, 163, 211, 0.4);
     --t0: #4a2535; --t1: #2d4439; --t2: #4d4018; --t3: #43264a; --t4: #1f4347; --t5: #4a2b44;
@@ -64,7 +65,7 @@
   --stage: #120812; --app: #1b0f1b; --screen: #1b0f1b; --surface: #281727; --ink: #fff7e8; --muted: #cdb6cb; --line: #3e2a3d;
   --tile: #331f32; --outline: #8f7390; --accent: #d9a3d3; --on-accent: #1b0f1b; --accent-ink: #ebc2e6; --accent-tint: #3c1f3a;
   --on-sun: #1b0f1b; --gold-deep: #ffc83d; --on-amber: #1b0f1b; --amber-ink: #ffd77a; --wash: #8fd3de; --bezel: #0a050a;
-  --edge: rgba(255, 247, 232, 0.5); --sole: #bfa8bc;
+  --edge: rgba(255, 247, 232, 0.5); --sole: #bfa8bc; --logo-bg: #fff7e8;
   --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.3), 0 12px 30px -8px rgba(0, 0, 0, 0.6);
   --shadow-accent: 0 8px 24px -8px rgba(217, 163, 211, 0.4);
   --t0: #4a2535; --t1: #2d4439; --t2: #4d4018; --t3: #43264a; --t4: #1f4347; --t5: #4a2b44;
@@ -114,6 +115,9 @@ h2 { font: 800 clamp(1.7rem, 3.8vw, 2.6rem)/1.1 var(--font-display); letter-spac
 .top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .mark { display: inline-flex; align-items: center; gap: 10px; white-space: nowrap; font: 800 1.3rem/1 var(--font-display); letter-spacing: -0.02em; text-decoration: none; color: var(--accent-ink); }
 .mark svg, .i-mark svg { overflow: visible; }
+.sym { display: block; height: 40px; width: auto; background: var(--logo-bg); border-radius: 8px; padding: 0 2px; }
+.i-mark .sym { background: #fff7e8; border-radius: 8px; padding: 2px 4px; height: 34px; }
+.logo-full { display: block; width: min(240px, 70%); height: auto; margin-bottom: 20px; background: var(--logo-bg); border-radius: 16px; padding: 8px; }
 .wm { white-space: nowrap; }
 .in { color: var(--sun); }
 .top nav { display: flex; align-items: center; gap: 22px; font-size: 0.95rem; font-weight: 500; }
@@ -280,18 +284,18 @@ h2 { font: 800 clamp(1.7rem, 3.8vw, 2.6rem)/1.1 var(--font-display); letter-spac
 .hero .wrap, #echange .wrap { position: relative; }
 .bf { position: absolute; z-index: 2; width: var(--s, 72px); pointer-events: none; display: none;
   animation: drift var(--dur, 9s) ease-in-out var(--delay, 0s) infinite alternate; }
-.bf svg { display: block; width: 100%; height: auto; transform-origin: 50% 55%; animation: flap 0.7s ease-in-out infinite alternate; }
+.bf svg, .bf img { display: block; width: 100%; height: auto; transform-origin: 50% 55%; animation: flap 0.7s ease-in-out infinite alternate; }
 @keyframes flap { from { transform: scaleX(1); } to { transform: scaleX(0.5); } }
 @keyframes drift { from { transform: translate(0, 0) rotate(var(--r0, -8deg)); } to { transform: translate(var(--dx, 18px), var(--dy, -14px)) rotate(var(--r1, 10deg)); } }
 .bf.rest { animation: none; transform: rotate(14deg); }
-.bf.rest svg { animation-duration: 2.6s; }
+.bf.rest svg, .bf.rest img { animation-duration: 2.6s; }
 .b1 { --s: 84px; right: 2%; top: 4px; --dx: -26px; --dy: 18px; }
 .b2 { --s: 108px; right: 4%; top: 340px; --w1: #8A4A86; --w2: #5A1E56; --dx: -34px; --dy: -22px; --dur: 11s; --delay: -3s; --r0: 6deg; --r1: -12deg; }
 .b3 { --s: 64px; right: 10%; top: 6px; --dx: 14px; --dy: 16px; --dur: 8s; --delay: -2s; }
 .b4 { --s: 70px; right: -14px; top: -38px; }
 .b4 { display: block; }
 @media (min-width: 1000px) { .b1, .b2, .b3 { display: block; } }
-@media (prefers-reduced-motion: reduce) { .bf, .bf svg { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .bf, .bf svg, .bf img { animation: none; } }
 .tagwrap { position: relative; max-width: 840px; }
 .tag { --pt: 28px; position: relative;
   padding: clamp(32px, 5vw, 56px) clamp(22px, 4vw, 56px) clamp(32px, 5vw, 56px) calc(var(--pt) + 22px);
@@ -373,7 +377,7 @@ footer .fine { margin-top: 24px; max-width: 80ch; }
 
 .i-fly { position: absolute; z-index: 2; left: 50%; bottom: 26%; width: var(--s, 70px); pointer-events: none; opacity: calc(var(--q, 0) * 1.4);
   transform: translate(calc(-50% + var(--dx) * var(--q, 0)), calc(var(--dy) * var(--q, 0))) rotate(calc(var(--r) * var(--q, 0))); }
-.i-fly svg { display: block; width: 100%; height: auto; transform-origin: 50% 55%; animation: flap 0.6s ease-in-out infinite alternate; }
+.i-fly svg, .i-fly img { display: block; width: 100%; height: auto; transform-origin: 50% 55%; animation: flap 0.6s ease-in-out infinite alternate; }
 
 .i-bot { margin-top: 10px; }
 .i-hint { font: 500 0.8rem/1 var(--font-body); letter-spacing: 0.14em; text-transform: uppercase; color: #cdb6cb; display: inline-flex; align-items: center; gap: 10px; min-width: 0; }
@@ -394,33 +398,13 @@ footer .fine { margin-top: 24px; max-width: 80ch; }
   <defs>
     <linearGradient id="g-shade" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".3"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".22"/></linearGradient>
     <pattern id="g-twill" width="2" height="2" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="1" height="2" fill="#000" fill-opacity=".09"/></pattern>
-    <linearGradient id="g-inf" x1="6" y1="0" x2="42" y2="0" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="var(--accent-ink)"/><stop offset="1" stop-color="#ffc83d"/></linearGradient>
-    <symbol id="brand" viewBox="0 0 48 40">
-      <g fill="none" stroke-linecap="round" stroke-linejoin="round">
-        <g stroke="currentColor" stroke-width="2.6"><path d="M24 12a4 4 0 1 0-4-4"/><path d="M24 12v4.5L7 30a3 3 0 0 0 2 5.4h30a3 3 0 0 0 2-5.4L24 16.5"/></g>
-        <path d="M24 28c-5-8-17-8-17 0s12 8 17 0c5-8 17-8 17 0s-12 8-17 0z" stroke="url(#g-inf)" stroke-width="3"/>
-      </g>
-    </symbol>
-    <symbol id="bfly" viewBox="0 0 64 48">
-      <g style="stroke:#3d1a3a;stroke-width:1.2;stroke-linejoin:round;stroke-linecap:round">
-        <path d="M31 23C27 9 15 2 7 5 2 7 3 18 9 25c5 5 14 3 22-2z" style="fill:var(--w1,#FFC83D)"/>
-        <path d="M31 25c-7-3-17-1-19 7-1 6 5 12 11 10 6-2 8-10 8-17z" style="fill:var(--w2,#FFDF85)"/>
-        <path d="M33 23C37 9 49 2 57 5c5 2 4 13-2 20-5 5-14 3-22-2z" style="fill:var(--w1,#FFC83D)"/>
-        <path d="M33 25c7-3 17-1 19 7 1 6-5 12-11 10-6-2-8-10-8-17z" style="fill:var(--w2,#FFDF85)"/>
-        <path d="M31 23L12 12M31 24L8 20M33 23L52 12M33 24L56 20" fill="none" stroke-width=".7" opacity=".5"/>
-        <circle cx="14" cy="14" r="2.2" fill="#fff" stroke="none"/><circle cx="50" cy="14" r="2.2" fill="#fff" stroke="none"/>
-        <circle cx="19" cy="35" r="1.8" fill="#fff" stroke="none"/><circle cx="45" cy="35" r="1.8" fill="#fff" stroke="none"/>
-        <path d="M32 14c1.4 0 1.8 2 1.8 5v14c0 3-.8 5-1.8 5s-1.8-2-1.8-5V19c0-3 .4-5 1.8-5z" style="fill:#3d1a3a"/>
-        <path d="M31.5 14c-1-4-3-6.5-6-8M32.5 14c1-4 3-6.5 6-8" fill="none"/>
-      </g>
-    </symbol>
   </defs>
 </svg>
 <script>document.documentElement.className += ' js';</script>
 <section class="intro" id="intro" aria-label="Ouverture : le placard de DeepIN Armour" data-ch="1">
   <div class="i-pin">
     <div class="i-top">
-      <span class="i-mark" style="color:#fff7e8"><svg width="30" height="25" viewBox="0 0 48 40" aria-hidden="true"><use href="#brand"/></svg><span class="wm">Deep<span class="in">IN</span> Armour</span></span>
+      <span class="i-mark" style="color:#fff7e8"><img class="sym" src="/brand/logo-symbole.png" alt="" width="69" height="40"><span class="wm">Deep<span class="in">IN</span> Armour</span></span>
       <span class="i-count" aria-hidden="true"><b id="i-cur">01</b> / 04</span>
     </div>
     <div class="i-text">
@@ -430,10 +414,10 @@ footer .fine { margin-top: 24px; max-width: 80ch; }
       <div class="i-ch" data-n="4"><p class="i-k">04 · DeepIN Armour</p><p class="i-h">Chaque matin, une <em>pièce oubliée</em> revient.</p></div>
     </div>
     <ul class="i-rail" id="i-rail" aria-hidden="true"></ul>
-    <span class="i-fly" style="--s:74px;--dx:-34vw;--dy:-46vh;--r:-22deg" aria-hidden="true"><svg viewBox="0 0 64 48"><use href="#bfly"/></svg></span>
-    <span class="i-fly" style="--s:54px;--dx:36vw;--dy:-54vh;--r:18deg;--w1:#8A4A86;--w2:#5A1E56" aria-hidden="true"><svg viewBox="0 0 64 48"><use href="#bfly"/></svg></span>
-    <span class="i-fly" style="--s:46px;--dx:-12vw;--dy:-62vh;--r:8deg" aria-hidden="true"><svg viewBox="0 0 64 48"><use href="#bfly"/></svg></span>
-    <span class="i-fly" style="--s:60px;--dx:24vw;--dy:-32vh;--r:30deg;--w1:#8A4A86;--w2:#5A1E56" aria-hidden="true"><svg viewBox="0 0 64 48"><use href="#bfly"/></svg></span>
+    <span class="i-fly" style="--s:74px;--dx:-34vw;--dy:-46vh;--r:-22deg" aria-hidden="true"><img src="/brand/papillon.png" alt="" width="97" height="102"></span>
+    <span class="i-fly" style="--s:54px;--dx:36vw;--dy:-54vh;--r:18deg;--w1:#8A4A86;--w2:#5A1E56" aria-hidden="true"><img src="/brand/papillon.png" alt="" width="97" height="102"></span>
+    <span class="i-fly" style="--s:46px;--dx:-12vw;--dy:-62vh;--r:8deg" aria-hidden="true"><img src="/brand/papillon.png" alt="" width="97" height="102"></span>
+    <span class="i-fly" style="--s:60px;--dx:24vw;--dy:-32vh;--r:30deg;--w1:#8A4A86;--w2:#5A1E56" aria-hidden="true"><img src="/brand/papillon.png" alt="" width="97" height="102"></span>
     <div class="i-bot">
       <span class="i-hint"><span>Faites défiler</span></span>
       <div class="i-barw" aria-hidden="true"><i id="i-bar"></i></div>
@@ -444,7 +428,7 @@ footer .fine { margin-top: 24px; max-width: 80ch; }
 <header class="top" id="entete">
   <div class="wrap">
     <a class="mark" href="#haut" aria-label="DeepIN Armour, haut de page">
-      <svg width="32" height="27" viewBox="0 0 48 40" aria-hidden="true"><use href="#brand"/></svg>
+      <img class="sym" src="/brand/logo-symbole.png" alt="" width="69" height="40">
       <span class="wm">Deep<span class="in">IN</span> Armour</span>
     </a>
     <nav aria-label="Démo"><a class="pill" href="#essayer">Essayer la démo</a></nav>
@@ -455,8 +439,8 @@ footer .fine { margin-top: 24px; max-width: 80ch; }
   <!-- ATTENTION -->
   <section class="hero">
     <div class="wrap">
-      <span class="bf b1" aria-hidden="true"><svg viewBox="0 0 64 48"><use href="#bfly"/></svg></span>
-      <span class="bf b2" aria-hidden="true"><svg viewBox="0 0 64 48"><use href="#bfly"/></svg></span>
+      <span class="bf b1" aria-hidden="true"><img src="/brand/papillon.png" alt="" width="97" height="102"></span>
+      <span class="bf b2" aria-hidden="true"><img src="/brand/papillon.png" alt="" width="97" height="102"></span>
       <div class="hero-grid">
         <h1>On déclare <span class="num">78</span> vêtements. Le placard en cache <span class="num hot">172</span>.</h1>
         <div class="hero-side">
@@ -533,7 +517,7 @@ footer .fine { margin-top: 24px; max-width: 80ch; }
   <!-- DÉSIR -->
   <section class="sec" id="echange" style="padding-top: 0;">
     <div class="wrap split flip">
-      <span class="bf b3" aria-hidden="true"><svg viewBox="0 0 64 48"><use href="#bfly"/></svg></span>
+      <span class="bf b3" aria-hidden="true"><img src="/brand/papillon.png" alt="" width="97" height="102"></span>
       <div class="copy">
         <h2>Ce qui dort chez toi peut vivre chez quelqu’un d’autre.</h2>
         <p class="lead">Tu donnes une pièce, tu en réclames une autre. Pas d’argent, pas de négociation.</p>
@@ -583,7 +567,7 @@ footer .fine { margin-top: 24px; max-width: 80ch; }
         <p class="link-out"><code>https://s2lyvn.github.io/Projet-Ecole/app/</code><span id="copied" role="status"></span></p>
         <p class="small">Le dressing et les membres sont des exemples, la bourse est simulée.</p>
       </div>
-        <span class="bf b4 rest" aria-hidden="true"><svg viewBox="0 0 64 48"><use href="#bfly"/></svg></span>
+        <span class="bf b4 rest" aria-hidden="true"><img src="/brand/papillon.png" alt="" width="97" height="102"></span>
       </div>
     </div>
   </section>
@@ -591,6 +575,7 @@ footer .fine { margin-top: 24px; max-width: 80ch; }
 
 <footer id="sources">
   <div class="wrap">
+    <img class="logo-full" src="/brand/logo-complet.png" alt="DeepIN Armour : partager le bonheur dans son armoire" width="240" height="149">
     <h2>Source</h2>
     <p class="fine">ADEME, « Analyse des pratiques liées aux achats de produits d’habillement », enquête en ligne auprès de 4 000 personnes de 16 à 75 ans, avril 2024. Environ 50 % de stock dormant et 78 pièces déclarées contre 172 constatées : diapositive 6.</p>
     <p class="fine">DeepIN Armour est un projet d’école (Clermont School of Business). Le dressing, les membres et les annonces sont des exemples.</p>
