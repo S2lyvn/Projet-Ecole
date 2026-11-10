@@ -903,11 +903,43 @@ footer .fine { margin-top: 24px; max-width: 80ch; }
       flies.forEach(function (f, i) { f.style.setProperty('--q', clamp(q * 1.15 - i * 0.07).toFixed(3)); });
       bar.style.width = (p * 100).toFixed(1) + '%';
     }
-    function onScroll() { if (!ticking) { ticking = true; requestAnimationFrame(render); } }
+    /* Aimant : quand le défilement s'arrête, la page se cale sur le chapitre le plus proche, dans le sens du geste.
+       Un point par chapitre, au moment où il est complet (le nombre a fini de compter, tous les vêtements sont allumés,
+       les papillons ont pris leur envol). Après le dernier point, on laisse la page continuer librement. */
+    var SNAP = [0, 0.4, 0.72, 0.96];
+    var lastY = window.scrollY, dir = 1, snapTimer = 0, pressed = false, auto = 0;
+    function settle() {
+      var span = intro.offsetHeight - window.innerHeight;
+      if (span <= 0 || pressed || performance.now() < auto) return;
+      var top = intro.getBoundingClientRect().top + window.scrollY;
+      var p = (window.scrollY - top) / span;
+      if (p <= 0.003 || p >= SNAP[3]) return; /* avant l'intro, ou au dernier point : on laisse passer */
+      var i = 0;
+      while (i < SNAP.length - 2 && p >= SNAP[i + 1]) i++; /* SNAP[i] <= p < SNAP[i + 1] */
+      var f = (p - SNAP[i]) / (SNAP[i + 1] - SNAP[i]);
+      var target = dir > 0 ? (f > 0.18 ? SNAP[i + 1] : SNAP[i]) : (f < 0.82 ? SNAP[i] : SNAP[i + 1]);
+      if (Math.abs(target - p) < 0.004) return;
+      auto = performance.now() + 900;
+      window.scrollTo({ top: top + target * span, behavior: 'smooth' });
+    }
+    function onScroll() {
+      if (!ticking) { ticking = true; requestAnimationFrame(render); }
+      var y = window.scrollY;
+      if (y !== lastY) { dir = y > lastY ? 1 : -1; lastY = y; }
+      clearTimeout(snapTimer);
+      snapTimer = setTimeout(settle, 160);
+    }
     window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('scrollend', settle);
     window.addEventListener('resize', onScroll);
+    /* Pas d'aimant tant qu'un doigt ou la souris tient la page (glisser la barre de défilement). */
+    ['touchstart', 'mousedown'].forEach(function (t) { window.addEventListener(t, function () { pressed = true; }, { passive: true }); });
+    ['touchend', 'touchcancel', 'mouseup'].forEach(function (t) {
+      window.addEventListener(t, function () { pressed = false; clearTimeout(snapTimer); snapTimer = setTimeout(settle, 160); }, { passive: true });
+    });
     render();
     document.getElementById('i-skip').addEventListener('click', function () {
+      auto = performance.now() + 2500; /* « Passer l'intro » : pas d'aimant pendant le défilement vers la page */
       document.getElementById('entete').scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   })();
