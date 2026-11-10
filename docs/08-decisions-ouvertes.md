@@ -4,7 +4,7 @@
 
 | # | Question | Valeur par défaut dans le code | Pourquoi c'est important |
 |---|---|---|---|
-| 1 | **Nom de l'application.** Le README du dépôt parle de « Vestiaire » | Nom de code « e-mirror » | « Vestiaire Collective » est une marque de revente de mode connue : risque de confusion et de conflit de marque. Vérifier sur la base de l'INPI avant de choisir |
+| 1 | **Nom de l'application.** Le README du dépôt parlait de « Vestiaire » | **« DeepIN Armour »**, issu de la charte graphique de l'équipe (novembre 2026) ; « e-mirror » reste le nom de code du dépôt | À vérifier avant toute diffusion : disponibilité sur la base de l'INPI (marques proches : « Vestiaire Collective », « Armour »), et nom de domaine. La majuscule de « IN » fait partie du logo |
 | 2 | Miroir : option A (appli d'abord), B (miroir d'abord) ou C (capteurs d'abord) | A, avec un « mode miroir » simulé pour la démo | Change le budget et le pitch |
 | 3 | **Bourse ouverte aux 15-17 ans ?** | Non : 18 ans et plus | Rencontres en personne entre inconnus ; la cible du projet inclut des ados |
 | 4 | Jetons seuls, ou aussi troc direct 1 contre 1 | Jetons seuls | Le troc direct ajoute de la négociation et de la complexité |

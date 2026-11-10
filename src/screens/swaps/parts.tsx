@@ -11,7 +11,7 @@ export function tokensLabel(n: number): string {
   return `${n} ${plural(n, 'jeton', 'jetons')}`
 }
 
-/** Un jeton de réclamation : pièce dorée frappée d'un cintre. Décoratif. */
+/** Un jeton de réclamation : pièce jaune soleil frappée d'un cintre. Décoratif. */
 export function TokenCoin({ size = 28, muted = false }: { size?: number; muted?: boolean }) {
   return (
     <span
@@ -21,7 +21,7 @@ export function TokenCoin({ size = 28, muted = false }: { size?: number; muted?:
         'grid flex-none place-items-center rounded-full border-2',
         muted
           ? 'border-dashed border-accent-ink/50 text-accent-ink/60'
-          : 'border-accent-ink/25 bg-accent text-on-accent shadow-[var(--shadow-accent)]',
+          : 'border-on-sun/20 bg-sun text-on-sun shadow-[var(--shadow-sun)]',
       ].join(' ')}
     >
       <Icon name="hanger" size={Math.round(size * 0.58)} strokeWidth={2.2} />

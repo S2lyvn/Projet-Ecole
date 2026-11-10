@@ -1,6 +1,6 @@
-# e-mirror
+# DeepIN Armour
 
-Projet d'école (Clermont School of Business). **Ton dressing se tient à jour tout seul.**
+*Partager le bonheur dans son armoire.* Projet d'école (Clermont School of Business), nom de code **e-mirror** dans le dépôt. **Ton dressing se tient à jour tout seul.**
 
 Application web mobile installable (PWA) qui aide à porter ce qu'on possède vraiment : tenue du jour construite autour d'une pièce oubliée, suivi du lavage, pièces dormantes à remettre en jeu, échanger, vendre ou donner, et une bourse d'échange entre membres avec des jetons de réclamation (1 habit fourni = 1 jeton = 1 habit à réclamer).
 

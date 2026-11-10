@@ -14,6 +14,9 @@
   --color-outline: var(--outline);
   --color-accent: var(--accent);
   --color-focus: var(--focus);
+  --color-sun: var(--sun);
+  --color-on-sun: var(--on-sun);
+  --color-rose: var(--rose);
   --color-on-accent: var(--on-accent);
   --color-accent-ink: var(--accent-ink);
   --color-accent-tint: var(--accent-tint);

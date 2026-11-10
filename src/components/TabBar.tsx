@@ -5,11 +5,11 @@ import { Icon, type IconName } from './Icon'
 type Tab = { to: string; label: string; icon: IconName }
 
 export const TABS: Tab[] = [
-  { to: '/', label: 'Aujourd’hui', icon: 'sun' },
-  { to: '/dressing', label: 'Dressing', icon: 'hanger' },
-  { to: '/echanges', label: 'Échanges', icon: 'swap' },
-  { to: '/a-sortir', label: 'À sortir', icon: 'out' },
-  { to: '/bilan', label: 'Bilan', icon: 'bars' },
+  { to: '/', label: 'Aujourd’hui', icon: 'looks' },
+  { to: '/dressing', label: 'Dressing', icon: 'wardrobe' },
+  { to: '/echanges', label: 'Échanges', icon: 'community' },
+  { to: '/a-sortir', label: 'À sortir', icon: 'circulate' },
+  { to: '/bilan', label: 'Bilan', icon: 'impact' },
 ]
 
 export function TabBar() {

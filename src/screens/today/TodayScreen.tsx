@@ -96,6 +96,7 @@ export function TodayScreen() {
   const header = (
     <>
       <ScreenHeader
+        brand
         eyebrow={formatLongDate(today)}
         title="Tenue du jour"
         subtitle="Construite autour d’une pièce que tu ne portes plus."

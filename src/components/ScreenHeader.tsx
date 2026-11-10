@@ -1,13 +1,15 @@
 import type { ReactNode } from 'react'
+import { BrandLockup } from './Brand'
 import { ThemeToggle } from './ThemeToggle'
 
-type Props = { title: string; subtitle?: ReactNode; eyebrow?: ReactNode }
+type Props = { title: string; subtitle?: ReactNode; eyebrow?: ReactNode; brand?: boolean }
 
-export function ScreenHeader({ title, subtitle, eyebrow }: Props) {
+export function ScreenHeader({ title, subtitle, eyebrow, brand = false }: Props) {
   return (
     <header className="flex flex-col gap-1.5">
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 flex-col gap-1.5">
+          {brand && <BrandLockup />}
           {eyebrow && <p className="m-0 text-sm text-muted">{eyebrow}</p>}
           <h1
             id="screen-title"

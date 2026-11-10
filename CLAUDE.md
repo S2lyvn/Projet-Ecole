@@ -1,4 +1,4 @@
-# CLAUDE.md — Application e-mirror (projet d'école)
+# CLAUDE.md — Application DeepIN Armour, nom de code e-mirror (projet d'école)
 
 Ce fichier est lu automatiquement par Claude Code. Il résume le projet et fixe les règles de travail. Le détail est dans `docs/`.
 

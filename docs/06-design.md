@@ -1,48 +1,81 @@
 # 06 — Design
 
-Identité chaleureuse, validée par Sullyvan le 30 octobre 2026 (elle remplace la palette menthe et violet du prototype) : fond crème, encre brun chocolat, jaune miel pour agir, terracotta pour les pièces qui dorment, un pastel chaud par pièce. Le prototype reste la référence pour la mise en page et les textes, plus pour les couleurs.
+Identité issue de la **charte graphique DeepIN Armour** (novembre 2026), appliquée à l'application et à la vitrine. Elle remplace les palettes précédentes (menthe et violet, puis crème et miel). Le prototype reste la référence pour la mise en page et les textes, plus pour les couleurs.
+
+**La marque :** DeepIN Armour, « Partager le bonheur dans son armoire ». Une communauté qui révèle la valeur de nos armoires, prolonge la vie des vêtements et fait circuler le style, les savoir-faire et le bonheur. Six valeurs : communautaire, responsable, transformatrice, circulaire, positive, inspirante. Message : « Less is more. Plus de bonheur avec ce que l'on possède déjà ! »
 
 ## Polices (Google Fonts)
 
-- Titres : **Bricolage Grotesque** 600 et 700.
-- Texte : **DM Sans** 400, 500, 700.
+- Titres : **Montserrat** 600, 700 et 800 (moderne, impactant, accessible).
+- Texte : **Lato** 400 et 700 (claire, lisible, digitale et inclusive). Lato n'a pas de graisse 500 : « medium » s'affiche en 400.
 
-## Couleurs (variables CSS)
+## Couleurs de la charte
+
+| Couleur | Code | Rôle |
+|---|---|---|
+| Violet | `#5A1E56` | Identité, élégance : texte des titres, bouton principal |
+| Jaune Soleil | `#FFC83D` | Énergie, bonheur : jetons, pièces qui dorment, bande d'action, « IN » du logo |
+| Rose poudré | `#F7D4DC` | Douceur, féminité : fonds de vignette |
+| Vert sauge | `#A8C9B5` | Nature, équilibre : puce « Disponible » |
+| Crème | `#FFF7E8` | Lumière, respiration : fond de l'appli |
+| Bleu nuit | `#1E4D56` | Confiance, contraste : lavage, boutons pleins, toasts |
+
+## Variables CSS (`src/styles/tokens.css`)
+
+Les valeurs ci-dessous dérivent des six couleurs ; les teintes plus claires ou plus foncées (texte, bordures, thème sombre) sont calculées pour respecter les contrastes.
 
 | Variable | Clair | Sombre | Usage |
 |---|---|---|---|
-| `--stage` | `#F5E9CF` | `#14100B` | Fond derrière l'appli (bureau) |
-| `--app` | `#FFF8EB` | `#1C1711` | Fond de l'appli (crème) |
-| `--surface` | `#FFFDF7` | `#27201A` | Cartes, barre d'onglets |
-| `--ink` | `#2B2118` | `#FBF3E4` | Texte (brun chocolat) |
-| `--muted` | `#6B5A45` | `#CDBDA4` | Texte secondaire |
-| `--line` | `#ECDFC5` | `#3D3328` | Bordures |
-| `--tile` | `#F6EAD2` | `#30281F` | Fond neutre de vignette |
-| `--outline` | `#9A8668` | `#8F7D63` | Bordure des boutons secondaires |
-| `--accent` | `#F2B705` | `#F2B705` | Action principale (jaune miel) |
-| `--on-accent` | `#2B2118` | `#1C1711` | Texte sur le jaune (toujours foncé : le blanc ne se lit pas sur du jaune) |
-| `--accent-ink` | `#7A5200` | `#FFD46B` | Texte sur teinte miel |
-| `--accent-tint` | `#FCEFC7` | `#3D3014` | Bannières, onglet actif, jetons |
-| `--amber` | `#F2946A` | `#F2946A` | Puce « Dort » (terracotta) |
-| `--amber-ink` | `#A23B12` | `#FFB18C` | Texte « pas portée depuis… » |
-| `--fresh` | `#A9D98F` | `#A9D98F` | Puce « Disponible » (vert sauge) |
-| `--wash` | `#1D6A80` | `#7FD6EE` | Puce « Lavage » |
-| `--solid` | `#2B2118` | `#FBF3E4` | Bouton plein foncé, toast |
-| `--focus` | `#8A5A00` | `#FFD46B` | Contour de focus (le jaune seul est trop pâle sur la crème) |
+| `--stage` | `#FBEED9` | `#120812` | Fond derrière l'appli (bureau) |
+| `--app` | `#FFF7E8` | `#1B0F1B` | Fond de l'appli (crème) |
+| `--surface` | `#FFFDF8` | `#281727` | Cartes, barre d'onglets |
+| `--ink` | `#3D1A3A` | `#FFF7E8` | Texte (violet très foncé) |
+| `--muted` | `#755673` | `#CDB6CB` | Texte secondaire |
+| `--line` | `#EFDFD3` | `#3E2A3D` | Bordures |
+| `--tile` | `#F8ECDB` | `#331F32` | Fond neutre de vignette |
+| `--outline` | `#957693` | `#8F7390` | Bordure des boutons secondaires |
+| `--accent` | `#5A1E56` | `#D9A3D3` | Action principale (violet ; violet clair en sombre) |
+| `--on-accent` | `#FFF7E8` | `#1B0F1B` | Texte sur l'action principale |
+| `--accent-ink` | `#5A1E56` | `#EBC2E6` | Texte sur teinte violette |
+| `--accent-tint` | `#F3E4F1` | `#3C1F3A` | Bannières, onglet actif |
+| `--sun` | `#FFC83D` | `#FFC83D` | Jaune Soleil : jetons, mises en avant |
+| `--on-sun` | `#3D1A3A` | `#1B0F1B` | Texte sur le jaune (jamais de blanc sur du jaune) |
+| `--amber` | `#FFC83D` | `#FFC83D` | Puce « Dort » |
+| `--amber-ink` | `#8A2A5C` | `#FFD77A` | Texte « pas portée depuis… » |
+| `--fresh` | `#A8C9B5` | `#A8C9B5` | Puce « Disponible » |
+| `--wash` | `#1E4D56` | `#8FD3DE` | Puce « Lavage » |
+| `--solid` | `#1E4D56` | `#FFF7E8` | Bouton plein foncé, toast |
+| `--focus` | `#5A1E56` | `#FFC83D` | Contour de focus |
 
-Pastels de vignette (une couleur par pièce, choisie à partir du nom) : beurre, pêche, miel, olive, rose, latte.
-Clair `#FFE8B0 #FFDCC6 #F7E3A6 #E6EBC8 #FBD7D0 #F0E2CC` ; sombre `#4A3A12 #4D3020 #46401C #3A4024 #4A2C2A #43382B`.
+Pastels de vignette (une couleur par pièce, choisie à partir du nom), tous tirés des couleurs de la charte : rose, sauge, soleil, violet, bleu nuit, rose-violet.
+Clair `#F7D4DC #D9E9DF #FFE8A6 #EAD5E8 #D2E3E3 #F3DDEB` ; sombre `#4A2535 #2D4439 #4D4018 #43264A #1F4347 #4A2B44`.
 
-Contrastes vérifiés au calcul (WCAG AA, 4,5:1 pour le texte, 3:1 pour les contours) pour chaque paire texte/fond, en clair et en sombre.
+Contrastes vérifiés au calcul (WCAG AA : 4,5:1 pour le texte, 3:1 pour les contours) pour chaque paire texte/fond, en clair et en sombre. Deux exceptions assumées : le jaune sur la crème (anneau du Bilan, 1,5:1), où le chiffre central et le libellé portent aussi l'information, et le « IN » jaune du logo, qui est un logotype.
 
-**Nouveau pour l'échange** : puce « Proposée à l'échange » et jetons de réclamation en `--accent-tint` / `--accent-ink`. Ne pas ajouter de nouvelle couleur vive sans raison.
+## Symboles de la marque
+
+Dessinés dans `src/components/Brand.tsx` (application) et dans les `<symbol>` de `index.html` (vitrine) :
+- **Cintre-cœur et lien infini** (style, amour de ses pièces ; partage, circularité, continuité) : symbole principal, dégradé violet vers jaune. Il sert aussi d'icône d'application et de favicon.
+- **Maison / communauté** (le foyer, le collectif).
+- **Papillon** (transformation, renouveau) : ailes jaunes, contour violet.
+- **Nom** : « Deep**IN** Armour », avec « IN » en jaune soleil.
+
+Le logo complet de la charte (maison, cintre, infini et papillon réunis) n'est pas redessiné ici : ce sont des versions simplifiées pour l'écran. Pour l'imprimé ou les réseaux sociaux, utiliser les fichiers vectoriels d'origine.
+
+## Icônes (bibliothèque de la charte)
+
+Au trait, violet, 24 px : Mon armoire & mon inventaire, Idées looks & inspirations, Réutiliser & faire circuler, Réparer & entretenir, Donner / Vendre / Échanger, Prêter / Louer, Artisans & partenaires locaux, Communauté & partage, Suivi d'impact & armoire responsable, Mes progrès & défis.
+
+Barre d'onglets : Aujourd'hui = Idées looks, Dressing = Mon armoire, Échanges = Communauté, À sortir = Réutiliser & faire circuler, Bilan = Suivi d'impact. Les autres icônes de la bibliothèque (Réparer, Prêter, Artisans, Mes progrès) servent aux fonctions futures et ne sont pas encore dessinées.
+
+**Parcours utilisateur de la charte :** Évaluer mon armoire → Découvrir des looks → Faire circuler → Réduire mon impact → Me sentir bien !
 
 ## Composants
 
 - **Carte** : rayon 24 px, bordure `--line`, marge interne 16 px.
-- **Bouton principal** : jaune miel, texte brun foncé gras, hauteur 48 px (56 px pour l'action de l'écran), rayon 14 à 18 px.
+- **Bouton principal** : violet, texte crème gras, hauteur 48 px (56 px pour l'action de l'écran), rayon 14 à 18 px.
 - **Bouton secondaire** : contour `--outline`, fond transparent.
-- **Pastille de filtre** (pill) : rayon 999 px, 44 px de haut, active = jaune miel plein.
+- **Pastille de filtre** (pill) : rayon 999 px, 44 px de haut, active = violet plein.
 - **Puce d'état** (chip) : petite, grasse, rayon 999 px.
 - **Vignette de pièce** : pastel + silhouette (ou photo réelle quand elle existe), rayon 16 px.
 - **Feuille du bas** (bottom sheet) pour les actions sur une pièce.
@@ -59,5 +92,5 @@ Contrastes vérifiés au calcul (WCAG AA, 4,5:1 pour le texte, 3:1 pour les cont
 
 - Contrastes AA au minimum, vérifiés en clair et en sombre.
 - Respecter `prefers-reduced-motion`.
-- Focus visible (contour `--focus` 3 px, brun miel en clair, jaune clair en sombre).
+- Focus visible (contour `--focus` 3 px : violet en clair, jaune en sombre).
 - Les silhouettes sont décoratives (`aria-hidden`) ; le nom de la pièce porte l'information.

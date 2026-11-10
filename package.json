@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "description": "e-mirror : ton dressing se tient à jour tout seul (projet d'école).",
+  "description": "DeepIN Armour (nom de code e-mirror) : partager le bonheur dans son armoire (projet d'école).",
   "engines": {
     "node": ">=20.19"
   },
