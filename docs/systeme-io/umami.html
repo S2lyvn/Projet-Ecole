@@ -1,0 +1,64 @@
+<!-- umami-landing : mesure d'audience sans cookie (Umami Cloud). À coller dans le code d'en-tête des pages systeme.io. -->
+<script defer src="https://cloud.umami.is/script.js" data-website-id="3c918c8d-5e3f-4c8e-9157-46eca8eb4e98"></script>
+<script>
+(function () {
+  var KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'lieu'];
+  var p = new URLSearchParams(location.search), saved = {};
+  try { saved = JSON.parse(sessionStorage.getItem('dia.utm') || '{}'); } catch (e) {}
+  KEYS.forEach(function (k) { if (p.get(k)) saved[k] = p.get(k); });
+  try { sessionStorage.setItem('dia.utm', JSON.stringify(saved)); } catch (e) {}
+
+  function track(name, data, tries) {
+    tries = tries || 0;
+    if (window.umami && window.umami.track) window.umami.track(name, data || {});
+    else if (tries < 20) setTimeout(function () { track(name, data, tries + 1); }, 500);
+  }
+  var once = {};
+  function first(name, data) { if (!once[name]) { once[name] = 1; track(name, data); } }
+
+  // Scan de QR code (ou tout lien avec une source) : un événement avec la source et le lieu.
+  if (saved.utm_source) first('qr_scan', saved);
+
+  // Clics sur les boutons, les liens du menu et la démo.
+  document.addEventListener('click', function (ev) {
+    var t = ev.target && ev.target.closest ? ev.target : null;
+    if (!t) return;
+    var a = t.closest('a[href*="github.io/Projet-Ecole"]');
+    if (a) {
+      var u = new URL(a.href);
+      KEYS.forEach(function (k) { if (saved[k]) u.searchParams.set(k, saved[k]); });
+      u.searchParams.set('from', 'landing');
+      a.href = u.toString();
+      track('demo_open', saved);
+    }
+    var b = t.closest('[id^="button-"]');
+    if (b) track('cta_click', { emplacement: b.id, texte: (b.innerText || '').trim().slice(0, 40) });
+    var s = t.closest('[id^="survey-"]');
+    if (s) {
+      var line = (s.innerText || '').split('\n').filter(Boolean)[0] || '';
+      if (t.closest('button')) track('email_submit', saved);
+      else track('quiz_question', { question: line.slice(0, 80) });
+    }
+  }, true);
+
+  // Profondeur de défilement : 25, 50, 75 et 100 %.
+  var marks = [25, 50, 75, 100];
+  window.addEventListener('scroll', function () {
+    var h = document.documentElement.scrollHeight - window.innerHeight;
+    if (h <= 0) return;
+    var pct = (window.scrollY / h) * 100;
+    marks.forEach(function (m) { if (pct >= m - 1) first('scroll_depth_' + m, { palier: m }); });
+  }, { passive: true });
+
+  // Quiz : démarré quand il est à moitié visible, terminé quand la demande d'e-mail apparaît.
+  function watchQuiz() {
+    var s = document.querySelector('[id^="survey-"]');
+    if (!s) return;
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) first('quiz_start', saved); }); }, { threshold: 0.5 }).observe(s);
+    }
+    new MutationObserver(function () { if (s.querySelector('input[type="email"]')) first('quiz_complete', saved); }).observe(s, { childList: true, subtree: true });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', watchQuiz); else watchQuiz();
+})();
+</script>

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router'
+import { track } from '../app/track'
 
 /** Page d'inscription à la file d'attente (systeme.io). Modifiable au build avec VITE_WAITLIST_URL. */
 const WAITLIST_URL =
@@ -35,7 +36,10 @@ export function WaitlistCard() {
     const seen = new Set<string>(JSON.parse(read(SEEN_KEY) ?? '[]'))
     seen.add(pathname)
     write(SEEN_KEY, JSON.stringify([...seen]))
-    if (seen.size >= SCREENS_BEFORE) setVisible(true)
+    if (seen.size >= SCREENS_BEFORE) {
+      setVisible(true)
+      track('waitlist_card_view')
+    }
   }, [pathname])
 
   if (!visible) return null
@@ -56,6 +60,7 @@ export function WaitlistCard() {
           href={WAITLIST_URL}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() => track('waitlist_click')}
           className="inline-flex min-h-[48px] flex-1 items-center justify-center rounded-2xl bg-accent px-4 text-[15px] font-bold text-on-accent no-underline"
         >
           Rejoindre la file d’attente
@@ -63,6 +68,7 @@ export function WaitlistCard() {
         <button
           type="button"
           onClick={() => {
+            track('waitlist_later')
             write(DISMISSED_KEY, '1')
             setVisible(false)
           }}
