@@ -1,6 +1,8 @@
-// Dressing (stockScreen() du prototype) : grille des pièces, filtres, et feuille d'actions d'une pièce.
+// Armoire : mes pièces, le filtre « Elles dorment » (ex-À sortir, pour les donner à la communauté), le résumé de la part
+// portée (ex-Bilan) et la feuille d'actions d'une pièce.
 import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useSearchParams } from 'react-router'
 import { useActiveGarments, useWardrobe } from '../../app/WardrobeProvider'
 import { Banner } from '../../components/Banner'
 import { Chip, GarmentStateChip } from '../../components/Chip'
@@ -8,37 +10,61 @@ import { listedGarmentIds } from '../../domain/swaps'
 import { GarmentTile } from '../../components/GarmentTile'
 import { Pills } from '../../components/Pills'
 import { ScreenHeader } from '../../components/ScreenHeader'
+import { listDormant } from '../../domain/dormancy'
+import type { DormancyThreshold } from '../../domain/dormancy'
 import { isInLaundry } from '../../domain/laundry'
+import { computeUsage, formatUsagePercent } from '../../domain/usage'
+import type { UsagePeriod } from '../../domain/usage'
 import { plural } from '../../domain/wording'
 import { GarmentSheet, statusText } from './GarmentSheet'
+import { UsageRing } from './UsageRing'
 
-type Filter = 'all' | 'available' | 'laundry'
+type Filter = 'all' | 'available' | 'laundry' | 'dort'
 
 const FILTERS: { value: Filter; label: string }[] = [
   { value: 'all', label: 'Tout' },
   { value: 'available', label: 'Disponible' },
   { value: 'laundry', label: 'Au lavage' },
+  { value: 'dort', label: 'Elles dorment' },
+]
+
+const DORMANCY_OPTIONS: { value: DormancyThreshold; label: string }[] = [
+  { value: 90, label: '3 mois' },
+  { value: 180, label: '6 mois' },
+  { value: 365, label: '12 mois' },
+]
+
+const PERIOD_OPTIONS: { value: UsagePeriod; label: string }[] = [
+  { value: 90, label: '3 mois' },
+  { value: 365, label: '12 mois' },
 ]
 
 export function WardrobeScreen() {
-  const { data } = useWardrobe()
+  const { data, run } = useWardrobe()
   const garments = useActiveGarments()
-  const [filter, setFilter] = useState<Filter>('all')
+  const [params, setParams] = useSearchParams()
+  // Le filtre vit dans l'adresse (?filtre=dort) : « Donner une pièce » et les anciens liens y arrivent directement.
+  const filter: Filter = FILTERS.find((f) => f.value === params.get('filtre'))?.value ?? 'all'
+  const setFilter = (value: Filter) => setParams(value === 'all' ? {} : { filtre: value }, { replace: true })
   const [sheetId, setSheetId] = useState<string | null>(null)
   // Pièce à refocaliser après fermeture, avec la liste visible avant (pour trouver une voisine si elle a disparu).
   const [focusAfterClose, setFocusAfterClose] = useState<{ id: string; ids: string[] } | null>(null)
   const buttons = useRef(new Map<string, HTMLButtonElement>())
 
   const listedIds = useMemo(() => listedGarmentIds(data.swaps.listings), [data.swaps.listings])
-  const list = useMemo(
-    () =>
-      garments.filter((g) => {
-        if (filter === 'available') return !isInLaundry(g, data.today)
-        if (filter === 'laundry') return isInLaundry(g, data.today)
-        return true
-      }),
-    [garments, filter, data.today],
-  )
+  const threshold = data.settings.dormancyDays
+  const list = useMemo(() => {
+    if (filter === 'dort') return listDormant(garments, data.today, threshold)
+    return garments.filter((g) => {
+      if (filter === 'available') return !isInLaundry(g, data.today)
+      if (filter === 'laundry') return isInLaundry(g, data.today)
+      return true
+    })
+  }, [garments, filter, data.today, threshold])
+
+  const period = data.settings.usagePeriod
+  const usage = computeUsage(data.garments, data.today, period)
+  const ringLabel = `${usage.worn} ${plural(usage.worn, 'pièce portée', 'pièces portées')} sur ${usage.total} ces ${period === 90 ? 3 : 12} derniers mois`
 
   const sheetGarment = sheetId ? (garments.find((g) => g.id === sheetId) ?? null) : null
 
@@ -63,7 +89,29 @@ export function WardrobeScreen() {
 
   return (
     <>
-      <ScreenHeader title="Dressing" subtitle="Ce que tu peux vraiment porter aujourd’hui." />
+      <ScreenHeader title="Armoire" />
+
+      <section
+        aria-label="Part de l’armoire portée"
+        className="flex items-center gap-4 rounded-3xl border border-line bg-surface p-4 shadow-[var(--shadow-sm)]"
+      >
+        <UsageRing compact worn={usage.worn} total={usage.total} label={ringLabel} />
+        <div className="flex min-w-0 flex-1 flex-col gap-2">
+          <p className="m-0 text-[15px] leading-snug">
+            <strong className="font-display text-2xl tabular-nums">{formatUsagePercent(usage.ratio)}</strong>
+            <br />
+            de ton armoire portée
+          </p>
+          <Pills
+            label="Période"
+            options={PERIOD_OPTIONS}
+            value={period}
+            onChange={(value) => {
+              if (value !== period) void run((r) => r.updateSettings({ usagePeriod: value }))
+            }}
+          />
+        </div>
+      </section>
 
       {purchases > 0 && (
         <Banner to="/achats">
@@ -71,13 +119,41 @@ export function WardrobeScreen() {
         </Banner>
       )}
 
-      <div className="flex flex-col gap-2">
-        <Pills label="Filtrer le dressing" options={FILTERS} value={filter} onChange={setFilter} />
-        <p className="m-0 text-sm text-muted">Touche une pièce pour changer son état ou décider de son sort.</p>
+      <div role="group" aria-label="Filtrer l’armoire" className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none]">
+        {FILTERS.map((f) => (
+          <button
+            key={f.value}
+            type="button"
+            aria-pressed={filter === f.value}
+            onClick={() => setFilter(f.value)}
+            className={[
+              'min-h-11 flex-none rounded-full border px-4 text-sm transition-colors',
+              filter === f.value ? 'border-accent bg-accent font-bold text-on-accent' : 'border-outline font-medium text-ink',
+            ].join(' ')}
+          >
+            {f.label}
+          </button>
+        ))}
       </div>
 
+      {filter === 'dort' && (
+        <div className="flex flex-col gap-2">
+          <Pills
+            label="Elles dorment depuis"
+            options={DORMANCY_OPTIONS}
+            value={threshold}
+            onChange={(value) => {
+              if (value !== threshold) void run((r) => r.updateSettings({ dormancyDays: value }))
+            }}
+          />
+          <p className="m-0 text-sm text-muted">Touche une pièce pour la donner à la communauté.</p>
+        </div>
+      )}
+
       {list.length === 0 ? (
-        <p className="m-0 text-[15px] text-muted">Aucune pièce dans cette vue.</p>
+        <p className="m-0 text-[15px] text-muted">
+          {filter === 'dort' ? 'Rien ne dort : tout ton armoire circule.' : 'Aucune pièce dans cette vue.'}
+        </p>
       ) : (
         <ul className="m-0 grid list-none grid-cols-3 gap-x-2.5 gap-y-3 p-0">
           <AnimatePresence initial={false} mode="popLayout">

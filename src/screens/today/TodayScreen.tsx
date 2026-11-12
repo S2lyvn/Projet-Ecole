@@ -95,12 +95,7 @@ export function TodayScreen() {
 
   const header = (
     <>
-      <ScreenHeader
-        brand
-        eyebrow={formatLongDate(today)}
-        title="Tenue du jour"
-        subtitle="Construite autour d’une pièce que tu ne portes plus."
-      />
+      <ScreenHeader eyebrow={formatLongDate(today)} title="Tenue du jour" />
       <p className="sr-only" aria-live="polite">
         {announce}
       </p>
@@ -122,11 +117,11 @@ export function TodayScreen() {
           <h2 className={H2_CLASSES}>Rien à proposer</h2>
           <p className="m-0 text-sm text-muted">
             {allWashing
-              ? 'Toutes tes pièces sont au lavage. Remets-en une en jeu depuis le dressing.'
-              : 'Ajoute au moins un vêtement, pas seulement des chaussures, depuis le dressing.'}
+              ? 'Toutes tes pièces sont au lavage. Remets-en une en jeu depuis l’armoire.'
+              : 'Ajoute au moins un vêtement, pas seulement des chaussures, depuis l’armoire.'}
           </p>
-          <ButtonLink to="/dressing" size="sm">
-            Ouvrir le dressing
+          <ButtonLink to="/armoire" size="sm">
+            Ouvrir l’armoire
           </ButtonLink>
         </Card>
       </>
@@ -192,7 +187,6 @@ export function TodayScreen() {
               Pas aujourd’hui
             </Button>
           </div>
-          <p className={NOTE_CLASSES}>Un geste suffit&nbsp;: en validant la tenue, ton dressing se met à jour.</p>
         </motion.div>
       )}
       </AnimatePresence>

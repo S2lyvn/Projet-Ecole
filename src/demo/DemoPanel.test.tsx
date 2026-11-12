@@ -15,7 +15,7 @@ import { DemoPanel } from './DemoPanel'
 vi.mock('../app/config', () => ({ isDemoMode: false }))
 
 // Même montage que renderApp, avec le panneau à côté des écrans (isDemoMode vaut false en test).
-function renderDemo(path = '/', options: { withoutDemo?: boolean } = {}) {
+function renderDemo(path = '/looks', options: { withoutDemo?: boolean } = {}) {
   const local = createLocalRepository({ storage: null, startDate: TEST_TODAY })
   const repository: Repository = options.withoutDemo ? { ...local, advanceDay: undefined, reset: undefined } : local
   const user = userEvent.setup()
@@ -83,7 +83,7 @@ describe('panneau de démonstration', () => {
     expect(screen.queryByRole('link', { name: /Hier\s:/ })).not.toBeInTheDocument()
   })
 
-  it('depuis un écran secondaire, avancer d’un jour ramène à Aujourd’hui', async () => {
+  it('depuis un écran secondaire, avancer d’un jour ramène à Looks', async () => {
     const { user } = renderDemo('/achats')
     const aside = await panel()
     expect(within(aside).getByRole('status')).toHaveTextContent('Ajoute ou ignore les achats détectés.')
@@ -91,8 +91,8 @@ describe('panneau de démonstration', () => {
     expect(await screen.findByRole('heading', { level: 1, name: 'Tenue du jour' })).toBeInTheDocument()
   })
 
-  it('réinitialiser repart des données d’exemple et revient à Aujourd’hui', async () => {
-    const { user } = renderDemo('/bilan')
+  it('réinitialiser repart des données d’exemple et revient à Looks', async () => {
+    const { user } = renderDemo('/armoire')
     const aside = await panel()
     await user.click(within(aside).getByRole('button', { name: 'Avancer d’un jour' }))
     await within(aside).findByText('Mercredi 28 octobre')
@@ -120,7 +120,7 @@ describe('panneau de démonstration', () => {
   })
 
   it('sans commandes de démo : rien n’est affiché', async () => {
-    renderDemo('/', { withoutDemo: true })
+    renderDemo('/looks', { withoutDemo: true })
     await screen.findByRole('heading', { level: 1, name: 'Tenue du jour' })
     expect(screen.queryByRole('button', { name: 'Avancer d’un jour' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Démo' })).not.toBeInTheDocument()

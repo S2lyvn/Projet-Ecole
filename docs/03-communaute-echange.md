@@ -36,7 +36,8 @@ Points d'entrée : bouton « Échanger » sur une pièce dormante (À sortir) ou
 4. L'annonce est publiée. Dans son dressing, la pièce reste active avec la puce « Proposée à l'échange ».
 
 ### B. Trouver et réserver une pièce
-1. Onglet Échanges → **Bourse** : grille d'annonces filtrée par défaut sur **mes tailles** et **ma ville**. Filtres : catégorie, taille, cercle.
+1. Onglet **Carte** (accueil) : une **carte de proximité** montre, par quartier, les personnes et les pièces disponibles autour de moi. Une pastille par quartier indique le nombre de pièces ; un appui ouvre le détail des personnes et de leurs pièces ; une vue **Liste** montre les mêmes pièces en grille. Filtres : le rayon (visible), et dans une feuille « Filtres » la catégorie et **mes tailles**.
+   - La carte du simulateur est une **illustration** des quartiers de Clermont-Ferrand, pas une vraie carte : une carte réelle (fonds de carte OpenStreetMap) demanderait de charger des tuiles chez un tiers et d'y envoyer le quartier à chaque affichage ; à arbitrer avec la règle de vie privée avant de la brancher.
    - **Près de chez toi** : filtre par distance autour de **mon quartier** (1 km, 3 km par défaut, 5 km, toute la ville), annonces triées de la plus proche à la plus lointaine. La distance est calculée **entre centres de quartiers** et arrondie au demi-kilomètre : l'appli ne connaît jamais la position exacte ni l'adresse (CLAUDE.md, règle 5). Dans le simulateur, les positions des quartiers de Clermont-Ferrand sont des ordres de grandeur d'exemple ; à l'étape 4, une table `neighborhoods` (ville, nom, centre approximatif) les remplacera.
 2. Fiche d'une annonce : photos, état, taille, ville et quartier du membre (jamais l'adresse), note du membre, nombre d'échanges réussis.
 3. « Réclamer cette pièce » → réservation. 1 jeton est bloqué. L'annonce passe « réservée » et disparaît de la bourse.
@@ -89,7 +90,7 @@ Points d'entrée : bouton « Échanger » sur une pièce dormante (À sortir) ou
 
 ## Écrans à ajouter au prototype
 
-1. Onglet Échanges : sous-onglets **Bourse**, **Mes échanges**, **Mes annonces** ; jetons en haut.
+1. Onglet **Carte** : carte de proximité, vue Liste, filtres. Onglet **Échanges** : jetons, bouton « Donner une pièce », sous-onglets **En cours** et **Mes annonces**.
 2. Proposer à l'échange (formulaire prérempli).
 3. Fiche d'une annonce.
 4. Échange en cours : état, messagerie, rendez-vous, QR code, bouton de confirmation.

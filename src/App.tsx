@@ -7,12 +7,11 @@ import { repository } from './data'
 import { ConfirmScreen } from './screens/confirm/ConfirmScreen'
 import { PurchasesScreen } from './screens/purchases/PurchasesScreen'
 import { SellScreen } from './screens/sell/SellScreen'
-import { SummaryScreen } from './screens/summary/SummaryScreen'
+import { MapScreen } from './screens/map/MapScreen'
 import { ListingScreen } from './screens/swaps/ListingScreen'
 import { ProposeScreen } from './screens/swaps/ProposeScreen'
 import { SwapScreen } from './screens/swaps/SwapScreen'
 import { SwapsScreen } from './screens/swaps/SwapsScreen'
-import { ToSortScreen } from './screens/to-sort/ToSortScreen'
 import { TodayScreen } from './screens/today/TodayScreen'
 import { WardrobeScreen } from './screens/wardrobe/WardrobeScreen'
 
@@ -26,14 +25,17 @@ export function AppRoutes() {
     <Routes>
       {/* Une seule mise en page : AppLayout masque la barre d'onglets sur les écrans secondaires (app/navigation). */}
       <Route element={<AppLayout />}>
-        <Route index element={<TodayScreen />} />
-        <Route path="dressing" element={<WardrobeScreen />} />
+        <Route index element={<MapScreen />} />
         <Route path="echanges" element={<SwapsScreen />} />
+        <Route path="armoire" element={<WardrobeScreen />} />
+        <Route path="looks" element={<TodayScreen />} />
         <Route path="echanges/annonce/:listingId" element={<ListingScreen />} />
         <Route path="echanges/proposer/:garmentId" element={<ProposeScreen />} />
         <Route path="echanges/echange/:swapId" element={<SwapScreen />} />
-        <Route path="a-sortir" element={<ToSortScreen />} />
-        <Route path="bilan" element={<SummaryScreen />} />
+        {/* Anciennes adresses (liens enregistrés, vitrine) : elles mènent aux nouveaux écrans. */}
+        <Route path="dressing" element={<Navigate to="/armoire" replace />} />
+        <Route path="a-sortir" element={<Navigate to="/armoire?filtre=dort" replace />} />
+        <Route path="bilan" element={<Navigate to="/armoire" replace />} />
         <Route path="confirmer" element={<ConfirmScreen />} />
         <Route path="achats" element={<PurchasesScreen />} />
         <Route path="vendre/:garmentId" element={<SellScreen />} />

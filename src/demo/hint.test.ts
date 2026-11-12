@@ -3,7 +3,7 @@ import { demoHint } from './hint'
 import type { DemoHintInput } from './hint'
 
 const base: DemoHintInput = {
-  path: '/',
+  path: '/looks',
   pendingCount: 0,
   outfitStatus: 'proposed',
   hasOutfit: true,
@@ -24,14 +24,14 @@ describe('demoHint', () => {
   it('pièces à confirmer : renvoie vers la bannière, accordée au nombre', () => {
     expect(hint({ pendingCount: 3 })).toBe('Ouvre la bannière « Hier : 3 pièces à confirmer ».')
     expect(hint({ pendingCount: 1 })).toBe('Ouvre la bannière « Hier : 1 pièce à confirmer ».')
-    expect(hint({ pendingCount: 2, path: '/bilan' })).toBe(
-      'Dans Aujourd’hui, ouvre la bannière « Hier : 2 pièces à confirmer ».',
+    expect(hint({ pendingCount: 2, path: '/armoire' })).toBe(
+      'Dans Looks, ouvre la bannière « Hier : 2 pièces à confirmer ».',
     )
   })
 
   it('tenue proposée : la valider', () => {
     expect(hint({})).toBe('Valide la tenue du jour avec « Je porte cette tenue ».')
-    expect(hint({ path: '/dressing' })).toBe('Dans Aujourd’hui, valide la tenue du jour avec « Je porte cette tenue ».')
+    expect(hint({ path: '/armoire' })).toBe('Dans Looks, valide la tenue du jour avec « Je porte cette tenue ».')
   })
 
   it('tenue validée : avancer d’un jour, selon le mode miroir', () => {
@@ -43,17 +43,17 @@ describe('demoHint', () => {
     )
   })
 
-  it('achats détectés en attente : renvoie vers Dressing', () => {
+  it('achats détectés en attente : renvoie vers Armoire', () => {
     expect(hint({ outfitStatus: 'dismissed', purchasesCount: 3 })).toBe(
-      'Dans Dressing, ouvre la bannière « 3 achats détectés, à confirmer ».',
+      'Dans Armoire, ouvre la bannière « 3 achats détectés, à confirmer ».',
     )
-    expect(hint({ hasOutfit: false, purchasesCount: 1, path: '/dressing' })).toBe(
+    expect(hint({ hasOutfit: false, purchasesCount: 1, path: '/armoire' })).toBe(
       'Ouvre la bannière « 1 achat détecté, à confirmer ».',
     )
   })
 
   it('sinon : explorer ou avancer', () => {
-    const explore = 'Explore le dressing, À sortir et le Bilan, ou avance d’un jour.'
+    const explore = 'Explore la carte, les échanges et ton armoire, ou avance d’un jour.'
     expect(hint({ outfitStatus: 'dismissed' })).toBe(explore)
     expect(hint({ hasOutfit: false })).toBe(explore)
   })

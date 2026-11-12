@@ -10,43 +10,99 @@ import { ToastProvider } from '../../components/Toast'
 import { createLocalRepository } from '../../data/local'
 import { TEST_TODAY, renderApp } from '../../test/renderApp'
 
-describe('bourse d’échange simulée', () => {
-  it('affiche les jetons, la règle et les annonces à ma taille', async () => {
-    const { user } = renderApp('/echanges')
-    expect(await screen.findByRole('heading', { level: 1, name: 'Échanges' })).toBeInTheDocument()
-    expect(screen.getByText('Mes jetons').parentElement).toHaveTextContent('1')
-    expect(screen.getByText(/1 habit donné = 1 jeton = 1 habit à réclamer/)).toBeInTheDocument()
-    const market = screen.getByRole('list', { name: 'Annonces de la bourse' })
-    expect(within(market).getByText('Pull marin rayé')).toBeInTheDocument()
-    // Doudoune en L : masquée par le filtre « À ma taille » (haut M).
-    expect(within(market).queryByText('Doudoune légère kaki')).not.toBeInTheDocument()
+describe('Carte de proximité', () => {
+  it('montre les quartiers proches avec leurs pièces, les plus proches d’abord', async () => {
+    const { user } = renderApp('/')
+    expect(await screen.findByRole('heading', { level: 1, name: 'Autour de toi' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /1 jeton, voir mes échanges/ })).toHaveAttribute('href', '/echanges')
 
-    await user.click(screen.getByRole('switch', { name: /À ma taille/ }))
-    await user.click(screen.getByRole('button', { name: 'Toute la ville' }))
-    expect(await screen.findByText('Doudoune légère kaki')).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: 'Chaussures' }))
-    await waitFor(() => expect(screen.queryByText('Pull marin rayé')).not.toBeInTheDocument())
-    expect(screen.getByText('Baskets en toile écrue')).toBeInTheDocument()
+    // Saint-Jacques, 3 km, à ma taille : le quartier de Sarah est sélectionné, avec ses 2 pièces.
+    const home = screen.getByRole('button', { name: /^Saint-Jacques \(ton quartier\) : 2 pièces, Sarah/ })
+    expect(home).toHaveAttribute('aria-pressed', 'true')
+    const panel = screen.getByRole('region', { name: 'Pièces à Saint-Jacques' })
+    expect(within(panel).getByText('Sarah')).toBeInTheDocument()
+    expect(within(panel).getByRole('link', { name: /Robe fleurie d’été/ })).toHaveAttribute('href', '/echanges/annonce/l3')
+
+    // Quartier hors rayon (Montferrand, ~4 km) : pas de pastille.
+    expect(screen.queryByRole('button', { name: /^Montferrand/ })).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /^Jaude/ }))
+    const jaude = await screen.findByRole('region', { name: 'Pièces à Jaude' })
+    expect(within(jaude).getByText('Inès')).toBeInTheDocument()
+    expect(within(jaude).getByRole('link', { name: /Pull marin rayé/ })).toBeInTheDocument()
   })
 
-  it('filtre par distance autour de mon quartier, les plus proches d’abord', async () => {
-    const { user, repository } = renderApp('/echanges')
-    await user.click(await screen.findByRole('switch', { name: /À ma taille/ }))
-    const market = () => screen.getByRole('list', { name: 'Annonces de la bourse' })
-    // Saint-Jacques, 3 km par défaut : Sarah (même quartier) en premier, Chloé (Chamalières, ~3,5 km) masquée.
-    expect(within(market()).getAllByRole('link')[0]).toHaveTextContent('Ton quartier')
-    expect(within(market()).queryByText('Baskets en toile écrue')).not.toBeInTheDocument()
+  it('la vue Liste regroupe les mêmes pièces, avec la distance', async () => {
+    const { user } = renderApp('/')
+    await screen.findByRole('heading', { level: 1, name: 'Autour de toi' })
+    await user.click(screen.getByRole('tab', { name: 'Liste' }))
+    const list = await screen.findByRole('list', { name: 'Pièces près de chez toi' })
+    // 2 pièces à Saint-Jacques, 1 à Jaude (le T-shirt en S est masqué), 2 aux Cézeaux.
+    expect(within(list).getAllByRole('listitem')).toHaveLength(5)
+    expect(within(list).getAllByRole('link')[0]).toHaveTextContent('Ton quartier')
+  })
+
+  it('le rayon élargit la carte, et un rayon vide propose toute la ville', async () => {
+    const { user } = renderApp('/')
+    await screen.findByRole('heading', { level: 1, name: 'Autour de toi' })
+    await user.click(screen.getByRole('button', { name: '5 km' }))
+    // ~3,5 km : Chamalières entre dans le rayon.
+    expect(await screen.findByRole('button', { name: /^Chamalières : 2 pièces, Chloé/ })).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: '1 km' }))
-    await waitFor(() => expect(within(market()).queryByText('Pull marin rayé')).not.toBeInTheDocument())
-    await user.click(screen.getByRole('button', { name: '5 km' }))
-    expect(await within(market()).findByText('Baskets en toile écrue')).toBeInTheDocument()
-
-    await user.selectOptions(screen.getByRole('combobox', { name: 'Mon quartier' }), 'Chamalières')
-    await waitFor(async () => expect((await repository.getSwapState()).neighborhood).toBe('Chamalières'))
-    expect(await within(market()).findByText('Baskets en toile écrue')).toBeInTheDocument()
+    await waitFor(() => expect(screen.queryByRole('button', { name: /^Chamalières/ })).not.toBeInTheDocument())
+    // À 1 km de Saint-Jacques, seules les pièces de Sarah restent ; en filtrant les chaussures, plus rien.
+    await user.click(screen.getByRole('button', { name: 'Filtres' }))
+    const sheet = await screen.findByRole('dialog', { name: 'Filtres' })
+    await user.click(within(sheet).getByRole('button', { name: 'Chaussures' }))
+    await user.click(within(sheet).getByRole('button', { name: /^Voir 0 pièce/ }))
+    expect(await screen.findByText('Rien dans ce rayon.')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Voir toute la ville' }))
+    expect(await screen.findByRole('button', { name: /^Chamalières : 1 pièce, Chloé/ })).toBeInTheDocument()
   })
 
+  it('les filtres comptent ce qui a changé, et se réinitialisent', async () => {
+    const { user } = renderApp('/')
+    await screen.findByRole('heading', { level: 1, name: 'Autour de toi' })
+    await user.click(screen.getByRole('button', { name: 'Filtres' }))
+    const sheet = await screen.findByRole('dialog', { name: 'Filtres' })
+    await user.click(within(sheet).getByRole('switch', { name: /À ma taille/ }))
+    await user.click(within(sheet).getByRole('button', { name: 'Manteaux' }))
+    await user.click(within(sheet).getByRole('button', { name: 'Réinitialiser' }))
+    expect(within(sheet).getByRole('switch', { name: /À ma taille/ })).toHaveAttribute('aria-checked', 'true')
+    expect(within(sheet).getByRole('button', { name: 'Tout' })).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  it('change de quartier', async () => {
+    const { user, repository } = renderApp('/')
+    await user.selectOptions(await screen.findByRole('combobox', { name: 'Mon quartier' }), 'Chamalières')
+    await waitFor(async () => expect((await repository.getSwapState()).neighborhood).toBe('Chamalières'))
+    expect(await screen.findByRole('button', { name: /^Chamalières \(ton quartier\) : 2 pièces, Chloé/ })).toBeInTheDocument()
+  })
+})
+
+describe('Échanges', () => {
+  it('montre mes jetons, la règle en un appui, et mène à « Donner une pièce »', async () => {
+    const { user } = renderApp('/echanges')
+    expect(await screen.findByRole('heading', { level: 1, name: 'Échanges' })).toBeInTheDocument()
+    expect(screen.getByRole('region', { name: 'Mes jetons' })).toHaveTextContent('1 jeton')
+    expect(screen.queryByText(/1 habit donné = 1 jeton/)).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Comment marchent les jetons ?' }))
+    expect(await screen.findByText(/1 habit donné = 1 jeton = 1 habit à réclamer/)).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Donner une pièce' })).toHaveAttribute('href', '/armoire?filtre=dort')
+  })
+
+  it('liste mes échanges en cours et terminés, puis mes annonces', async () => {
+    const { user } = renderApp('/echanges')
+    const swaps = await screen.findByRole('list', { name: 'Mes échanges' })
+    expect(within(swaps).getByText('Sweat à capuche gris')).toBeInTheDocument()
+    // Je n'ai pas encore mis de pièce de mon armoire en ligne : l'échange passé ne compte pas comme une annonce.
+    await user.click(screen.getByRole('tab', { name: /Mes annonces/ }))
+    expect(await screen.findByRole('heading', { level: 2, name: 'Aucune annonce' })).toBeInTheDocument()
+  })
+})
+
+describe('Bourse d’échange simulée', () => {
   it('réclamer, fixer le rendez-vous, scanner : la pièce arrive dans le dressing', async () => {
     const { user, repository } = renderApp('/echanges/annonce/l1')
     await user.click(await screen.findByRole('button', { name: 'Réclamer cette pièce · 1 jeton' }))
@@ -70,10 +126,11 @@ describe('bourse d’échange simulée', () => {
     const { user } = renderApp('/echanges/annonce/l1')
     await user.click(await screen.findByRole('button', { name: 'Réclamer cette pièce · 1 jeton' }))
     await screen.findByRole('heading', { name: 'Fixer le rendez-vous' })
-    // Le seul jeton est bloqué : une deuxième réclamation est refusée.
+    // Le seul jeton est bloqué : une deuxième réclamation, trouvée sur la carte, est refusée.
     await user.click(screen.getByRole('button', { name: 'Retour à mes échanges' }))
-    await user.click(await screen.findByRole('tab', { name: /Bourse/ }))
-    await user.click(await screen.findByText('Jean mom bleu clair'))
+    await user.click(await screen.findByRole('link', { name: /Carte/ }))
+    await user.click(await screen.findByRole('button', { name: /^Les Cézeaux/ }))
+    await user.click(await screen.findByRole('link', { name: /Jean mom bleu clair/ }))
     expect(await screen.findByText(/Il te faut un jeton/)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Réclamer cette pièce · 1 jeton' })).toHaveAttribute('aria-disabled', 'true')
   })
@@ -102,14 +159,6 @@ describe('bourse d’échange simulée', () => {
     const listing = (await repository.getSwapState()).listings.find((l) => l.garmentId === 'g10')
     expect(listing).toMatchObject({ status: 'open' })
     expect(screen.getByRole('list', { name: 'Mes annonces' })).toHaveTextContent('+1 jeton à la remise')
-  })
-
-  it('le bouton Échanger d’À sortir ouvre le formulaire prérempli', async () => {
-    const { user } = renderApp('/a-sortir')
-    const list = await screen.findByRole('list', { name: 'Pièces à sortir' })
-    const card = within(list).getAllByRole('article')[0]
-    await user.click(within(card).getByRole('button', { name: /Échanger/ }))
-    expect(await screen.findByRole('heading', { level: 1, name: 'Proposer à l’échange' })).toBeInTheDocument()
   })
 
   it('donner une pièce rapporte 1 jeton à la remise', async () => {

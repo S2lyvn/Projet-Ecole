@@ -29,7 +29,7 @@ export function useGarmentActions() {
         await r.markGarmentClean(garment.id)
         await r.saveDailyOutfit({ day: data.today, orphanId: garment.id, status: 'proposed' })
       })
-      navigate('/')
+      navigate('/looks')
       showToast(`${garment.name} : ${agree(garment.agreement, 'proposé')} dans la tenue du jour.`)
     },
     /** Donner : la pièce quitte le dressing, avec « Annuler » pendant quelques secondes. */

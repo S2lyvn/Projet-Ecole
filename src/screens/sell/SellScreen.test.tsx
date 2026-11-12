@@ -37,8 +37,8 @@ describe('Vendre', () => {
     // Testing Library normalise l'espace ins\u00e9cable en espace simple.
     expect(await screen.findByText(/^Chemise en lin vert sauge.: vendue\. Elle quitte ton dressing\.$/)).toBeInTheDocument()
     expect((await repository.getGarment('g01'))?.status).toBe('sold')
-    // La navigation de react-router est une transition : l'écran À sortir arrive juste après le toast.
-    expect(await screen.findByRole('heading', { level: 1, name: 'À sortir' })).toBeInTheDocument()
+    // La navigation de react-router est une transition : l'Armoire arrive juste après le toast.
+    expect(await screen.findByRole('heading', { level: 1, name: 'Armoire' })).toBeInTheDocument()
     expect(screen.queryByRole('heading', { level: 1, name: 'Vendre cette pièce' })).not.toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Annuler' }))
@@ -50,9 +50,9 @@ describe('Vendre', () => {
     expect(await screen.findByRole('button', { name: 'Je les ai vendues' })).toBeInTheDocument()
   })
 
-  it('pièce inconnue : message et lien vers À sortir', async () => {
+  it('pièce inconnue : message et lien vers l’armoire', async () => {
     renderApp('/vendre/inconnue')
     expect(await screen.findByRole('heading', { name: 'Pièce introuvable' })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Voir les pièces à sortir' })).toHaveAttribute('href', '/a-sortir')
+    expect(screen.getByRole('link', { name: 'Voir les pièces à sortir' })).toHaveAttribute('href', '/armoire?filtre=dort')
   })
 })

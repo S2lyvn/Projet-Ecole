@@ -3,7 +3,7 @@ import type { DailyOutfitStatus } from '../data/repository'
 import { plural } from '../domain/wording'
 
 export interface DemoHintInput {
-  /** Chemin de l'écran affiché, ex. « / », « /confirmer », « /vendre/g04 ». */
+  /** Chemin de l'écran affiché, ex. « /looks », « /confirmer », « /vendre/g04 ». */
   path: string
   /** Pièces portées hier, en attente de confirmation. */
   pendingCount: number
@@ -28,25 +28,25 @@ export function demoHint({ path, pendingCount, outfitStatus, hasOutfit, mirrorMo
   if (path === '/achats') return 'Ajoute ou ignore les achats détectés.'
   if (path.startsWith('/vendre/')) return 'Remplis l’annonce, copie-la, puis marque la pièce comme vendue.'
 
-  // La bannière et la tenue sont sur Aujourd'hui : on y renvoie depuis les autres onglets.
-  const onToday = path === '/'
+  // La bannière et la tenue sont dans Looks : on y renvoie depuis les autres onglets.
+  const onToday = path === '/looks'
   if (pendingCount > 0) {
     const banner = quote(`Hier${NBSP}: ${pendingCount} ${plural(pendingCount, 'pièce', 'pièces')} à confirmer`)
-    return onToday ? `Ouvre la bannière ${banner}.` : `Dans Aujourd’hui, ouvre la bannière ${banner}.`
+    return onToday ? `Ouvre la bannière ${banner}.` : `Dans Looks, ouvre la bannière ${banner}.`
   }
   if (outfitStatus === 'proposed' && hasOutfit) {
     const action = quote('Je porte cette tenue')
-    return onToday ? `Valide la tenue du jour avec ${action}.` : `Dans Aujourd’hui, valide la tenue du jour avec ${action}.`
+    return onToday ? `Valide la tenue du jour avec ${action}.` : `Dans Looks, valide la tenue du jour avec ${action}.`
   }
   if (outfitStatus === 'validated') {
     return mirrorMode
       ? `Touche ${quote('Avancer d’un jour')}${NBSP}: le miroir enregistrera la tenue sans rien te demander.`
       : `Touche ${quote('Avancer d’un jour')} pour voir le stock se mettre à jour.`
   }
-  // Ajout au prototype : les achats détectés attendent dans Dressing.
+  // Ajout au prototype : les achats détectés attendent dans Armoire.
   if (purchasesCount > 0) {
     const banner = quote(`${purchasesCount} ${plural(purchasesCount, 'achat détecté', 'achats détectés')}, à confirmer`)
-    return path === '/dressing' ? `Ouvre la bannière ${banner}.` : `Dans Dressing, ouvre la bannière ${banner}.`
+    return path === '/armoire' ? `Ouvre la bannière ${banner}.` : `Dans Armoire, ouvre la bannière ${banner}.`
   }
-  return 'Explore le dressing, À sortir et le Bilan, ou avance d’un jour.'
+  return 'Explore la carte, les échanges et ton armoire, ou avance d’un jour.'
 }

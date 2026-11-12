@@ -8,6 +8,8 @@ import {
   neighborhoodDistanceKm,
   filterListings,
   fitsMySizes,
+  groupByNeighborhood,
+  isWithinRadius,
   handoverCodeFor,
   isSwapOpen,
   listedGarmentIds,
@@ -157,5 +159,47 @@ describe('localisation par quartier', () => {
     for (const name of ['Jaude', 'Les Cézeaux', 'Saint-Jacques', 'Montferrand', 'Chamalières', 'La Gauthière']) {
       expect(NEIGHBORHOOD_NAMES).toContain(name)
     }
+  })
+})
+
+describe('regroupement par quartier', () => {
+  const members = [
+    { id: 'a', displayName: 'Zoé', neighborhood: 'Jaude', rating: null, swapsCount: 0, memberSince: '' },
+    { id: 'a2', displayName: 'Inès', neighborhood: 'Jaude', rating: null, swapsCount: 0, memberSince: '' },
+    { id: 'b', displayName: 'Léo', neighborhood: 'Les Cézeaux', rating: null, swapsCount: 0, memberSince: '' },
+  ]
+  const list = [
+    listing({ id: 'l1', ownerId: 'b' }),
+    listing({ id: 'l2', ownerId: 'a' }),
+    listing({ id: 'l3', ownerId: 'a2' }),
+    listing({ id: 'l4', ownerId: 'a2' }),
+    listing({ id: 'l5', ownerId: 'inconnu' }),
+  ]
+
+  it('regroupe par quartier puis par personne, du plus proche au plus lointain', () => {
+    const groups = groupByNeighborhood(listingsNear(list, members, 'Jaude', null), members)
+    expect(groups.map((g) => [g.neighborhood, g.count])).toEqual([
+      ['Jaude', 3],
+      ['Les Cézeaux', 1],
+    ])
+    // Personnes par prénom : Inès avant Zoé ; une annonce d'un membre inconnu est ignorée.
+    expect(groups[0].people.map((p) => [p.member.displayName, p.listings.map((l) => l.id)])).toEqual([
+      ['Inès', ['l3', 'l4']],
+      ['Zoé', ['l2']],
+    ])
+    expect(groups[0].distanceKm).toBe(0)
+  })
+
+  it('ne garde que les quartiers dans le rayon', () => {
+    const groups = groupByNeighborhood(listingsNear(list, members, 'Jaude', 3), members)
+    expect(groups.map((g) => g.neighborhood)).toEqual(['Jaude'])
+    expect(groupByNeighborhood([], members)).toEqual([])
+  })
+
+  it('dit si un quartier est dans le rayon', () => {
+    expect(isWithinRadius('Jaude', 'Saint-Jacques', 3)).toBe(true)
+    expect(isWithinRadius('Jaude', 'Saint-Jacques', 1)).toBe(false)
+    expect(isWithinRadius('Jaude', 'Les Cézeaux', null)).toBe(true)
+    expect(isWithinRadius('Jaude', 'Nulle part', 5)).toBe(false)
   })
 })

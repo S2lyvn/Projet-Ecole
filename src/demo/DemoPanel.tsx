@@ -112,9 +112,9 @@ function DemoContent({ titleId, onClose }: { titleId: string; onClose?: () => vo
    * en page est remontée (autre cadre) et ne donne pas le focus au titre : on le fait à la main.
    */
   function goHome() {
-    if (pathname === '/') return
+    if (pathname === '/looks') return
     const fromSecondary = isSecondaryPath(pathname)
-    navigate('/')
+    navigate('/looks')
     if (fromSecondary) requestAnimationFrame(() => document.getElementById('screen-title')?.focus())
   }
 

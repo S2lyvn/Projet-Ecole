@@ -11,9 +11,9 @@ describe('navigation', () => {
   })
 
   it('glisse dans le sens de la navigation', () => {
-    expect(transitionDirection('/', '/bilan')).toBe(1)
-    expect(transitionDirection('/bilan', '/dressing')).toBe(-1)
+    expect(transitionDirection('/', '/looks')).toBe(1)
+    expect(transitionDirection('/looks', '/armoire')).toBe(-1)
     expect(transitionDirection('/', '/confirmer')).toBe(1)
-    expect(transitionDirection('/confirmer', '/dressing')).toBe(-1)
+    expect(transitionDirection('/confirmer', '/armoire')).toBe(-1)
   })
 })

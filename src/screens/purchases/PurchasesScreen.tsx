@@ -75,7 +75,7 @@ export function PurchasesScreen() {
         for (const id of ids) await r.acceptPurchase(id)
       })
       showToast(`${ids.length} ${plural(ids.length, 'pièce ajoutée', 'pièces ajoutées')} au dressing.`)
-      navigate('/dressing')
+      navigate('/armoire')
     } catch {
       showToast(ERROR_MESSAGE)
     } finally {
@@ -88,7 +88,7 @@ export function PurchasesScreen() {
       <SubScreenHeader
         title="Achats détectés"
         subtitle={`Trouvés dans tes e-mails de confirmation et tes tickets. Rien à saisir${NBSP}: confirme ou ignore.`}
-        backTo="/dressing"
+        backTo="/armoire"
         backLabel="Retour au dressing"
       />
 
@@ -118,7 +118,7 @@ export function PurchasesScreen() {
         <>
           <EmptyState title="Rien à confirmer">Les prochains achats arriveront ici.</EmptyState>
           <div className="mt-auto">
-            <Button size="lg" onClick={() => navigate('/dressing')}>
+            <Button size="lg" onClick={() => navigate('/armoire')}>
               Retour au dressing
             </Button>
           </div>

@@ -7,7 +7,7 @@ export function isSecondaryPath(path: string): boolean {
   return SECONDARY_PREFIXES.some((prefix) => path === prefix || path.startsWith(prefix))
 }
 
-const TAB_ORDER = ['/', '/dressing', '/echanges', '/a-sortir', '/bilan']
+const TAB_ORDER = ['/', '/echanges', '/armoire', '/looks']
 
 /** Position de l'onglet dans la barre (pour le sens du glissement), -1 pour un écran secondaire. */
 export function tabPosition(path: string): number {

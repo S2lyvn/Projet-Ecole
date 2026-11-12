@@ -73,7 +73,7 @@ export function ListingScreen() {
     <>
       <SubScreenHeader
         title={listing.item.name}
-        backTo={mine ? '/echanges?vue=annonces' : '/echanges'}
+        backTo={mine ? '/echanges?vue=annonces' : '/'}
         backLabel={mine ? 'Retour à mes annonces' : 'Retour à la bourse'}
       />
 

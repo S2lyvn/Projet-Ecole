@@ -16,7 +16,7 @@ async function outfitCard() {
 
 describe('écran Aujourd’hui', () => {
   it('affiche la date simulée, l’orpheline la plus oubliée et sa valeur sûre', async () => {
-    renderApp('/')
+    renderApp('/looks')
     expect(await screen.findByRole('heading', { level: 1, name: 'Tenue du jour' })).toBeInTheDocument()
     // La date apparaît aussi dans le panneau démo : on la cherche dans l'écran seulement.
     expect(within(screen.getByRole('main')).getByText('Mardi 27 octobre')).toBeInTheDocument()
@@ -31,13 +31,13 @@ describe('écran Aujourd’hui', () => {
   })
 
   it('affiche la bannière des pièces portées hier', async () => {
-    renderApp('/')
+    renderApp('/looks')
     const banner = await screen.findByRole('link', { name: /Hier\s: 3 pièces à confirmer/ })
     expect(banner).toHaveAttribute('href', '/confirmer')
   })
 
   it('compte seulement les pièces encore actives dans la bannière', async () => {
-    const { user, repository } = renderApp('/')
+    const { user, repository } = renderApp('/looks')
     await screen.findByRole('link', { name: /Hier\s: 3 pièces/ })
     await repository.setGarmentStatus('g02', 'donated')
     // Une action de l'écran recharge les données.
@@ -46,7 +46,7 @@ describe('écran Aujourd’hui', () => {
   })
 
   it('valide la tenue, puis annule la validation', async () => {
-    const { user, repository } = renderApp('/')
+    const { user, repository } = renderApp('/looks')
     await user.click(await screen.findByRole('button', { name: 'Je porte cette tenue' }))
 
     const change = await screen.findByRole('button', { name: 'Changer de tenue' })
@@ -63,7 +63,7 @@ describe('écran Aujourd’hui', () => {
   })
 
   it('annonce le miroir quand le mode miroir est actif', async () => {
-    const { user, repository } = renderApp('/')
+    const { user, repository } = renderApp('/looks')
     const validate = await screen.findByRole('button', { name: 'Je porte cette tenue' })
     // La validation recharge toutes les données, réglages compris.
     await repository.updateSettings({ mirrorMode: true })
@@ -72,7 +72,7 @@ describe('écran Aujourd’hui', () => {
   })
 
   it('« Autre proposition » passe à l’orpheline suivante', async () => {
-    const { user, repository } = renderApp('/')
+    const { user, repository } = renderApp('/looks')
     await outfitCard()
     const other = screen.getByRole('button', { name: 'Autre proposition' })
     await user.click(other)
@@ -87,7 +87,7 @@ describe('écran Aujourd’hui', () => {
   })
 
   it('« Autre proposition » prévient quand il n’y a qu’une seule orpheline possible', async () => {
-    const { user, repository } = renderApp('/')
+    const { user, repository } = renderApp('/looks')
     await outfitCard()
     for (const id of await clothesIds(repository)) if (id !== 'g17') await repository.washGarment(id)
     // Aller-retour par « Pas aujourd’hui » pour recharger les données.
@@ -101,7 +101,7 @@ describe('écran Aujourd’hui', () => {
   })
 
   it('« Pas aujourd’hui » met la tenue de côté, puis on peut la revoir', async () => {
-    const { user, repository } = renderApp('/')
+    const { user, repository } = renderApp('/looks')
     await user.click(await screen.findByRole('button', { name: 'Pas aujourd’hui' }))
 
     expect(await screen.findByRole('heading', { level: 2, name: 'Pas de tenue aujourd’hui' })).toBeInTheDocument()
@@ -116,28 +116,28 @@ describe('écran Aujourd’hui', () => {
   })
 
   it('affiche « Rien à proposer » quand tous les vêtements sont au lavage, même si les chaussures sont propres', async () => {
-    const { user, repository } = renderApp('/')
+    const { user, repository } = renderApp('/looks')
     await outfitCard()
     for (const id of await clothesIds(repository)) await repository.washGarment(id)
     await user.click(screen.getByRole('button', { name: 'Pas aujourd’hui' }))
 
     expect(await screen.findByRole('heading', { level: 2, name: 'Rien à proposer' })).toBeInTheDocument()
-    expect(screen.getByText('Toutes tes pièces sont au lavage. Remets-en une en jeu depuis le dressing.')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Ouvrir le dressing' })).toHaveAttribute('href', '/dressing')
+    expect(screen.getByText('Toutes tes pièces sont au lavage. Remets-en une en jeu depuis l’armoire.')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Ouvrir l’armoire' })).toHaveAttribute('href', '/armoire')
   })
 
   it('invite à ajouter des vêtements quand il ne reste que des chaussures', async () => {
-    const { user, repository } = renderApp('/')
+    const { user, repository } = renderApp('/looks')
     await outfitCard()
     for (const id of await clothesIds(repository)) await repository.setGarmentStatus(id, 'donated')
     await user.click(screen.getByRole('button', { name: 'Pas aujourd’hui' }))
 
     expect(await screen.findByRole('heading', { level: 2, name: 'Rien à proposer' })).toBeInTheDocument()
-    expect(screen.getByText('Ajoute au moins un vêtement, pas seulement des chaussures, depuis le dressing.')).toBeInTheDocument()
+    expect(screen.getByText('Ajoute au moins un vêtement, pas seulement des chaussures, depuis l’armoire.')).toBeInTheDocument()
   })
 
   it('accorde la bannière au singulier', async () => {
-    const { user, repository } = renderApp('/')
+    const { user, repository } = renderApp('/looks')
     await screen.findByRole('link', { name: /Hier\s: 3 pièces/ })
     await repository.setGarmentStatus('g02', 'donated')
     await repository.setGarmentStatus('g06', 'donated')

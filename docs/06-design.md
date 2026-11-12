@@ -71,7 +71,7 @@ Les composants sont dans `src/components/Brand.tsx`. Le nom « Deep**IN** Armour
 
 Au trait, violet, 24 px : Mon armoire & mon inventaire, Idées looks & inspirations, Réutiliser & faire circuler, Réparer & entretenir, Donner / Vendre / Échanger, Prêter / Louer, Artisans & partenaires locaux, Communauté & partage, Suivi d'impact & armoire responsable, Mes progrès & défis.
 
-Barre d'onglets : Aujourd'hui = Idées looks, Dressing = Mon armoire, Échanges = Communauté, À sortir = Réutiliser & faire circuler, Bilan = Suivi d'impact. Les autres icônes de la bibliothèque (Réparer, Prêter, Artisans, Mes progrès) servent aux fonctions futures et ne sont pas encore dessinées.
+Barre d'onglets : Carte = repère de lieu (Artisans & partenaires locaux), Échanges = Réutiliser & faire circuler, Armoire = Mon armoire, Looks = Idées looks. Les icônes Communauté et Suivi d'impact restent disponibles. Les autres icônes de la bibliothèque (Réparer, Prêter, Artisans, Mes progrès) servent aux fonctions futures et ne sont pas encore dessinées.
 
 **Parcours utilisateur de la charte :** Évaluer mon armoire → Découvrir des looks → Faire circuler → Réduire mon impact → Me sentir bien !
 
@@ -85,7 +85,8 @@ Barre d'onglets : Aujourd'hui = Idées looks, Dressing = Mon armoire, Échanges 
 - **Vignette de pièce** : pastel + silhouette (ou photo réelle quand elle existe), rayon 16 px.
 - **Feuille du bas** (bottom sheet) pour les actions sur une pièce.
 - **Toast** en bas, avec « Annuler » pour les actions destructrices (donner, vendre, échanger).
-- **Barre d'onglets** : 5 onglets, icône + libellé, onglet actif sur fond `--accent-tint`.
+- **Barre d'onglets** : 4 onglets (Carte, Échanges, Armoire, Looks), icône + libellé, onglet actif sur fond `--accent-tint`.
+- **Carte de proximité** : illustration des quartiers sur fond `--tile` (pastilles de quartier aux teintes de la charte, routes `--surface`, parc `--fresh`), cercle pointillé violet pour le rayon, pastilles violettes avec le nombre de pièces (jaune soleil pour le quartier sélectionné), pastille « Toi » sur mon quartier.
 
 ## Ton des textes
 

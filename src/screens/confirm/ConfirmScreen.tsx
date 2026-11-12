@@ -31,7 +31,7 @@ export function ConfirmScreen() {
       <SubScreenHeader
         title={`Qu’as-tu porté hier${NBSP}?`}
         subtitle="Déduit de la tenue que tu as validée. Un seul geste pour confirmer."
-        backTo="/"
+        backTo="/looks"
         backLabel="Fermer"
         icon="close"
       />
@@ -49,7 +49,7 @@ export function ConfirmScreen() {
               ? `Le miroir est actif${NBSP}: tes tenues validées s’enregistrent toutes seules.`
               : `Valide ta tenue du jour${NBSP}: demain matin, tu la confirmeras ici d’un geste.`}
           </EmptyState>
-          <ButtonLink to="/" variant="secondary">
+          <ButtonLink to="/looks" variant="secondary">
             Retour à Aujourd’hui
           </ButtonLink>
         </>
@@ -105,7 +105,7 @@ function ConfirmForm({
     onSavingChange(true)
     try {
       await run((r) => r.confirmWears(ids))
-      navigate('/dressing')
+      navigate('/armoire')
       showToast(`Dressing mis à jour${NBSP}: ${ids.length} ${plural(ids.length, 'pièce', 'pièces')}.`)
     } catch (e) {
       onSavingChange(false)
@@ -118,7 +118,7 @@ function ConfirmForm({
   // Les pièces de la tenue ont toutes quitté le dressing (données, vendues) : on vide l'attente.
   async function clearPending() {
     await run((r) => r.confirmWears([]))
-    navigate('/')
+    navigate('/looks')
   }
 
   if (pendingGarments.length === 0) {

@@ -32,9 +32,9 @@ export function SellScreen() {
   if (!garment || (garment.status !== 'active' && !selling)) {
     return (
       <>
-        <SubScreenHeader title="Vendre cette pièce" backTo="/a-sortir" backLabel="Retour" />
+        <SubScreenHeader title="Vendre cette pièce" backTo="/armoire?filtre=dort" backLabel="Retour" />
         <EmptyState title="Pièce introuvable">Elle n’est plus dans ton dressing.</EmptyState>
-        <ButtonLink to="/a-sortir" variant="secondary">
+        <ButtonLink to="/armoire?filtre=dort" variant="secondary">
           Voir les pièces à sortir
         </ButtonLink>
       </>
@@ -103,7 +103,7 @@ function SellForm({ garment, onSellingChange }: { garment: Garment; onSellingCha
       showToast(e instanceof Error ? e.message : 'La vente n’a pas pu être enregistrée.')
       return
     }
-    navigate('/a-sortir')
+    navigate('/armoire?filtre=dort')
     const subject = pronoun(a)
     showToast(
       `${garment.name}\u00a0: ${agree(a, 'vendu')}. ${subject.charAt(0).toUpperCase()}${subject.slice(1)} ${isPlural ? 'quittent' : 'quitte'} ton dressing.`,
@@ -120,7 +120,7 @@ function SellForm({ garment, onSellingChange }: { garment: Garment; onSellingCha
 
   return (
     <>
-      <SubScreenHeader title="Vendre cette pièce" subtitle={SUBTITLE} backTo="/a-sortir" backLabel="Retour" />
+      <SubScreenHeader title="Vendre cette pièce" subtitle={SUBTITLE} backTo="/armoire?filtre=dort" backLabel="Retour" />
 
       <section className="flex items-center gap-3.5 rounded-[20px] border border-line bg-surface p-3">
         <GarmentTile garment={garment} size="lg" />

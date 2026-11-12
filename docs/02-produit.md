@@ -1,20 +1,23 @@
 # 02 — Produit : écrans, parcours et règles métier
 
-Référence visuelle et logique : `reference/prototype-e-mirror.html` (ouvrir dans un navigateur). Le prototype contient déjà les écrans Aujourd'hui, Dressing, À sortir, Bilan, Achats détectés, Confirmation et Vendre. Cette version ajoute l'onglet **Échanges**.
+Référence visuelle et logique : `reference/prototype-e-mirror.html` (ouvrir dans un navigateur). Le prototype contient les écrans Aujourd'hui, Dressing, À sortir, Bilan, Achats détectés, Confirmation et Vendre ; cette version les regroupe autour de la communauté (voir la navigation ci-dessous).
 
 ## Navigation
 
-Barre du bas, 5 onglets :
+L'appli est centrée sur la communauté et la proximité. Barre du bas, **4 onglets** (refonte du 12 novembre 2026, qui remplace les 5 onglets du prototype) :
 
 | Onglet | Rôle | Boucle |
 |---|---|---|
-| Aujourd'hui | Tenue du jour, bannière « Hier : X pièces à confirmer » | Proposer |
-| Dressing | Stock réel : disponible, au lavage ; achats détectés | Capturer, Mettre à jour |
-| Échanges | La bourse : pièces proposées par les membres, mes échanges en cours, mes jetons de réclamation | Faire sortir (et entrer) |
-| À sortir | Pièces dormantes : remettre en jeu, échanger, vendre, donner | Faire sortir |
-| Bilan | Un seul chiffre : la part du dressing portée | Mesurer |
+| **Carte** (accueil) | Carte de proximité : les personnes et les pièces disponibles autour de moi, par quartier ; vue Liste ; filtres | Faire sortir (et entrer) |
+| **Échanges** | Mes jetons, mes échanges en cours, mes annonces, bouton « Donner une pièce » | Faire sortir (et entrer) |
+| **Armoire** | Mes pièces (disponible, au lavage, elles dorment), achats détectés, résumé de la part portée | Capturer, Mettre à jour, Mesurer |
+| **Looks** | **Le seul endroit du conseil d'habillage** : tenue du jour, confirmation d'hier | Proposer |
+
+Dressing et À sortir sont fusionnés dans Armoire (filtre « Elles dorment ») ; le Bilan devient un petit résumé en haut d'Armoire. Les anciennes adresses (`/dressing`, `/a-sortir`, `/bilan`) mènent aux nouveaux écrans.
 
 Écrans secondaires (sans barre du bas) : Achats détectés, Qu'as-tu porté hier ?, Vendre, Proposer à l'échange, Fiche d'une annonce, Échange en cours (avec messages), Profil d'un membre, Onboarding.
+
+**Principe visuel :** épuré pour donner envie dans un premier temps. Titres courts sans phrase d'explication, une action principale par écran, les détails (règle des jetons, filtres de catégorie et de taille) derrière un appui (ⓘ, « Filtres »).
 
 ## Parcours principaux
 
@@ -24,7 +27,7 @@ Barre du bas, 5 onglets :
 3. Ajouter **15 à 20 pièces portées cette semaine** : photo, catégorie, couleur. Pas tout le dressing.
 4. Arriver sur la tenue du jour.
 
-### 2. Tenue du jour (Aujourd'hui)
+### 2. Tenue du jour (Looks)
 - Carte avec la **pièce orpheline** (celle qu'on n'a pas portée depuis le plus longtemps) et 1 à 2 **valeurs sûres** pour l'accompagner.
 - Actions : « Je porte cette tenue », « Autre proposition », « Pas aujourd'hui ».
 - Une fois validée : « Demain matin, tu confirmeras ces pièces d'un geste. »
@@ -34,23 +37,23 @@ Barre du bas, 5 onglets :
 - « C'est bon » met à jour la date de dernier portage et passe les pièces au lavage selon leur catégorie. « Corriger » permet d'ajouter d'autres pièces.
 - **Mode miroir** (simulation) : la confirmation se fait sans geste.
 
-### 4. Dressing
-- Grille des pièces, filtres Tout, Disponible, Au lavage. Puces : Disponible, Lavage (jour de retour), Dort (durée).
-- Fiche d'une pièce : Mettre au lavage / Déjà propre, La proposer aujourd'hui, Échanger, Vendre, Donner.
+### 4. Armoire
+- En haut : le résumé de la part de l'armoire portée (petit anneau, 3 ou 12 mois).
+- Grille des pièces, filtres Tout, Disponible, Au lavage, Elles dorment. Puces : Disponible, Lavage (jour de retour), Dort (durée).
+- Fiche d'une pièce : Mettre au lavage / Déjà propre, La proposer aujourd'hui (dans Looks), Donner à la communauté, Vendre, Donner.
 - Bannière « X achats détectés, à confirmer » → écran Achats détectés (Ajouter / Ignorer / Tout ajouter). Dans le MVP, l'import automatique est **simulé** (données d'exemple) ; le vrai import d'e-mails est une étape future (RGPD à cadrer).
 
-### 5. À sortir
+### 5. Elles dorment (filtre de l'Armoire)
 - Seuil de dormance : 3, 6 ou 12 mois.
-- Pour chaque pièce dormante : **Remettre en jeu** (proposée dans la tenue du jour), **Échanger**, **Vendre** (annonce préremplie à copier), **Donner**.
+- Pour une pièce dormante, la fiche met en avant **Donner à la communauté** ; elle propose aussi de la **remettre en jeu** (proposée dans Looks), de la **vendre** (annonce préremplie à copier) ou de la **donner**.
 - Une pièce portée quitte la liste d'elle-même.
 
-### 6. Échanges
+### 6. Carte et Échanges
 Voir `03-communaute-echange.md`.
 
-### 7. Bilan
-- Anneau : pièces portées / pièces actives sur 3 ou 12 mois glissants.
-- Lien vers À sortir.
-- Ajout de cette version : une ligne « X pièces remises en circulation par l'échange ».
+### 7. Résumé de l'armoire (ex-Bilan)
+- Petit anneau : pièces portées / pièces actives sur 3 ou 12 mois glissants, avec le pourcentage.
+- Le message de la marque (« Less is more ») et la ligne « pièces remises en circulation par l'échange » ne sont plus affichés dans l'appli ; le nombre d'échanges terminés reste disponible dans les données.
 
 ## Règles métier
 

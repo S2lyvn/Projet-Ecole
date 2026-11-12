@@ -359,7 +359,7 @@ function Completed({
           : 'Tu as gagné 1 jeton. Ta pièce vit maintenant chez quelqu’un d’autre ; réclame la tienne chez n’importe quel membre, quand tu veux.'}
       </p>
       {role === 'receiver' ? (
-        <ButtonLink to="/dressing" variant="secondary" fullWidth={false}>
+        <ButtonLink to="/armoire" variant="secondary" fullWidth={false}>
           Voir mon dressing
         </ButtonLink>
       ) : (

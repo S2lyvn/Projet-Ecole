@@ -47,7 +47,7 @@ export function ProposeScreen() {
   if (!garment || existing) {
     return (
       <>
-        <SubScreenHeader title="Proposer à l’échange" backTo="/a-sortir" backLabel="Retour" />
+        <SubScreenHeader title="Proposer à l’échange" backTo="/armoire?filtre=dort" backLabel="Retour" />
         {existing ? (
           <>
             <EmptyState title="Déjà proposée">Cette pièce est déjà en ligne dans la bourse.</EmptyState>
@@ -92,7 +92,7 @@ export function ProposeScreen() {
       <SubScreenHeader
         title="Proposer à l’échange"
         subtitle="La fiche est déjà remplie : elle arrivera telle quelle chez la personne qui la prend."
-        backTo="/a-sortir"
+        backTo="/armoire?filtre=dort"
         backLabel="Retour"
       />
 

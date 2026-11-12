@@ -1,4 +1,5 @@
 // Éléments partagés par les écrans de la bourse d'échange.
+import { Link } from 'react-router'
 import { Chip } from '../../components/Chip'
 import { GarmentTile } from '../../components/GarmentTile'
 import type { TileSize } from '../../components/GarmentTile'
@@ -59,12 +60,21 @@ export function SwapStatusChip({ swap }: { swap: Swap }) {
   return <Chip tone={tone}>{SWAP_STATUS_LABELS[swap.status]}</Chip>
 }
 
-/** Rappel que la bourse est simulée (CLAUDE.md, règle 6). */
+/** Rappel discret que la bourse est simulée (CLAUDE.md, règle 6). */
 export function SimulationNote() {
+  return <p className="m-0 text-center text-xs text-muted">Démo : membres, annonces et distances fictifs.</p>
+}
+
+/** Pastille des jetons, en lien vers l'onglet Échanges. */
+export function TokensPill({ count }: { count: number }) {
   return (
-    <p className="m-0 flex items-start gap-2 rounded-2xl border border-dashed border-outline px-3.5 py-2.5 text-[13px] leading-snug text-muted">
-      <Icon name="play" size={16} />
-      <span>Simulation : les membres, les annonces et les échanges sont des exemples fictifs.</span>
-    </p>
+    <Link
+      to="/echanges"
+      aria-label={`${tokensLabel(count)}, voir mes échanges`}
+      className="inline-flex min-h-11 items-center gap-2 rounded-full border border-line bg-surface px-3 text-sm font-bold text-ink no-underline shadow-[var(--shadow-sm)] transition-transform active:scale-95"
+    >
+      <TokenCoin size={24} />
+      <span className="tabular-nums">{count}</span>
+    </Link>
   )
 }

@@ -13,7 +13,7 @@ export function SubScreenHeader({
 }: {
   title: string
   subtitle?: ReactNode
-  /** Écran de retour, ex. « /dressing ». */
+  /** Écran de retour, ex. « /armoire ». */
   backTo: string
   /** Ex. « Retour au dressing », « Fermer ». */
   backLabel: string

@@ -108,16 +108,17 @@ export function GarmentSheet({
                 <Button disabled={busy} onClick={() => act(actions.wash)}>
                   Mettre au lavage
                 </Button>
-                {/* Navigue vers Aujourd'hui : l'écran se démonte, inutile de fermer la feuille. */}
-                <Button variant="primary" disabled={busy} onClick={() => act(actions.proposeToday, false)}>
+                {/* Navigue vers Looks : l'écran se démonte, inutile de fermer la feuille. */}
+                <Button variant={dormant ? 'secondary' : 'primary'} disabled={busy} onClick={() => act(actions.proposeToday, false)}>
                   {capitalize(objectPronoun(garment.agreement))} proposer aujourd’hui
                 </Button>
               </>
             )}
 
-            <Button disabled={busy} onClick={() => act(actions.exchange, false)}>
+            {/* Une pièce qui dort : donner à la communauté est l'action mise en avant. */}
+            <Button variant={dormant && !inLaundry ? 'primary' : 'secondary'} disabled={busy} onClick={() => act(actions.exchange, false)}>
               <Icon name="swap" size={20} />
-              {listed ? 'Voir son annonce d’échange' : 'Échanger'}
+              {listed ? 'Voir son annonce' : 'Donner à la communauté'}
             </Button>
 
             <div className="grid grid-cols-2 gap-2.5">

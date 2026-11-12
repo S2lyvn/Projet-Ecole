@@ -1,39 +1,18 @@
-// Onglet Échanges (docs/03-communaute-echange.md) : jetons de réclamation, Bourse, Mes échanges, Mes annonces.
+// Onglet Échanges : mes jetons, mes échanges en cours et mes annonces. La Bourse est sur la Carte (accueil).
 import { AnimatePresence, motion } from 'motion/react'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { useWardrobe } from '../../app/WardrobeProvider'
 import { ButtonLink } from '../../components/Button'
-import { Card } from '../../components/Card'
-import { Chip } from '../../components/Chip'
 import { EmptyState } from '../../components/EmptyState'
 import { Icon } from '../../components/Icon'
 import { ScreenHeader } from '../../components/ScreenHeader'
 import { Segmented } from '../../components/Segmented'
-import { Switch } from '../../components/Switch'
+import { ME, isSwapOpen, swapRole } from '../../domain/swaps'
+import type { SwapListing } from '../../domain/swaps'
 import { balanceOf, heldTokens } from '../../domain/tokens'
-import {
-  DISTANCE_FILTERS,
-  ME,
-  NEIGHBORHOOD_NAMES,
-  filterListings,
-  formatDistance,
-  isSwapOpen,
-  listingsNear,
-  swapRole,
-} from '../../domain/swaps'
-import type { DistanceFilter, ListingCategoryFilter, Member, SwapListing } from '../../domain/swaps'
-import { CONDITION_LABELS, plural } from '../../domain/wording'
-import { ItemTile, SimulationNote, SwapStatusChip, TokenCoin, tokensLabel } from './parts'
-
-const CATEGORY_FILTERS: { value: ListingCategoryFilter; label: string }[] = [
-  { value: 'all', label: 'Tout' },
-  { value: 'tops', label: 'Hauts' },
-  { value: 'bottoms', label: 'Bas' },
-  { value: 'dress', label: 'Robes' },
-  { value: 'shoes', label: 'Chaussures' },
-  { value: 'outerwear', label: 'Manteaux' },
-]
+import { plural } from '../../domain/wording'
+import { ItemTile, SwapStatusChip, TokenCoin, tokensLabel } from './parts'
 
 const LISTING_STATUS_LABELS: Record<SwapListing['status'], string> = {
   open: 'En ligne',
@@ -43,7 +22,7 @@ const LISTING_STATUS_LABELS: Record<SwapListing['status'], string> = {
   expired: 'Expirée',
 }
 
-// Apparition en cascade des cartes (désactivée si l'utilisateur réduit les animations : MotionConfig).
+// Apparition en cascade des lignes (coupée si l'utilisateur réduit les animations : MotionConfig).
 const list = { show: { transition: { staggerChildren: 0.04 } } }
 const listItem = {
   hidden: { opacity: 0, y: 12 },
@@ -57,7 +36,9 @@ export function SwapsScreen() {
   const { data } = useWardrobe()
   const { swaps: community } = data
   const [params, setParams] = useSearchParams()
-  const view = (['bourse', 'echanges', 'annonces'] as const).find((v) => v === params.get('vue')) ?? 'bourse'
+  // Anciennes adresses (?vue=bourse) : la Bourse est maintenant sur la Carte, on retombe sur « En cours ».
+  const view = params.get('vue') === 'annonces' ? 'annonces' : 'echanges'
+  const [info, setInfo] = useState(false)
 
   const balance = balanceOf(community.ledger)
   const held = heldTokens(community.ledger)
@@ -68,61 +49,85 @@ export function SwapsScreen() {
 
   return (
     <>
-      <ScreenHeader title="Échanges" subtitle="Troque tes pièces qui dorment contre celles des autres membres." />
+      <ScreenHeader title="Échanges" />
 
-      <Card tone="tint" className="gap-3!">
-        <div className="flex items-end justify-between gap-3">
-          <div className="flex flex-col gap-1">
-            <span className="text-[13px] font-bold tracking-[0.04em] text-accent-ink uppercase">Mes jetons</span>
-            <motion.span
-              key={balance}
-              initial={{ y: -10, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              className="font-display text-[40px] leading-none font-bold tracking-[-0.02em] text-accent-ink tabular-nums"
-            >
-              {balance}
-            </motion.span>
-          </div>
-          {/* Un jeton par pièce : les nouveaux tombent dans la rangée avec un rebond. */}
-          <div className="flex flex-wrap justify-end gap-1.5" aria-hidden="true">
+      <section aria-label="Mes jetons" className="flex flex-col gap-2 rounded-3xl bg-accent-tint p-4 text-accent-ink">
+        <div className="flex items-center gap-3">
+          {/* Un jeton par pièce donnée : les nouveaux tombent dans la rangée avec un rebond. */}
+          <div className="flex items-center -space-x-2" aria-hidden="true">
             <AnimatePresence initial={false}>
-              {Array.from({ length: Math.min(balance, 6) }, (_, i) => (
+              {Array.from({ length: Math.min(balance, 4) }, (_, i) => (
                 <motion.span
                   key={`coin-${i}`}
-                  initial={{ y: -36, rotate: -90, opacity: 0 }}
+                  initial={{ y: -30, rotate: -90, opacity: 0 }}
                   animate={{ y: 0, rotate: 0, opacity: 1, transition: { type: 'spring', stiffness: 380, damping: 14 } }}
                   exit={{ scale: 0, opacity: 0 }}
                 >
-                  <TokenCoin />
+                  <TokenCoin size={34} />
                 </motion.span>
               ))}
-              {Array.from({ length: Math.min(held, 3) }, (_, i) => (
+              {Array.from({ length: Math.min(held, 2) }, (_, i) => (
                 <motion.span key={`held-${i}`} initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}>
-                  <TokenCoin muted />
+                  <TokenCoin size={34} muted />
                 </motion.span>
               ))}
             </AnimatePresence>
           </div>
+          <div className="flex min-w-0 flex-1 flex-col">
+            <motion.span
+              key={balance}
+              initial={{ y: -8, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              className="font-display text-2xl leading-tight font-bold"
+            >
+              {tokensLabel(balance)}
+            </motion.span>
+            {held > 0 && (
+              <span className="text-xs">
+                dont {held} {plural(held, 'bloqué', 'bloqués')} en ce moment
+              </span>
+            )}
+          </div>
+          <button
+            type="button"
+            aria-expanded={info}
+            aria-controls="token-rule"
+            aria-label="Comment marchent les jetons ?"
+            onClick={() => setInfo((v) => !v)}
+            className="grid size-11 flex-none place-items-center rounded-full text-lg font-bold"
+          >
+            <span aria-hidden="true" className="grid size-7 place-items-center rounded-full border-2 border-current text-sm">
+              i
+            </span>
+          </button>
         </div>
-        {held > 0 && (
-          <span className="text-[13px] text-accent-ink">
-            {tokensLabel(held)} {plural(held, 'bloqué', 'bloqués')} par {plural(held, 'ta réclamation', 'tes réclamations')} en cours
-          </span>
-        )}
-        <p className="m-0 text-[13px] leading-snug text-accent-ink">
-          <strong>1 habit donné = 1 jeton = 1 habit à réclamer</strong> chez n’importe quel membre, quand tu veux. Les
-          jetons n’expirent pas, ne s’achètent pas et ne valent pas d’euros.
-        </p>
-      </Card>
+        <AnimatePresence initial={false}>
+          {info && (
+            <motion.p
+              id="token-rule"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="m-0 overflow-hidden text-sm leading-snug"
+            >
+              1 habit donné = 1 jeton = 1 habit à réclamer, chez n’importe quel membre, quand tu veux. Pas d’expiration,
+              pas d’achat, pas d’euros.
+            </motion.p>
+          )}
+        </AnimatePresence>
+      </section>
+
+      <ButtonLink to="/armoire?filtre=dort" variant="primary" size="lg">
+        Donner une pièce
+      </ButtonLink>
 
       <Segmented
-        label="Bourse d’échange"
+        label="Mes échanges"
         value={view}
-        onChange={(v) => setParams(v === 'bourse' ? {} : { vue: v }, { replace: true })}
+        onChange={(v) => setParams(v === 'echanges' ? {} : { vue: v }, { replace: true })}
         options={[
-          { value: 'bourse', label: 'Bourse' },
-          { value: 'echanges', label: 'Échanges', badge: openSwaps },
-          { value: 'annonces', label: 'Annonces', badge: myOpenListings },
+          { value: 'echanges', label: 'En cours', badge: openSwaps },
+          { value: 'annonces', label: 'Mes annonces', badge: myOpenListings },
         ]}
       />
 
@@ -136,156 +141,10 @@ export function SwapsScreen() {
           transition={{ duration: 0.18 }}
           className="flex flex-col gap-4"
         >
-          {view === 'bourse' && <Market />}
-          {view === 'echanges' && <MySwaps />}
-          {view === 'annonces' && <MyListings />}
+          {view === 'echanges' ? <MySwaps /> : <MyListings />}
         </motion.div>
       </AnimatePresence>
-
-      <SimulationNote />
     </>
-  )
-}
-
-const DISTANCE_LABELS: Record<string, string> = { '1': '1 km', '3': '3 km', '5': '5 km', null: 'Toute la ville' }
-
-function Market() {
-  const { data, run } = useWardrobe()
-  const { swaps: community } = data
-  const [category, setCategory] = useState<ListingCategoryFilter>('all')
-  const [mySizesOnly, setMySizesOnly] = useState(true)
-  // Par défaut 3 km : les remises en main propre restent faciles.
-  const [maxKm, setMaxKm] = useState<DistanceFilter>(3)
-  const members = useMemo(() => new Map(community.members.map((m) => [m.id, m])), [community.members])
-  const filtered = filterListings(community.listings, { category, mySizesOnly, sizes: community.sizes, memberId: ME })
-  const nearby = listingsNear(filtered, community.members, community.neighborhood, maxKm)
-
-  return (
-    <>
-      <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none]" role="group" aria-label="Catégorie">
-        {CATEGORY_FILTERS.map((f) => (
-          <button
-            key={f.value}
-            type="button"
-            aria-pressed={category === f.value}
-            onClick={() => setCategory(f.value)}
-            className={[
-              'min-h-11 flex-none rounded-full border px-4 text-sm transition-colors',
-              category === f.value
-                ? 'border-accent bg-accent font-bold text-on-accent'
-                : 'border-outline font-medium text-ink',
-            ].join(' ')}
-          >
-            {f.label}
-          </button>
-        ))}
-      </div>
-      <section aria-labelledby="near-title" className="flex flex-col gap-2.5">
-        <div className="flex items-center justify-between gap-3">
-          <h2 id="near-title" className="m-0 flex items-center gap-1.5 text-[15px] font-medium">
-            <Icon name="pin" size={18} />
-            Près de chez toi
-          </h2>
-          <label className="flex items-center gap-1.5 text-[13px] text-muted">
-            <span className="sr-only">Mon quartier</span>
-            <select
-              value={community.neighborhood}
-              onChange={(e) => void run((r) => r.setMyNeighborhood(e.target.value))}
-              className="min-h-11 max-w-[170px] rounded-full border border-outline bg-surface px-3 text-sm font-medium text-ink"
-            >
-              {NEIGHBORHOOD_NAMES.map((n) => (
-                <option key={n} value={n}>
-                  {n}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-        <div role="group" aria-label="Distance maximale" className="grid grid-cols-4 gap-1.5">
-          {DISTANCE_FILTERS.map((km) => (
-            <button
-              key={String(km)}
-              type="button"
-              aria-pressed={maxKm === km}
-              onClick={() => setMaxKm(km)}
-              className={[
-                'min-h-11 rounded-full border px-1 text-[13px] leading-tight transition-colors',
-                maxKm === km ? 'border-accent bg-accent font-bold text-on-accent' : 'border-outline font-medium text-ink',
-              ].join(' ')}
-            >
-              {DISTANCE_LABELS[String(km)]}
-            </button>
-          ))}
-        </div>
-        <p className="m-0 text-xs text-muted">
-          Distances approximatives entre quartiers (exemple). L’appli ne connaît que ton quartier, jamais ta position.
-        </p>
-      </section>
-      <Switch
-        checked={mySizesOnly}
-        onChange={setMySizesOnly}
-        label="À ma taille"
-        // Trait d'union insécable : « Clermont-Ferrand » ne se coupe pas en fin de ligne.
-        description={`Haut ${community.sizes.top} · bas ${community.sizes.bottom} · pointure ${community.sizes.shoes} · ${community.city.replace('-', '\u2011')}`}
-      />
-
-      {nearby.length === 0 ? (
-        <EmptyState title="Rien pour l’instant">
-          {maxKm !== null && filtered.length > 0
-            ? 'Rien dans ce rayon : élargis la distance pour voir les autres quartiers.'
-            : 'Change de catégorie ou retire le filtre de taille.'}
-        </EmptyState>
-      ) : (
-        <motion.ul
-          key={`${category}-${mySizesOnly}-${maxKm}-${community.neighborhood}`}
-          variants={list}
-          initial="hidden"
-          animate="show"
-          className="m-0 grid list-none grid-cols-2 gap-3 p-0"
-          aria-label="Annonces de la bourse"
-        >
-          {nearby.map(({ listing: l, distanceKm }) => (
-            <motion.li key={l.id} variants={listItem}>
-              <ListingCard listing={l} member={members.get(l.ownerId)} distanceKm={distanceKm} />
-            </motion.li>
-          ))}
-        </motion.ul>
-      )}
-    </>
-  )
-}
-
-function ListingCard({
-  listing,
-  member,
-  distanceKm,
-}: {
-  listing: SwapListing
-  member: Member | undefined
-  distanceKm: number | null
-}) {
-  return (
-    <Link
-      to={`/echanges/annonce/${listing.id}`}
-      className="flex h-full flex-col gap-2 rounded-[20px] border border-line bg-surface p-2.5 text-ink no-underline shadow-[var(--shadow-sm)] transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)] active:scale-[0.98]"
-    >
-      <ItemTile item={listing.item} size="grid" />
-      <span className="line-clamp-2 text-sm leading-tight font-bold">{listing.item.name}</span>
-      <span className="text-xs text-muted">
-        {listing.item.size ? `Taille ${listing.item.size} · ` : ''}
-        {CONDITION_LABELS[listing.condition]}
-      </span>
-      {member && (
-        <span className="mt-auto truncate text-xs text-muted">
-          {member.displayName} · {member.neighborhood}
-        </span>
-      )}
-      <span className="inline-flex items-center gap-1 self-start rounded-full bg-tile px-2 py-0.5 text-xs font-bold text-ink">
-        <Icon name="pin" size={13} strokeWidth={2.2} />
-        {formatDistance(distanceKm)}
-      </span>
-      {listing.circle && <Chip tone="accent">{listing.circle}</Chip>}
-    </Link>
   )
 }
 
@@ -300,7 +159,13 @@ function MySwaps() {
   )
 
   if (sorted.length === 0) {
-    return <EmptyState title="Aucun échange">Réserve une pièce dans la bourse, ou propose les tiennes.</EmptyState>
+    return (
+      <EmptyState title="Aucun échange">
+        <Link to="/" className="font-bold text-accent-ink underline">
+          Trouve une pièce près de chez toi
+        </Link>
+      </EmptyState>
+    )
   }
   return (
     <motion.ul
@@ -341,40 +206,36 @@ function MyListings() {
     .filter((l) => l.ownerId === ME && l.garmentId !== null)
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
 
+  if (mine.length === 0) {
+    return <EmptyState title="Aucune annonce">Une pièce qui dort peut vivre chez quelqu’un d’autre.</EmptyState>
+  }
   return (
-    <>
-      {mine.length === 0 ? (
-        <EmptyState title="Aucune annonce">
-          Une pièce qui dort chez toi peut vivre chez quelqu’un d’autre. Tu gagnes 1 jeton à la remise.
-        </EmptyState>
-      ) : (
-        <motion.ul
-          variants={list}
-          initial="hidden"
-          animate="show"
-          className="m-0 flex list-none flex-col gap-2.5 p-0"
-          aria-label="Mes annonces"
-        >
-          {mine.map((l) => (
-            <motion.li key={l.id} variants={listItem}>
-              <Link to={`/echanges/annonce/${l.id}`} className={ROW_LINK}>
-                <ItemTile item={l.item} size="sm" />
-                <span className="flex min-w-0 flex-1 flex-col gap-1">
-                  <span className="truncate text-[15px] font-bold">{l.item.name}</span>
-                  <span className="text-[13px] text-muted">
-                    {LISTING_STATUS_LABELS[l.status]}
-                    {l.status === 'completed' ? ' · 1 jeton gagné' : l.status === 'open' || l.status === 'reserved' ? ' · +1 jeton à la remise' : ''}
-                  </span>
-                </span>
-                <Icon name="chev" size={20} />
-              </Link>
-            </motion.li>
-          ))}
-        </motion.ul>
-      )}
-      <ButtonLink to="/a-sortir" variant="primary">
-        Proposer une pièce qui dort
-      </ButtonLink>
-    </>
+    <motion.ul
+      variants={list}
+      initial="hidden"
+      animate="show"
+      className="m-0 flex list-none flex-col gap-2.5 p-0"
+      aria-label="Mes annonces"
+    >
+      {mine.map((l) => (
+        <motion.li key={l.id} variants={listItem}>
+          <Link to={`/echanges/annonce/${l.id}`} className={ROW_LINK}>
+            <ItemTile item={l.item} size="sm" />
+            <span className="flex min-w-0 flex-1 flex-col gap-1">
+              <span className="truncate text-[15px] font-bold">{l.item.name}</span>
+              <span className="text-[13px] text-muted">
+                {LISTING_STATUS_LABELS[l.status]}
+                {l.status === 'completed'
+                  ? ' · 1 jeton gagné'
+                  : l.status === 'open' || l.status === 'reserved'
+                    ? ' · +1 jeton à la remise'
+                    : ''}
+              </span>
+            </span>
+            <Icon name="chev" size={20} />
+          </Link>
+        </motion.li>
+      ))}
+    </motion.ul>
   )
 }

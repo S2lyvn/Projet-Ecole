@@ -14,9 +14,11 @@ type Props = {
   total: number
   /** Libellé complet lu par les lecteurs d'écran. */
   label: string
+  /** Petit anneau d'en-tête : sans le « pièces sur N », chiffre réduit. */
+  compact?: boolean
 }
 
-export function UsageRing({ worn, total, label }: Props) {
+export function UsageRing({ worn, total, label, compact = false }: Props) {
   const reduced = useReducedMotion()
   const share = total === 0 ? 0 : worn / total
   const progress = useMotionValue(reduced ? share : 0)
@@ -40,7 +42,7 @@ export function UsageRing({ worn, total, label }: Props) {
 
   const center = SIZE / 2
   return (
-    <div className="relative aspect-square w-60 max-w-full">
+    <div className={['relative aspect-square max-w-full', compact ? 'w-24 flex-none' : 'w-60'].join(' ')}>
       <svg viewBox={`0 0 ${SIZE} ${SIZE}`} className="block size-full" role="img" aria-label={label}>
         <circle cx={center} cy={center} r={RADIUS} fill="none" strokeWidth={STROKE} className="stroke-amber" />
         <motion.circle
@@ -57,10 +59,19 @@ export function UsageRing({ worn, total, label }: Props) {
       </svg>
       {/* Le chiffre est déjà dans l'aria-label de l'anneau : masqué pour ne pas le lire deux fois. */}
       <div aria-hidden="true" className="absolute inset-0 flex flex-col items-center justify-center gap-0.5">
-        <span className="font-display text-[76px] leading-none font-bold tracking-[-0.03em] tabular-nums">{shown}</span>
-        <span className="text-sm text-muted">
-          {plural(worn, 'pièce', 'pièces')} sur {total}
+        <span
+          className={[
+            'font-display leading-none font-bold tabular-nums',
+            compact ? 'text-[30px] tracking-[-0.02em]' : 'text-[76px] tracking-[-0.03em]',
+          ].join(' ')}
+        >
+          {shown}
         </span>
+        {!compact && (
+          <span className="text-sm text-muted">
+            {plural(worn, 'pièce', 'pièces')} sur {total}
+          </span>
+        )}
       </div>
     </div>
   )

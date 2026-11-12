@@ -247,3 +247,56 @@ export function listingsNear(
     .filter(({ distanceKm }) => maxKm === null || (distanceKm !== null && distanceKm <= maxKm))
     .sort((a, b) => (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity))
 }
+
+// --- Carte : les personnes et leurs pièces, regroupées par quartier ---
+
+export interface NeighborhoodPerson {
+  member: Member
+  listings: SwapListing[]
+}
+
+export interface NeighborhoodGroup {
+  neighborhood: string
+  /** Distance approximative depuis mon quartier, ou null si inconnue. */
+  distanceKm: number | null
+  people: NeighborhoodPerson[]
+  /** Nombre de pièces disponibles dans le quartier. */
+  count: number
+}
+
+/**
+ * Regroupe des annonces (déjà filtrées par rayon) par quartier du donneur, puis par personne.
+ * Les quartiers sont triés du plus proche au plus lointain, les personnes par prénom : l'ordre est stable.
+ */
+export function groupByNeighborhood(nearby: readonly NearbyListing[], members: readonly Member[]): NeighborhoodGroup[] {
+  const byId = new Map(members.map((m) => [m.id, m]))
+  const groups = new Map<string, NeighborhoodGroup>()
+  for (const { listing, distanceKm } of nearby) {
+    const member = byId.get(listing.ownerId)
+    if (!member) continue
+    let group = groups.get(member.neighborhood)
+    if (!group) {
+      group = { neighborhood: member.neighborhood, distanceKm, people: [], count: 0 }
+      groups.set(member.neighborhood, group)
+    }
+    let person = group.people.find((p) => p.member.id === member.id)
+    if (!person) {
+      person = { member, listings: [] }
+      group.people.push(person)
+    }
+    person.listings.push(listing)
+    group.count += 1
+  }
+  const result = [...groups.values()]
+  for (const g of result) g.people.sort((a, b) => a.member.displayName.localeCompare(b.member.displayName, 'fr'))
+  return result.sort(
+    (a, b) => (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity) || a.neighborhood.localeCompare(b.neighborhood, 'fr'),
+  )
+}
+
+/** Un quartier est dans le rayon choisi (null = toute la ville) ; position inconnue : hors rayon. */
+export function isWithinRadius(mine: string, other: string, maxKm: DistanceFilter): boolean {
+  if (maxKm === null) return true
+  const km = neighborhoodDistanceKm(mine, other)
+  return km !== null && km <= maxKm
+}
