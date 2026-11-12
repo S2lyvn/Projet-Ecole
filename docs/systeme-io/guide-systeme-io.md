@@ -6,6 +6,13 @@ Chaque bloc gris est à copier-coller tel quel. Les images sont dans le dossier 
 
 > Les noms de menus viennent de l'aide de systeme.io (souvent en anglais). Si ton interface est en français, cherche l'équivalent : *Form* = Formulaire, *Survey* = Sondage, *Raw HTML* = HTML brut, *Funnel* = Tunnel.
 
+
+> **Mise à jour du 11 novembre 2026 : le design suit la charte graphique.**
+> Les couleurs (violet `#5A1E56`, jaune soleil `#FFC83D`, rose poudré `#F7D4DC`, crème `#FFF7E8`), les polices (Montserrat pour les titres, Lato pour les textes), les boutons violets, le bandeau violet et le fond crème viennent d'**un seul bloc de style** collé dans chaque page : *Modifier la page › Paramètres › Modifier le code d'en-tête*. Le bloc est dans [`charte.css.html`](charte.css.html). Pour changer une couleur ou une police partout, modifie ce bloc, pas chaque élément.
+> Les textes, les images et le quiz restent modifiables normalement dans l'éditeur.
+> **Attention aux deux logos** : le logo officiel est aussi posé par ce bloc (partie `logo-officiel`, en bas du code d'en-tête). Si tu importes un autre logo dans l'éditeur, supprime d'abord cette partie, sinon l'ancien logo reste affiché.
+> Les captures du téléphone (Tenue du jour, Échanges) à jour avec la charte sont dans [`images-charte/`](images-charte/) : à importer dans l'éditeur (élément Image › roue dentée › Fichier de l'image).
+
 ---
 
 ## 1. Ce qu'on construit

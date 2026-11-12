@@ -5,6 +5,7 @@ import { isDemoMode } from '../app/config'
 import { isSecondaryPath, transitionDirection } from '../app/navigation'
 import { DemoPanel } from '../demo/DemoPanel'
 import { TabBar } from './TabBar'
+import { WaitlistCard } from './WaitlistCard'
 import { ToastHost } from './Toast'
 
 // Glissement + fondu entre écrans : l'écran sortant part vite, l'entrant arrive avec un ressort.
@@ -54,6 +55,7 @@ export function AppLayout() {
               className="flex flex-1 flex-col gap-4"
             >
               {outlet}
+              {withTabs && <WaitlistCard />}
             </motion.div>
           </AnimatePresence>
         </main>
