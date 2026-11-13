@@ -95,8 +95,16 @@ Il ne repose que sur les réponses de la personne, aucun chiffre extérieur :
 
 Le visuel du groupe montrait aussi un impact en kg de CO₂e. Il n'est pas affiché tant qu'on n'a pas de source pour le CO₂ par vêtement dans `docs/sources.md` (règle « pas de chiffres inventés »).
 
+## Français ou anglais
+
+Le quiz s'affiche en français, avec un bouton **FR / EN** en haut (sur l'accueil et pendant les questions). Le choix est gardé sur le téléphone. Pour ouvrir directement en anglais : `…/quiz/?src=presentation&lang=en`.
+
+Les réponses sont **toujours enregistrées en français**, quelle que soit la langue : le Google Sheet et la page de résultats ne mélangent pas deux jeux de libellés. La page de résultats reste en français.
+
+Les textes anglais sont à côté des textes français dans `public/quiz/questions.js` (clé `en`, options dans le même ordre) et, pour le reste de l'écran, dans `public/quiz/index.html` (objet `T`).
+
 ## Modifier une question
 
-Les textes sont dans `public/quiz/questions.js` (partagé par le quiz et la page de résultats). Évite de changer un libellé de réponse pendant la collecte : les anciennes réponses resteraient sous l'ancien libellé.
+Les textes (français et anglais) sont dans `public/quiz/questions.js` (partagé par le quiz et la page de résultats). Évite de changer un libellé de réponse pendant la collecte : les anciennes réponses resteraient sous l'ancien libellé.
 
 Si tu modifies `apps-script.gs` après le déploiement : colle la nouvelle version dans Apps Script, puis **Déployer › Gérer les déploiements › crayon › Version : Nouvelle version › Déployer**. L'adresse `/exec` reste la même.

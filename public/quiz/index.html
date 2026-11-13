@@ -122,40 +122,53 @@
   .thanks { text-align: center; padding: 8px 0 2px; font-weight: 700; color: var(--accent); }
   .center { text-align: center; margin-top: 18px; }
   .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  /* Choix de la langue */
+  .lang { display: inline-flex; flex: none; border: 1.5px solid var(--line); border-radius: 12px; padding: 2px; background: var(--surface); }
+  .lang button { min-width: 40px; min-height: 40px; border: 0; border-radius: 9px; background: transparent; color: var(--muted);
+    font: 800 13px Montserrat, sans-serif; letter-spacing: .04em; cursor: pointer; }
+  .lang button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); }
+  .lang button:focus-visible { outline: 3px solid var(--jaune); outline-offset: 1px; }
+  .intro-top { display: flex; justify-content: flex-end; }
+  .intro-top + .logo { margin-top: -4px; }
 </style>
 </head>
 <body>
 <main class="wrap">
   <header class="top" id="topbar" hidden>
-    <button class="back" id="back" type="button" aria-label="Question précédente">
+    <button class="back" id="back" type="button" data-ta="back">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
-    <div class="progress" role="progressbar" aria-label="Avancement" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0"><span id="bar"></span></div>
+    <div class="progress" role="progressbar" data-ta="progress" aria-valuemin="0" aria-valuemax="6" aria-valuenow="0"><span id="bar"></span></div>
     <span class="step" id="stepLabel"></span>
+    <div class="lang" role="group" data-ta="langGroup"><button type="button" data-lang="fr" lang="fr">FR</button><button type="button" data-lang="en" lang="en">EN</button></div>
   </header>
 
   <!-- Accueil -->
   <section class="screen on hero" id="intro">
+    <div class="intro-top">
+      <div class="lang" role="group" data-ta="langGroup"><button type="button" data-lang="fr" lang="fr">FR</button><button type="button" data-lang="en" lang="en">EN</button></div>
+    </div>
     <img class="logo" src="../brand/logo-symbole.png" alt="">
     <div class="brand">Deep<b>IN</b> Armour</div>
-    <h1>Et si tu découvrais le <mark>vrai potentiel</mark> de ton armoire&nbsp;?</h1>
-    <p class="lead">En 2 minutes, fais le point sur tes vêtements, chaussures et accessoires et révèle&nbsp;:</p>
+    <h1 data-th="h1"></h1>
+    <p class="lead" data-t="lead"></p>
     <ul class="checks">
-      <li>Ce que tu utilises vraiment (et ce qui dort&nbsp;!)</li>
-      <li>La valeur de tes pièces oubliées</li>
-      <li>Des idées simples pour les faire vivre plus longtemps</li>
+      <li data-t="check1"></li>
+      <li data-t="check2"></li>
+      <li data-t="check3"></li>
     </ul>
-    <button class="cta" id="start" type="button">Faire le quiz (2 min) <span aria-hidden="true">→</span></button>
-    <div class="meta"><span id="qCount">6 questions</span>·<span>Anonyme</span>·<span>Résultat immédiat</span></div>
+    <button class="cta" id="start" type="button"><span data-t="start"></span> <span aria-hidden="true">→</span></button>
+    <div class="meta"><span id="qCount"></span>·<span data-t="anonymous"></span>·<span data-t="instant"></span></div>
   </section>
 
   <section class="screen q" id="question" aria-live="polite"></section>
 
   <!-- Résultat -->
   <section class="screen" id="result">
-    <h2 class="res-title">Ton résultat</h2>
+    <h2 class="res-title" data-t="resultTitle"></h2>
     <div class="card">
-      <h3>Score santé de ton armoire</h3>
+      <h3 data-t="scoreTitle"></h3>
       <svg class="gauge" viewBox="0 0 200 120" role="img" id="gauge" aria-label="">
         <path d="M20 100 A80 80 0 0 1 180 100" fill="none" stroke="var(--track)" stroke-width="16" stroke-linecap="round"/>
         <path id="gaugeArc" d="M20 100 A80 80 0 0 1 180 100" fill="none" stroke="url(#g)" stroke-width="16" stroke-linecap="round" stroke-dasharray="0 252"/>
@@ -166,31 +179,31 @@
     </div>
     <div class="grid2">
       <div class="card">
-        <h3>Pièces qui dorment</h3>
+        <h3 data-t="dormantTitle"></h3>
         <p class="big" id="dormantPct"></p>
         <p class="sub" id="dormantCount"></p>
       </div>
       <div class="card">
-        <h3>Leur valeur</h3>
+        <h3 data-t="valueTitle"></h3>
         <p class="big small" id="value"></p>
-        <p class="sub">selon ton estimation</p>
+        <p class="sub" data-t="valueSub"></p>
       </div>
     </div>
     <div class="card">
-      <h3>Ton impact positif</h3>
+      <h3 data-t="impactTitle"></h3>
       <p class="big" id="circular"></p>
       <p class="sub" id="circularSub"></p>
     </div>
     <div class="card">
-      <h3>Nos recommandations</h3>
+      <h3 data-t="recosTitle"></h3>
       <ul class="recos" id="recos"></ul>
     </div>
     <div class="card interest" id="interest">
       <h3 id="interestTitle"></h3>
       <div class="choices" id="interestChoices" role="radiogroup" aria-labelledby="interestTitle"></div>
     </div>
-    <p class="note">Résultat indicatif, calculé à partir de tes réponses. Tes réponses sont anonymes : aucun nom ni e-mail n’est demandé.</p>
-    <div class="center"><button class="link" id="restart" type="button">Refaire le quiz</button></div>
+    <p class="note" data-t="note"></p>
+    <div class="center"><button class="link" id="restart" type="button" data-t="restart"></button></div>
   </section>
 </main>
 
@@ -203,6 +216,80 @@
   var QUESTIONS = window.QUIZ_QUESTIONS
   var INTEREST = window.QUIZ_INTEREST
   var QUEUE_KEY = 'deepin.quiz.queue'
+  var LANG_KEY = 'deepin.quiz.lang'
+
+  // ---------- Textes de l'interface (français / anglais) ----------
+  // Les réponses sont toujours enregistrées en français ; seule l'interface change de langue.
+  var T = {
+    fr: {
+      pageTitle: 'Quiz DeepIN Armour',
+      h1: 'Et si tu découvrais le <mark>vrai potentiel</mark> de ton armoire&nbsp;?',
+      lead: 'En 2 minutes, fais le point sur tes vêtements, chaussures et accessoires et révèle :',
+      check1: 'Ce que tu utilises vraiment (et ce qui dort !)',
+      check2: 'La valeur de tes pièces oubliées',
+      check3: 'Des idées simples pour les faire vivre plus longtemps',
+      start: 'Faire le quiz (2 min)',
+      questions: ' questions', anonymous: 'Anonyme', instant: 'Résultat immédiat',
+      back: 'Question précédente', progress: 'Avancement', langGroup: 'Langue',
+      next: 'Continuer', see: 'Voir mon résultat', less: 'Moins : ', more: 'Plus : ',
+      resultTitle: 'Ton résultat', scoreTitle: 'Score santé de ton armoire', gauge: 'Score : {n} sur 100',
+      verdictHigh: 'Une armoire en bonne forme, avec encore du potentiel !',
+      verdictMid: 'De belles bases, et des pièces qui n’attendent que toi.',
+      verdictLow: 'Ton armoire cache un trésor : à toi de le réveiller.',
+      dormantTitle: 'Pièces qui dorment', dormantCount: 'soit environ {n} pièces',
+      valueTitle: 'Leur valeur', valueSub: 'selon ton estimation',
+      impactTitle: 'Ton impact positif', piece: ' pièce', pieces: ' pièces',
+      impact0: 'remise en circulation en 6 mois : c’est le moment de commencer !',
+      impact1: 'gardée en vie en 6 mois grâce à tes échanges, réparations et dons',
+      impactN: 'gardées en vie en 6 mois grâce à tes échanges, réparations et dons',
+      recosTitle: 'Nos recommandations', thanks: 'Merci, c’est noté !',
+      note: 'Résultat indicatif, calculé à partir de tes réponses. Tes réponses sont anonymes : aucun nom ni e-mail n’est demandé.',
+      restart: 'Refaire le quiz',
+    },
+    en: {
+      pageTitle: 'DeepIN Armour quiz',
+      h1: 'What if you discovered the <mark>true potential</mark> of your wardrobe?',
+      lead: 'In 2 minutes, take stock of your clothes, shoes and accessories and discover:',
+      check1: 'What you really use (and what’s sleeping!)',
+      check2: 'The value of your forgotten pieces',
+      check3: 'Simple ideas to make them last longer',
+      start: 'Take the quiz (2 min)',
+      questions: ' questions', anonymous: 'Anonymous', instant: 'Instant result',
+      back: 'Previous question', progress: 'Progress', langGroup: 'Language',
+      next: 'Continue', see: 'See my result', less: 'Less: ', more: 'More: ',
+      resultTitle: 'Your result', scoreTitle: 'Your wardrobe health score', gauge: 'Score: {n} out of 100',
+      verdictHigh: 'A wardrobe in good shape, with even more potential!',
+      verdictMid: 'Good foundations, and pieces just waiting for you.',
+      verdictLow: 'Your wardrobe hides a treasure: time to wake it up.',
+      dormantTitle: 'Sleeping pieces', dormantCount: 'about {n} pieces',
+      valueTitle: 'Their value', valueSub: 'based on your estimate',
+      impactTitle: 'Your positive impact', piece: ' piece', pieces: ' pieces',
+      impact0: 'given a new life in 6 months: now is the time to start!',
+      impact1: 'kept alive over 6 months through your swaps, repairs and donations',
+      impactN: 'kept alive over 6 months through your swaps, repairs and donations',
+      recosTitle: 'Our recommendations', thanks: 'Thanks, noted!',
+      note: 'Indicative result, based on your answers. Your answers are anonymous: no name or email is asked.',
+      restart: 'Retake the quiz',
+    },
+  }
+
+  var lang = (function () {
+    var p = new URLSearchParams(location.search).get('lang')
+    if (p === 'fr' || p === 'en') return p
+    try { var s = localStorage.getItem(LANG_KEY); if (s === 'fr' || s === 'en') return s } catch (e) {}
+    return 'fr'
+  })()
+  function t(key, n) { return (T[lang][key] || T.fr[key]).replace('{n}', n) }
+  /** Version affichée d'une question (titre, aide, options) dans la langue choisie. */
+  function L(q) {
+    var en = lang === 'en' && q.en ? q.en : {}
+    return { title: en.title || q.title, hint: en.hint || q.hint, options: en.options || q.options, items: en.items }
+  }
+  /** Libellé affiché pour une réponse enregistrée (en français). */
+  function shown(q, value) {
+    var i = q.options.indexOf(value)
+    return i < 0 ? value : L(q).options[i]
+  }
 
   // ---------- Petits outils ----------
   function $(id) { return document.getElementById(id) }
@@ -220,6 +307,7 @@
     var s = new URLSearchParams(location.search).get('src') || 'direct'
     return s.toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 40) || 'direct'
   }
+  function byKey(key) { return QUESTIONS.filter(function (x) { return x.key === key })[0] }
 
   // ---------- Envoi des réponses (file d'attente : rien ne se perd si le Wi-Fi coupe) ----------
   var memQueue = []
@@ -264,6 +352,9 @@
     $('topbar').hidden = id === 'intro'
     window.scrollTo(0, 0)
   }
+  function current() {
+    return ['intro', 'question', 'result'].filter(function (s) { return $(s).classList.contains('on') })[0]
+  }
   function setProgress(done) {
     var n = QUESTIONS.length
     $('bar').style.width = (done / n * 100) + '%'
@@ -272,25 +363,49 @@
     $('stepLabel').textContent = done >= n ? '' : (state.index + 1) + '/' + n
   }
 
+  // ---------- Langue ----------
+  function applyStatic() {
+    document.documentElement.lang = lang
+    document.title = t('pageTitle')
+    document.querySelectorAll('[data-t]').forEach(function (n) { n.textContent = t(n.dataset.t) })
+    document.querySelectorAll('[data-th]').forEach(function (n) { n.innerHTML = T[lang][n.dataset.th] }) // textes fixes ci-dessus
+    document.querySelectorAll('[data-ta]').forEach(function (n) { n.setAttribute('aria-label', t(n.dataset.ta)) })
+    document.querySelectorAll('.lang button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.lang === lang)) })
+    $('qCount').textContent = QUESTIONS.length + t('questions')
+  }
+  function setLang(l) {
+    if (l === lang) return
+    lang = l
+    try { localStorage.setItem(LANG_KEY, l) } catch (e) {}
+    applyStatic()
+    var scr = current()
+    if (scr === 'question') renderQuestion()
+    if (scr === 'result') renderResult()
+  }
+  document.querySelectorAll('.lang button').forEach(function (b) {
+    b.addEventListener('click', function () { setLang(b.dataset.lang) })
+  })
+
   // ---------- Questions ----------
   function renderQuestion() {
-    var q = QUESTIONS[state.index]
-    var nextLabel = state.index === QUESTIONS.length - 1 ? 'Voir mon résultat' : 'Continuer'
+    var q = QUESTIONS[state.index], v = L(q)
+    var nextLabel = state.index === QUESTIONS.length - 1 ? t('see') : t('next')
     var box = $('question')
     box.textContent = ''
     $('back').disabled = false
     setProgress(state.index)
     box.appendChild(el('div', { class: 'qnum', 'aria-hidden': 'true' }, String(state.index + 1)))
-    var h = el('h2', { id: 'qtitle', tabindex: '-1' }, q.title)
+    var h = el('h2', { id: 'qtitle', tabindex: '-1' }, v.title)
     box.appendChild(h)
-    if (q.hint) box.appendChild(el('p', { class: 'hint' }, q.hint))
+    if (v.hint) box.appendChild(el('p', { class: 'hint' }, v.hint))
 
+    // Chaque bouton garde la valeur française (enregistrée) et affiche le libellé de la langue choisie.
     if (q.type === 'single') {
       var list = el('div', { class: 'choices', role: 'radiogroup', 'aria-labelledby': 'qtitle' })
-      q.options.forEach(function (opt) {
+      q.options.forEach(function (opt, i) {
         var b = el('button', { type: 'button', class: 'choice', role: 'radio', 'aria-checked': String(state.answers[q.key] === opt) })
         b.appendChild(el('span', { class: 'mark', 'aria-hidden': 'true' }))
-        b.appendChild(el('span', null, opt))
+        b.appendChild(el('span', null, v.options[i]))
         b.addEventListener('click', function () {
           state.answers[q.key] = opt
           list.querySelectorAll('.choice').forEach(function (c) { c.setAttribute('aria-checked', String(c === b)) })
@@ -311,13 +426,13 @@
           c.setAttribute('aria-pressed', String(picked.indexOf(c.dataset.opt) >= 0))
         })
       }
-      q.options.forEach(function (opt) {
+      q.options.forEach(function (opt, i) {
         var b = el('button', { type: 'button', class: 'choice multi', 'aria-pressed': 'false', 'data-opt': opt })
         b.appendChild(el('span', { class: 'mark', 'aria-hidden': 'true' }))
-        b.appendChild(el('span', null, opt))
+        b.appendChild(el('span', null, v.options[i]))
         b.addEventListener('click', function () {
-          var i = picked.indexOf(opt)
-          if (i >= 0) { picked.splice(i, 1) }
+          var k = picked.indexOf(opt)
+          if (k >= 0) { picked.splice(k, 1) }
           else {
             // Une réponse « exclusive » (ex. : « Rien de tout ça ») ne se combine pas avec les autres.
             if (q.exclusive) {
@@ -340,14 +455,14 @@
     if (q.type === 'counters') {
       var vals = state.answers[q.key]
       var clist = el('div', { class: 'counters' })
-      q.items.forEach(function (it) {
-        var key = it[0], label = it[1]
+      q.items.forEach(function (it, i) {
+        var key = it[0], label = (v.items && v.items[i]) || it[1]
         var row = el('div', { class: 'counter' })
         row.appendChild(el('span', { id: 'lbl-' + key }, label))
         var st = el('div', { class: 'stepper' })
-        var minus = el('button', { type: 'button', 'aria-label': 'Moins : ' + label }, '−')
+        var minus = el('button', { type: 'button', 'aria-label': t('less') + label }, '−')
         var out = el('output', { 'aria-live': 'polite', 'aria-labelledby': 'lbl-' + key }, String(vals[key]))
-        var plus = el('button', { type: 'button', 'aria-label': 'Plus : ' + label }, '+')
+        var plus = el('button', { type: 'button', 'aria-label': t('more') + label }, '+')
         function upd(d) {
           vals[key] = Math.max(0, Math.min(30, vals[key] + d))
           out.textContent = String(vals[key])
@@ -375,7 +490,7 @@
     else showResult()
   }
   function back() {
-    if ($('result').classList.contains('on')) { renderQuestion(); return }
+    if (current() === 'result') { renderQuestion(); return }
     if (state.index === 0) { show('intro'); return }
     state.index--; renderQuestion()
   }
@@ -383,10 +498,7 @@
   // ---------- Calcul du résultat (indicatif, à partir des réponses seulement) ----------
   var TAILLE_MOY = [25, 45, 80, 120]   // pièces, milieu de chaque tranche
   var PORTEE_MOY = [90, 70, 50, 30]    // % porté, milieu de chaque tranche
-  function idx(key) {
-    var q = QUESTIONS.filter(function (x) { return x.key === key })[0]
-    return q.options.indexOf(state.answers[key])
-  }
+  function idx(key) { return byKey(key).options.indexOf(state.answers[key]) }
   function compute() {
     var h = state.answers.habitudes
     var portee = PORTEE_MOY[idx('part_portee')]
@@ -410,62 +522,79 @@
     hanger: '<path d="M12 7a2 2 0 1 1 2-2c0 1-2 1.5-2 3l8.5 6.2a1.5 1.5 0 0 1-.9 2.8H4.4a1.5 1.5 0 0 1-.9-2.8L12 8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>',
     leaf: '<path d="M5 19c0-8 5-13 14-14 0 9-5 14-13 14zM5 19l7-7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>',
   }
-  // La première recommandation reprend ce que la personne veut faire en communauté (question 6).
+  // Recommandations : g = famille (une seule par famille), i = icône, puis titre et texte par langue.
+  var RECOS = {
+    c_swap: { g: 'swap', i: 'swap', fr: ['Échanger', 'Tu veux troquer : choisis 3 pièces qui dorment, elles sont ta monnaie d’échange.'], en: ['Swap', 'You want to swap: pick 3 sleeping pieces, they are your currency.'] },
+    c_lend: { g: 'lend', i: 'heart', fr: ['Prêter', 'Tes tenues d’occasion peuvent sortir plus souvent en passant d’une armoire à l’autre.'], en: ['Lend', 'Your occasion outfits can go out more often by moving from one wardrobe to another.'] },
+    c_give: { g: 'give', i: 'heart', fr: ['Donner', 'Tes pièces peuvent faire le bonheur de quelqu’un de ton quartier.'], en: ['Give', 'Your pieces can make someone in your neighbourhood happy.'] },
+    c_repair: { g: 'repair', i: 'repair', fr: ['Réparer', 'Une retouche chez un artisan près de chez toi peut remettre une pièce dans ta rotation.'], en: ['Repair', 'An alteration by a local craftsperson can put a piece back into your rotation.'] },
+    c_sell: { g: 'sell', i: 'leaf', fr: ['Remettre en jeu', 'Vendre ou échanger entre membres : tes pièces restent en circulation près de chez toi.'], en: ['Put back in play', 'Selling or swapping between members keeps your pieces circulating near you.'] },
+    reorganize: { g: 'reorganize', i: 'bulb', fr: ['Réorganiser', 'Sors tes pièces oubliées sur le devant : une rangée « à porter cette semaine ».'], en: ['Reorganise', 'Bring your forgotten pieces to the front: one row of “to wear this week”.'] },
+    repair: { g: 'repair', i: 'repair', fr: ['Réparer', 'Choisis une pièce abîmée et confie-la à une retoucherie ou un cordonnier ce mois-ci.'], en: ['Repair', 'Pick a damaged piece and take it to a tailor or cobbler this month.'] },
+    swap: { g: 'swap', i: 'swap', fr: ['Échanger', 'Les pièces qui ne te vont plus peuvent faire le bonheur de quelqu’un près de chez toi.'], en: ['Swap', 'Pieces that no longer suit you could make someone nearby happy.'] },
+    lend: { g: 'lend', i: 'heart', fr: ['Prêter', 'Une tenue d’occasion se prête très bien : elle sortira plus souvent.'], en: ['Lend', 'An occasion outfit is perfect for lending: it will get worn more often.'] },
+    revive: { g: 'revive', i: 'hanger', fr: ['Faire revivre', 'Une retouche peut rendre portable une pièce à laquelle tu tiens.'], en: ['Bring it back', 'An alteration can make a piece you love wearable again.'] },
+    challenge: { g: 'challenge', i: 'leaf', fr: ['Défi', 'Avant ton prochain achat neuf, cherche d’abord dans ton armoire : un mois sans achat ?'], en: ['Challenge', 'Before your next new purchase, look in your wardrobe first: a month without buying?'] },
+    keep: { g: 'keep', i: 'heart', fr: ['Continuer', 'Tu fais déjà vivre ton armoire : partage tes astuces autour de toi.'], en: ['Keep going', 'You already keep your wardrobe alive: share your tips around you.'] },
+  }
+  // Question 6 (réponses en français) → recommandation « communauté » mise en premier.
   var COMMUNITY_RECO = {
-    'Les échanger contre d’autres pièces': ['swap', 'Échanger', 'Tu veux troquer : choisis 3 pièces qui dorment, elles sont ta monnaie d’échange.'],
-    'Les prêter ou en emprunter pour une occasion': ['heart', 'Prêter', 'Tes tenues d’occasion peuvent sortir plus souvent en passant d’une armoire à l’autre.'],
-    'Les donner à quelqu’un près de chez moi': ['heart', 'Donner', 'Tes pièces peuvent faire le bonheur de quelqu’un de ton quartier.'],
-    'Les faire réparer ou retoucher par un artisan local': ['repair', 'Réparer', 'Une retouche chez un artisan près de chez toi peut remettre une pièce dans ta rotation.'],
-    'Les vendre à d’autres membres': ['leaf', 'Remettre en jeu', 'Vendre ou échanger entre membres : tes pièces restent en circulation près de chez toi.'],
+    'Les échanger contre d’autres pièces': 'c_swap',
+    'Les prêter ou en emprunter pour une occasion': 'c_lend',
+    'Les donner à quelqu’un près de chez moi': 'c_give',
+    'Les faire réparer ou retoucher par un artisan local': 'c_repair',
+    'Les vendre à d’autres membres': 'c_sell',
   }
   function recommendations(r) {
-    var why = state.answers.raisons, h = state.answers.habitudes, out = []
+    var why = state.answers.raisons, h = state.answers.habitudes, ids = []
     var wish = state.answers.communaute || []
     function has(s) { return why.indexOf(s) >= 0 }
-    for (var w = 0; w < wish.length; w++) if (COMMUNITY_RECO[wish[w]]) { out.push(COMMUNITY_RECO[wish[w]]); break }
-    if (has('Pas visibles / oubliées')) out.push(['bulb', 'Réorganiser', 'Sors tes pièces oubliées sur le devant : une rangée « à porter cette semaine ».'])
-    if (has('À réparer')) out.push(['repair', 'Réparer', 'Choisis une pièce abîmée et confie-la à une retoucherie ou un cordonnier ce mois-ci.'])
-    if (has('Je veux les donner / les échanger') || has('Plus à mon goût ou à ma taille')) out.push(['swap', 'Échanger', 'Les pièces qui ne te vont plus peuvent faire le bonheur de quelqu’un près de chez toi.'])
-    if (has('Achetées pour une occasion spécifique')) out.push(['heart', 'Prêter', 'Une tenue d’occasion se prête très bien : elle sortira plus souvent.'])
-    if (has('Valeur sentimentale (je veux les garder)')) out.push(['hanger', 'Faire revivre', 'Une retouche peut rendre portable une pièce à laquelle tu tiens.'])
-    if (h.achats_neufs > r.circular) out.push(['leaf', 'Défi', 'Avant ton prochain achat neuf, cherche d’abord dans ton armoire : un mois sans achat ?'])
-    if (!out.length) out.push(['heart', 'Continuer', 'Tu fais déjà vivre ton armoire : partage tes astuces autour de toi.'])
-    // Pas deux fois la même idée (même titre).
+    for (var w = 0; w < wish.length; w++) if (COMMUNITY_RECO[wish[w]]) { ids.push(COMMUNITY_RECO[wish[w]]); break }
+    if (has('Pas visibles / oubliées')) ids.push('reorganize')
+    if (has('À réparer')) ids.push('repair')
+    if (has('Je veux les donner / les échanger') || has('Plus à mon goût ou à ma taille')) ids.push('swap')
+    if (has('Achetées pour une occasion spécifique')) ids.push('lend')
+    if (has('Valeur sentimentale (je veux les garder)')) ids.push('revive')
+    if (h.achats_neufs > r.circular) ids.push('challenge')
+    if (!ids.length) ids.push('keep')
+    // Pas deux fois la même idée (même famille).
     var seen = {}
-    return out.filter(function (o) { if (seen[o[1]]) return false; seen[o[1]] = 1; return true }).slice(0, 3)
+    return ids.map(function (id) { return RECOS[id] })
+      .filter(function (o) { if (seen[o.g]) return false; seen[o.g] = 1; return true }).slice(0, 3)
   }
 
-  function showResult() {
-    var r = compute(), h = state.answers.habitudes
+  function renderResult() {
+    var r = compute()
     setProgress(QUESTIONS.length)
     show('result')
 
     var len = 251.3
     $('gaugeArc').setAttribute('stroke-dasharray', (len * r.score / 100).toFixed(1) + ' ' + len)
     $('scoreNum').textContent = r.score
-    $('gauge').setAttribute('aria-label', 'Score : ' + r.score + ' sur 100')
-    $('verdict').textContent = r.score >= 75 ? 'Une armoire en bonne forme, avec encore du potentiel !'
-      : r.score >= 50 ? 'De belles bases, et des pièces qui n’attendent que toi.'
-      : 'Ton armoire cache un trésor : à toi de le réveiller.'
-    $('dormantPct').textContent = r.pct_dormant + ' %'
-    $('dormantCount').textContent = 'soit environ ' + r.pieces_dormantes + ' pièces'
-    $('value').textContent = state.answers.valeur.replace(/ (€|%)/g, ' $1')
-    $('circular').textContent = r.circular + (r.circular > 1 ? ' pièces' : ' pièce')
-    $('circularSub').textContent = r.circular === 0
-      ? 'remise en circulation en 6 mois : c’est le moment de commencer !'
-      : (r.circular > 1 ? 'gardées' : 'gardée') + ' en vie en 6 mois grâce à tes échanges, réparations et dons'
+    $('gauge').setAttribute('aria-label', t('gauge', r.score))
+    $('verdict').textContent = r.score >= 75 ? t('verdictHigh') : r.score >= 50 ? t('verdictMid') : t('verdictLow')
+    $('dormantPct').textContent = r.pct_dormant + (lang === 'en' ? '%' : ' %')
+    $('dormantCount').textContent = t('dormantCount', r.pieces_dormantes)
+    $('value').textContent = shown(byKey('valeur'), state.answers.valeur).replace(/ (€|%)/g, ' $1')
+    $('circular').textContent = r.circular + (r.circular === 1 || (lang === 'fr' && r.circular === 0) ? t('piece') : t('pieces'))
+    $('circularSub').textContent = r.circular === 0 ? t('impact0') : r.circular === 1 ? t('impact1') : t('impactN')
 
     var ul = $('recos'); ul.textContent = ''
     recommendations(r).forEach(function (rec) {
       var li = el('li')
       var ico = el('span', { class: 'ico', 'aria-hidden': 'true' })
-      ico.innerHTML = '<svg viewBox="0 0 24 24">' + ICONS[rec[0]] + '</svg>'
-      var txt = el('div'); txt.appendChild(el('b', null, rec[1])); txt.appendChild(el('span', null, rec[2]))
+      ico.innerHTML = '<svg viewBox="0 0 24 24">' + ICONS[rec.i] + '</svg>'
+      var txt = el('div'); txt.appendChild(el('b', null, rec[lang][0])); txt.appendChild(el('span', null, rec[lang][1]))
       li.appendChild(ico); li.appendChild(txt); ul.appendChild(li)
     })
 
     renderInterest()
+    return r
+  }
 
+  function showResult() {
+    var r = renderResult(), h = state.answers.habitudes
+    // Valeurs en français, quelle que soit la langue affichée.
     send({
       etape: 'termine',
       taille: state.answers.taille,
@@ -484,13 +613,14 @@
   }
 
   function renderInterest() {
-    $('interestTitle').textContent = INTEREST.title
+    var v = L(INTEREST)
+    $('interestTitle').textContent = v.title
     var box = $('interestChoices'); box.textContent = ''
-    if (state.interest) { box.appendChild(el('p', { class: 'thanks' }, 'Merci, c’est noté !')); return }
-    INTEREST.options.forEach(function (opt) {
+    if (state.interest) { box.appendChild(el('p', { class: 'thanks' }, t('thanks'))); return }
+    INTEREST.options.forEach(function (opt, i) {
       var b = el('button', { type: 'button', class: 'choice', role: 'radio', 'aria-checked': 'false' })
       b.appendChild(el('span', { class: 'mark', 'aria-hidden': 'true' }))
-      b.appendChild(el('span', null, opt))
+      b.appendChild(el('span', null, v.options[i]))
       b.addEventListener('click', function () {
         state.interest = opt
         send({ etape: 'interet', interet: opt })
@@ -500,7 +630,7 @@
     })
   }
 
-  $('qCount').textContent = QUESTIONS.length + ' questions'
+  applyStatic()
 
   // ---------- Branchements ----------
   $('start').addEventListener('click', function () {
