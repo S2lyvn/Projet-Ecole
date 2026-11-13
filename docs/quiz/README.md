@@ -29,6 +29,8 @@ Fichiers : `public/quiz/` (les pages), `docs/quiz/apps-script.gs` (le script à 
 
 L'onglet `Réponses` se crée tout seul à la première réponse.
 
+> **Si « Extensions › Apps Script » ne s'ouvre pas** (navigateur qui bloque les nouveaux onglets) : va directement sur [script.google.com/create](https://script.google.com/create), colle le script et remplis `SPREADSHEET_ID` en haut avec l'identifiant du Sheet (le morceau entre `/d/` et `/edit` dans son adresse). C'est ainsi que le quiz actuel a été branché le 13 novembre 2026 : Sheet « Quiz DeepIN Armour – réponses » et projet Apps Script « Quiz DeepIN Armour », sur le compte Google de Sullyvan.
+
 ## 2. Brancher le quiz sur ce Google Sheet
 
 Ouvre `public/quiz/config.js` et colle l'adresse entre les guillemets :
