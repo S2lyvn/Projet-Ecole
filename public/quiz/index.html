@@ -1,0 +1,486 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Quiz DeepIN Armour</title>
+<meta name="description" content="En 2 minutes, découvre le vrai potentiel de ton armoire.">
+<meta name="theme-color" content="#5A1E56">
+<meta name="robots" content="noindex">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --violet: #5A1E56; --jaune: #FFC83D; --rose: #F7D4DC; --sauge: #A8C9B5; --creme: #FFF7E8; --nuit: #1E4D56;
+    --bg: var(--creme); --surface: #FFFFFF; --ink: #2B1029; --muted: #6E5A6B; --line: #EADFD9;
+    --accent: var(--violet); --on-accent: #FFFFFF; --selected: #FBE7EC; --track: #F1E6E2;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1C1220; --surface: #291B2D; --ink: #F7EEF3; --muted: #C4B3C2; --line: #43304A;
+      --accent: #E0AEDB; --on-accent: #2B1029; --selected: #3E2545; --track: #3A2A3F;
+      color-scheme: dark;
+    }
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg); color: var(--ink);
+    font: 17px/1.45 Lato, system-ui, sans-serif;
+    min-height: 100dvh; -webkit-text-size-adjust: 100%;
+  }
+  h1, h2, h3 { font-family: Montserrat, system-ui, sans-serif; line-height: 1.15; margin: 0; }
+  button { font: inherit; color: inherit; }
+  .wrap { max-width: 480px; margin: 0 auto; padding: 16px 16px calc(24px + env(safe-area-inset-bottom)); }
+
+  header.top { display: flex; align-items: center; gap: 10px; min-height: 48px; }
+  .back { width: 44px; height: 44px; border: 0; background: transparent; border-radius: 12px; cursor: pointer; display: grid; place-items: center; }
+  .back:disabled { visibility: hidden; }
+  .back svg { width: 22px; height: 22px; }
+  .progress { flex: 1; height: 8px; border-radius: 99px; background: var(--track); overflow: hidden; }
+  .progress > span { display: block; height: 100%; width: 0; background: var(--jaune); border-radius: inherit; transition: width .3s ease; }
+  .step { font: 700 13px Montserrat, sans-serif; color: var(--muted); min-width: 34px; text-align: right; }
+
+  .screen { display: none; animation: in .25s ease; }
+  .screen.on { display: block; }
+  @keyframes in { from { transform: translateY(6px); } to { transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .screen { animation: none; } .progress > span { transition: none; } }
+
+  /* Accueil */
+  .logo { display: block; width: 76px; height: auto; margin: 8px auto 4px; }
+  .brand { text-align: center; font: 800 15px Montserrat, sans-serif; color: var(--accent); letter-spacing: .02em; }
+  .brand b { color: #E3A300; }
+  .hero h1 { font-size: clamp(27px, 7.4vw, 33px); font-weight: 800; color: var(--accent); margin: 22px 0 12px; }
+  .hero h1 mark { background: linear-gradient(transparent 55%, var(--jaune) 55%); color: inherit; padding: 0 2px; }
+  @media (prefers-color-scheme: dark) {
+    .hero h1 mark { background: linear-gradient(transparent 60%, rgba(255,200,61,.45) 60%); }
+    .brand b { color: var(--jaune); }
+    .logo { background: var(--creme); border-radius: 20px; padding: 8px; }
+  }
+  .lead { color: var(--muted); margin: 0 0 16px; }
+  .checks { list-style: none; padding: 0; margin: 0 0 26px; display: grid; gap: 10px; }
+  .checks li { display: flex; gap: 10px; align-items: flex-start; }
+  .checks li::before { content: ""; flex: none; width: 22px; height: 22px; margin-top: 1px; border-radius: 50%;
+    background: var(--jaune) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 12.5l4 4 8-9' fill='none' stroke='%235A1E56' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/14px no-repeat; }
+  .meta { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 14px; color: var(--muted); font-size: 14px; }
+
+  .cta { display: flex; width: 100%; min-height: 56px; align-items: center; justify-content: center; gap: 8px;
+    border: 0; border-radius: 18px; background: var(--accent); color: var(--on-accent);
+    font: 700 17px Montserrat, sans-serif; cursor: pointer; padding: 0 20px; }
+  .cta:disabled { opacity: .4; cursor: default; }
+  .cta:focus-visible, .choice:focus-visible, .stepper button:focus-visible, .back:focus-visible, .link:focus-visible { outline: 3px solid var(--jaune); outline-offset: 2px; }
+  .link { background: none; border: 0; color: var(--muted); text-decoration: underline; cursor: pointer; min-height: 44px; padding: 0 8px; font-size: 15px; }
+
+  /* Questions */
+  .qnum { display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 50%;
+    background: var(--jaune); color: #5A1E56; font: 800 16px Montserrat, sans-serif; margin: 18px 0 12px; }
+  .q h2 { font-size: 23px; font-weight: 700; color: var(--accent); }
+  .hint { color: var(--muted); margin: 8px 0 0; font-size: 15px; }
+  .choices { display: grid; gap: 10px; margin: 22px 0 22px; }
+  .choice { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 56px; padding: 12px 16px;
+    text-align: left; background: var(--surface); border: 2px solid var(--line); border-radius: 16px; cursor: pointer; font-size: 17px; }
+  .choice .mark { flex: none; width: 22px; height: 22px; border: 2px solid var(--muted); border-radius: 50%; display: grid; place-items: center; }
+  .choice.multi .mark { border-radius: 6px; }
+  .choice[aria-checked="true"], .choice[aria-pressed="true"] { border-color: var(--accent); background: var(--selected); }
+  .choice[aria-checked="true"] .mark, .choice[aria-pressed="true"] .mark { border-color: var(--accent); background: var(--accent); }
+  .choice[aria-checked="true"] .mark::after, .choice[aria-pressed="true"] .mark::after { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--on-accent); }
+  .choice.multi[aria-pressed="true"] .mark::after { width: 10px; height: 6px; border-radius: 0; background: none; border: solid var(--on-accent); border-width: 0 0 2.5px 2.5px; transform: rotate(-45deg) translate(1px, -1px); }
+
+  .counters { display: grid; gap: 10px; margin: 22px 0; }
+  .counter { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: var(--surface); border: 2px solid var(--line); border-radius: 16px; padding: 8px 8px 8px 16px; min-height: 64px; }
+  .stepper { display: flex; align-items: center; gap: 4px; }
+  .stepper button { width: 44px; height: 44px; border-radius: 12px; border: 0; background: var(--selected); color: var(--accent); font: 700 22px Montserrat, sans-serif; cursor: pointer; }
+  .stepper button:disabled { opacity: .35; cursor: default; }
+  .stepper output { min-width: 32px; text-align: center; font: 800 20px Montserrat, sans-serif; }
+
+  /* Résultat */
+  .res-title { font-size: 26px; font-weight: 800; color: var(--accent); margin: 18px 0 4px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 18px; margin-top: 12px; }
+  .card h3 { font-size: 15px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+  .gauge { display: block; width: 220px; max-width: 100%; margin: 6px auto 0; }
+  .gauge-num { font: 800 44px Montserrat, sans-serif; fill: var(--ink); }
+  .gauge-max { font: 700 16px Montserrat, sans-serif; fill: var(--muted); }
+  .verdict { text-align: center; margin: 4px 0 0; font-weight: 700; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid2 .card { margin-top: 12px; }
+  .big { font: 800 32px Montserrat, sans-serif; color: var(--accent); margin: 8px 0 2px; }
+  .big.small { font-size: 24px; }
+  .sub { color: var(--muted); font-size: 14px; margin: 0; }
+  .recos { list-style: none; padding: 0; margin: 10px 0 0; display: grid; gap: 12px; }
+  .recos li { display: grid; grid-template-columns: 36px 1fr; gap: 10px; align-items: start; }
+  .recos .ico { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: var(--rose); color: #5A1E56; }
+  .recos .ico svg { width: 20px; height: 20px; }
+  .recos b { display: block; }
+  .note { color: var(--muted); font-size: 13px; margin: 12px 2px 0; }
+  .interest { border: 2px solid var(--jaune); }
+  .interest h3 { text-transform: none; letter-spacing: 0; font-size: 19px; color: var(--accent); }
+  .interest .choices { margin: 14px 0 0; }
+  .thanks { text-align: center; padding: 8px 0 2px; font-weight: 700; color: var(--accent); }
+  .center { text-align: center; margin-top: 18px; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header class="top" id="topbar" hidden>
+    <button class="back" id="back" type="button" aria-label="Question précédente">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <div class="progress" role="progressbar" aria-label="Avancement" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0"><span id="bar"></span></div>
+    <span class="step" id="stepLabel"></span>
+  </header>
+
+  <!-- Accueil -->
+  <section class="screen on hero" id="intro">
+    <img class="logo" src="../brand/logo-symbole.png" alt="">
+    <div class="brand">Deep<b>IN</b> Armour</div>
+    <h1>Et si tu découvrais le <mark>vrai potentiel</mark> de ton armoire&nbsp;?</h1>
+    <p class="lead">En 2 minutes, fais le point sur tes vêtements, chaussures et accessoires et révèle&nbsp;:</p>
+    <ul class="checks">
+      <li>Ce que tu utilises vraiment (et ce qui dort&nbsp;!)</li>
+      <li>La valeur de tes pièces oubliées</li>
+      <li>Des idées simples pour les faire vivre plus longtemps</li>
+    </ul>
+    <button class="cta" id="start" type="button">Faire le quiz (2 min) <span aria-hidden="true">→</span></button>
+    <div class="meta"><span>5 questions</span>·<span>Anonyme</span>·<span>Résultat immédiat</span></div>
+  </section>
+
+  <section class="screen q" id="question" aria-live="polite"></section>
+
+  <!-- Résultat -->
+  <section class="screen" id="result">
+    <h2 class="res-title">Ton résultat</h2>
+    <div class="card">
+      <h3>Score santé de ton armoire</h3>
+      <svg class="gauge" viewBox="0 0 200 120" role="img" id="gauge" aria-label="">
+        <path d="M20 100 A80 80 0 0 1 180 100" fill="none" stroke="var(--track)" stroke-width="16" stroke-linecap="round"/>
+        <path id="gaugeArc" d="M20 100 A80 80 0 0 1 180 100" fill="none" stroke="url(#g)" stroke-width="16" stroke-linecap="round" stroke-dasharray="0 252"/>
+        <defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#FFC83D"/><stop offset="1" stop-color="#7FB394"/></linearGradient></defs>
+        <text x="100" y="92" text-anchor="middle"><tspan class="gauge-num" id="scoreNum">0</tspan><tspan class="gauge-max" dx="2">/100</tspan></text>
+      </svg>
+      <p class="verdict" id="verdict"></p>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h3>Pièces qui dorment</h3>
+        <p class="big" id="dormantPct"></p>
+        <p class="sub" id="dormantCount"></p>
+      </div>
+      <div class="card">
+        <h3>Leur valeur</h3>
+        <p class="big small" id="value"></p>
+        <p class="sub">selon ton estimation</p>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Ton impact positif</h3>
+      <p class="big" id="circular"></p>
+      <p class="sub" id="circularSub"></p>
+    </div>
+    <div class="card">
+      <h3>Nos recommandations</h3>
+      <ul class="recos" id="recos"></ul>
+    </div>
+    <div class="card interest" id="interest">
+      <h3 id="interestTitle"></h3>
+      <div class="choices" id="interestChoices" role="radiogroup" aria-labelledby="interestTitle"></div>
+    </div>
+    <p class="note">Résultat indicatif, calculé à partir de tes réponses. Tes réponses sont anonymes : aucun nom ni e-mail n’est demandé.</p>
+    <div class="center"><button class="link" id="restart" type="button">Refaire le quiz</button></div>
+  </section>
+</main>
+
+<script src="config.js"></script>
+<script src="questions.js"></script>
+<script>
+(function () {
+  'use strict'
+  var CFG = window.QUIZ_CONFIG || {}
+  var QUESTIONS = window.QUIZ_QUESTIONS
+  var INTEREST = window.QUIZ_INTEREST
+  var QUEUE_KEY = 'deepin.quiz.queue'
+
+  // ---------- Petits outils ----------
+  function $(id) { return document.getElementById(id) }
+  function el(tag, attrs, text) {
+    var n = document.createElement(tag)
+    for (var k in attrs || {}) n.setAttribute(k, attrs[k])
+    if (text != null) n.textContent = text
+    return n
+  }
+  function newId() {
+    if (window.crypto && crypto.randomUUID) return crypto.randomUUID()
+    return Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10)
+  }
+  function readSource() {
+    var s = new URLSearchParams(location.search).get('src') || 'direct'
+    return s.toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 40) || 'direct'
+  }
+
+  // ---------- Envoi des réponses (file d'attente : rien ne se perd si le Wi-Fi coupe) ----------
+  var memQueue = []
+  function loadQueue() { try { return JSON.parse(localStorage.getItem(QUEUE_KEY) || '[]') } catch (e) { return memQueue } }
+  function saveQueue(q) { memQueue = q; try { localStorage.setItem(QUEUE_KEY, JSON.stringify(q)) } catch (e) {} }
+  var flushing = false
+  function flush() {
+    if (!CFG.endpoint || flushing) return
+    var q = loadQueue()
+    if (!q.length) return
+    flushing = true
+    fetch(CFG.endpoint, {
+      method: 'POST', mode: 'no-cors', keepalive: true,
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(q[0]),
+    }).then(function () {
+      saveQueue(loadQueue().slice(1)); flushing = false; flush()
+    }).catch(function () { flushing = false })
+  }
+  function send(fields) {
+    var payload = Object.assign({ id: state.id, source: state.source }, fields)
+    if (!CFG.endpoint) { console.info('[quiz] Pas d’adresse dans config.js : réponse non envoyée', payload); return }
+    var q = loadQueue(); q.push(payload); saveQueue(q); flush()
+  }
+  window.addEventListener('online', flush)
+  setInterval(flush, 10000)
+  flush()
+
+  // ---------- État ----------
+  var state
+  function reset() {
+    state = { id: newId(), source: readSource(), index: 0, answers: {}, interest: null }
+    QUESTIONS.forEach(function (q) {
+      if (q.type === 'multi') state.answers[q.key] = []
+      if (q.type === 'counters') { state.answers[q.key] = {}; q.items.forEach(function (it) { state.answers[q.key][it[0]] = 0 }) }
+    })
+  }
+  reset()
+
+  function show(id) {
+    ;['intro', 'question', 'result'].forEach(function (s) { $(s).classList.toggle('on', s === id) })
+    $('topbar').hidden = id === 'intro'
+    window.scrollTo(0, 0)
+  }
+  function setProgress(done) {
+    var n = QUESTIONS.length
+    $('bar').style.width = (done / n * 100) + '%'
+    document.querySelector('.progress').setAttribute('aria-valuenow', done)
+    $('stepLabel').textContent = done >= n ? '' : (state.index + 1) + '/' + n
+  }
+
+  // ---------- Questions ----------
+  function renderQuestion() {
+    var q = QUESTIONS[state.index]
+    var box = $('question')
+    box.textContent = ''
+    $('back').disabled = false
+    setProgress(state.index)
+    box.appendChild(el('div', { class: 'qnum', 'aria-hidden': 'true' }, String(state.index + 1)))
+    var h = el('h2', { id: 'qtitle', tabindex: '-1' }, q.title)
+    box.appendChild(h)
+    if (q.hint) box.appendChild(el('p', { class: 'hint' }, q.hint))
+
+    if (q.type === 'single') {
+      var list = el('div', { class: 'choices', role: 'radiogroup', 'aria-labelledby': 'qtitle' })
+      q.options.forEach(function (opt) {
+        var b = el('button', { type: 'button', class: 'choice', role: 'radio', 'aria-checked': String(state.answers[q.key] === opt) })
+        b.appendChild(el('span', { class: 'mark', 'aria-hidden': 'true' }))
+        b.appendChild(el('span', null, opt))
+        b.addEventListener('click', function () {
+          state.answers[q.key] = opt
+          list.querySelectorAll('.choice').forEach(function (c) { c.setAttribute('aria-checked', String(c === b)) })
+          setTimeout(next, 220)
+        })
+        list.appendChild(b)
+      })
+      box.appendChild(list)
+    }
+
+    if (q.type === 'multi') {
+      var picked = state.answers[q.key]
+      var mlist = el('div', { class: 'choices', role: 'group', 'aria-labelledby': 'qtitle' })
+      var go = el('button', { type: 'button', class: 'cta' }, 'Continuer')
+      function sync() { go.disabled = picked.length === 0 }
+      q.options.forEach(function (opt) {
+        var b = el('button', { type: 'button', class: 'choice multi', 'aria-pressed': String(picked.indexOf(opt) >= 0) })
+        b.appendChild(el('span', { class: 'mark', 'aria-hidden': 'true' }))
+        b.appendChild(el('span', null, opt))
+        b.addEventListener('click', function () {
+          var i = picked.indexOf(opt)
+          if (i >= 0) picked.splice(i, 1); else picked.push(opt)
+          b.setAttribute('aria-pressed', String(i < 0))
+          sync()
+        })
+        mlist.appendChild(b)
+      })
+      go.addEventListener('click', next)
+      sync()
+      box.appendChild(mlist)
+      box.appendChild(go)
+    }
+
+    if (q.type === 'counters') {
+      var vals = state.answers[q.key]
+      var clist = el('div', { class: 'counters' })
+      q.items.forEach(function (it) {
+        var key = it[0], label = it[1]
+        var row = el('div', { class: 'counter' })
+        row.appendChild(el('span', { id: 'lbl-' + key }, label))
+        var st = el('div', { class: 'stepper' })
+        var minus = el('button', { type: 'button', 'aria-label': 'Moins : ' + label }, '−')
+        var out = el('output', { 'aria-live': 'polite', 'aria-labelledby': 'lbl-' + key }, String(vals[key]))
+        var plus = el('button', { type: 'button', 'aria-label': 'Plus : ' + label }, '+')
+        function upd(d) {
+          vals[key] = Math.max(0, Math.min(30, vals[key] + d))
+          out.textContent = String(vals[key])
+          minus.disabled = vals[key] === 0
+          plus.disabled = vals[key] === 30
+        }
+        minus.addEventListener('click', function () { upd(-1) })
+        plus.addEventListener('click', function () { upd(1) })
+        upd(0)
+        st.appendChild(minus); st.appendChild(out); st.appendChild(plus)
+        row.appendChild(st)
+        clist.appendChild(row)
+      })
+      box.appendChild(clist)
+      var see = el('button', { type: 'button', class: 'cta' }, 'Voir mon résultat')
+      see.addEventListener('click', next)
+      box.appendChild(see)
+    }
+    show('question')
+    h.focus({ preventScroll: true })
+  }
+
+  function next() {
+    if (state.index < QUESTIONS.length - 1) { state.index++; renderQuestion() }
+    else showResult()
+  }
+  function back() {
+    if ($('result').classList.contains('on')) { renderQuestion(); return }
+    if (state.index === 0) { show('intro'); return }
+    state.index--; renderQuestion()
+  }
+
+  // ---------- Calcul du résultat (indicatif, à partir des réponses seulement) ----------
+  var TAILLE_MOY = [25, 45, 80, 120]   // pièces, milieu de chaque tranche
+  var PORTEE_MOY = [90, 70, 50, 30]    // % porté, milieu de chaque tranche
+  function idx(key) {
+    var q = QUESTIONS.filter(function (x) { return x.key === key })[0]
+    return q.options.indexOf(state.answers[key])
+  }
+  function compute() {
+    var h = state.answers.habitudes
+    var portee = PORTEE_MOY[idx('part_portee')]
+    var circ = h.echanges_prets + h.reparations + h.dons
+    var score = Math.round(portee * 0.5 + Math.min(30, circ * 6) + Math.max(0, 20 - h.achats_neufs * 4))
+    score = Math.max(0, Math.min(100, score))
+    var pct = 100 - portee
+    return {
+      score: score,
+      pct_dormant: pct,
+      pieces_dormantes: Math.round(TAILLE_MOY[idx('taille')] * pct / 100),
+      circular: circ,
+    }
+  }
+
+  var ICONS = {
+    repair: '<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L4 17v3h3l5.3-5.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>',
+    swap: '<path d="M4 8h13l-3-3M20 16H7l3 3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>',
+    heart: '<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>',
+    bulb: '<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>',
+    hanger: '<path d="M12 7a2 2 0 1 1 2-2c0 1-2 1.5-2 3l8.5 6.2a1.5 1.5 0 0 1-.9 2.8H4.4a1.5 1.5 0 0 1-.9-2.8L12 8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>',
+    leaf: '<path d="M5 19c0-8 5-13 14-14 0 9-5 14-13 14zM5 19l7-7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>',
+  }
+  function recommendations(r) {
+    var why = state.answers.raisons, h = state.answers.habitudes, out = []
+    function has(s) { return why.indexOf(s) >= 0 }
+    if (has('Pas visibles / oubliées')) out.push(['bulb', 'Réorganiser', 'Sors tes pièces oubliées sur le devant : une rangée « à porter cette semaine ».'])
+    if (has('À réparer')) out.push(['repair', 'Réparer', 'Choisis une pièce abîmée et confie-la à une retoucherie ou un cordonnier ce mois-ci.'])
+    if (has('Je veux les donner / les échanger') || has('Plus à mon goût ou à ma taille')) out.push(['swap', 'Échanger', 'Les pièces qui ne te vont plus peuvent faire le bonheur de quelqu’un près de chez toi.'])
+    if (has('Achetées pour une occasion spécifique')) out.push(['heart', 'Prêter', 'Une tenue d’occasion se prête très bien : elle sortira plus souvent.'])
+    if (has('Valeur sentimentale (je veux les garder)')) out.push(['hanger', 'Faire revivre', 'Une retouche peut rendre portable une pièce à laquelle tu tiens.'])
+    if (h.achats_neufs > r.circular) out.push(['leaf', 'Défi', 'Avant ton prochain achat neuf, cherche d’abord dans ton armoire : un mois sans achat ?'])
+    if (!out.length) out.push(['heart', 'Continuer', 'Tu fais déjà vivre ton armoire : partage tes astuces autour de toi.'])
+    return out.slice(0, 3)
+  }
+
+  function showResult() {
+    var r = compute(), h = state.answers.habitudes
+    setProgress(QUESTIONS.length)
+    show('result')
+
+    var len = 251.3
+    $('gaugeArc').setAttribute('stroke-dasharray', (len * r.score / 100).toFixed(1) + ' ' + len)
+    $('scoreNum').textContent = r.score
+    $('gauge').setAttribute('aria-label', 'Score : ' + r.score + ' sur 100')
+    $('verdict').textContent = r.score >= 75 ? 'Une armoire en bonne forme, avec encore du potentiel !'
+      : r.score >= 50 ? 'De belles bases, et des pièces qui n’attendent que toi.'
+      : 'Ton armoire cache un trésor : à toi de le réveiller.'
+    $('dormantPct').textContent = r.pct_dormant + ' %'
+    $('dormantCount').textContent = 'soit environ ' + r.pieces_dormantes + ' pièces'
+    $('value').textContent = state.answers.valeur.replace(/ (€|%)/g, ' $1')
+    $('circular').textContent = r.circular + (r.circular > 1 ? ' pièces' : ' pièce')
+    $('circularSub').textContent = r.circular === 0
+      ? 'remise en circulation en 6 mois : c’est le moment de commencer !'
+      : (r.circular > 1 ? 'gardées' : 'gardée') + ' en vie en 6 mois grâce à tes échanges, réparations et dons'
+
+    var ul = $('recos'); ul.textContent = ''
+    recommendations(r).forEach(function (rec) {
+      var li = el('li')
+      var ico = el('span', { class: 'ico', 'aria-hidden': 'true' })
+      ico.innerHTML = '<svg viewBox="0 0 24 24">' + ICONS[rec[0]] + '</svg>'
+      var txt = el('div'); txt.appendChild(el('b', null, rec[1])); txt.appendChild(el('span', null, rec[2]))
+      li.appendChild(ico); li.appendChild(txt); ul.appendChild(li)
+    })
+
+    renderInterest()
+
+    send({
+      etape: 'termine',
+      taille: state.answers.taille,
+      part_portee: state.answers.part_portee,
+      raisons: state.answers.raisons.join(' ; '),
+      valeur: state.answers.valeur,
+      achats_neufs: h.achats_neufs,
+      echanges_prets: h.echanges_prets,
+      reparations: h.reparations,
+      dons: h.dons,
+      score: r.score,
+      pct_dormant: r.pct_dormant,
+      pieces_dormantes: r.pieces_dormantes,
+    })
+  }
+
+  function renderInterest() {
+    $('interestTitle').textContent = INTEREST.title
+    var box = $('interestChoices'); box.textContent = ''
+    if (state.interest) { box.appendChild(el('p', { class: 'thanks' }, 'Merci, c’est noté !')); return }
+    INTEREST.options.forEach(function (opt) {
+      var b = el('button', { type: 'button', class: 'choice', role: 'radio', 'aria-checked': 'false' })
+      b.appendChild(el('span', { class: 'mark', 'aria-hidden': 'true' }))
+      b.appendChild(el('span', null, opt))
+      b.addEventListener('click', function () {
+        state.interest = opt
+        send({ etape: 'interet', interet: opt })
+        renderInterest()
+      })
+      box.appendChild(b)
+    })
+  }
+
+  // ---------- Branchements ----------
+  $('start').addEventListener('click', function () {
+    send({ etape: 'debut' })
+    state.index = 0
+    renderQuestion()
+  })
+  $('back').addEventListener('click', back)
+  $('restart').addEventListener('click', function () { reset(); show('intro') })
+})()
+</script>
+</body>
+</html>

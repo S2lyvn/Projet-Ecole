@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Quiz en direct</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --violet: #5A1E56; --jaune: #FFC83D; --rose: #F7D4DC; --sauge: #A8C9B5;
+    --bg: #FFF7E8; --surface: #FFFFFF; --ink: #2B1029; --muted: #6E5A6B; --line: #EADFD9;
+    --accent: var(--violet); --track: #F1E6E2; --bar: var(--violet); --bar2: var(--jaune);
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1C1220; --surface: #291B2D; --ink: #F7EEF3; --muted: #C4B3C2; --line: #43304A;
+      --accent: #E0AEDB; --track: #3A2A3F; --bar: #E0AEDB;
+      color-scheme: dark;
+    }
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html, body { margin: 0; }
+  body { background: var(--bg); color: var(--ink); font: 16px/1.4 Lato, system-ui, sans-serif; min-height: 100dvh; }
+  h1, h2 { font-family: Montserrat, system-ui, sans-serif; margin: 0; line-height: 1.15; }
+  .wrap { max-width: 1400px; margin: 0 auto; padding: 16px; }
+  header { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+  header img { width: 44px; height: auto; background: #FFF7E8; border-radius: 12px; padding: 4px; }
+  header h1 { font-size: clamp(20px, 3vw, 30px); font-weight: 800; color: var(--accent); flex: 1; min-width: 200px; }
+  .live { display: inline-flex; align-items: center; gap: 8px; font: 700 13px Montserrat, sans-serif; color: var(--muted); }
+  .live i { width: 10px; height: 10px; border-radius: 50%; background: #7FB394; box-shadow: 0 0 0 0 rgba(127,179,148,.6); animation: pulse 2s infinite; }
+  .live.off i { background: #C9A9A9; animation: none; }
+  @keyframes pulse { 70% { box-shadow: 0 0 0 10px rgba(127,179,148,0); } 100% { box-shadow: 0 0 0 0 rgba(127,179,148,0); } }
+  @media (prefers-reduced-motion: reduce) { .live i { animation: none; } }
+  .badge { background: var(--jaune); color: #5A1E56; font: 800 12px Montserrat, sans-serif; padding: 4px 10px; border-radius: 99px; text-transform: uppercase; letter-spacing: .04em; }
+
+  .layout { display: grid; gap: 16px; grid-template-columns: 1fr; }
+  @media (min-width: 900px) { .layout { grid-template-columns: 340px 1fr; align-items: start; } .side { position: sticky; top: 16px; } }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 18px; }
+  .side { display: grid; gap: 16px; }
+  .qr { text-align: center; }
+  .qr #qrcode { display: inline-block; padding: 12px; background: #fff; border-radius: 16px; }
+  .qr #qrcode img, .qr #qrcode canvas { display: block; width: 240px; height: 240px; }
+  .qr p { margin: 10px 0 0; font: 700 18px Montserrat, sans-serif; color: var(--accent); }
+  .qr small { display: block; color: var(--muted); word-break: break-all; margin-top: 4px; }
+  .kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .kpi .n { font: 800 clamp(36px, 5vw, 56px) Montserrat, sans-serif; color: var(--accent); line-height: 1; }
+  .kpi .l { color: var(--muted); font-size: 14px; margin-top: 6px; }
+
+  .charts { display: grid; gap: 16px; grid-template-columns: 1fr; }
+  @media (min-width: 700px) { .charts { grid-template-columns: 1fr 1fr; } }
+  .card h2 { font-size: 17px; font-weight: 700; margin-bottom: 14px; }
+  .bars { display: grid; gap: 10px; }
+  .bar .top { display: flex; justify-content: space-between; gap: 12px; font-size: 15px; margin-bottom: 4px; }
+  .bar .top b { font-family: Montserrat, sans-serif; white-space: nowrap; }
+  .bar .track { height: 12px; border-radius: 99px; background: var(--track); overflow: hidden; }
+  .bar .fill { height: 100%; width: 0; border-radius: inherit; background: var(--bar); transition: width .6s ease; }
+  .bar.alt .fill { background: var(--bar2); }
+  .habits { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .habit .n { font: 800 32px Montserrat, sans-serif; color: var(--accent); }
+  .habit .l { color: var(--muted); font-size: 14px; }
+  .msg { color: var(--muted); }
+  .wide { grid-column: 1 / -1; }
+  footer { color: var(--muted); font-size: 13px; margin-top: 16px; }
+  select { font: inherit; color: inherit; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; min-height: 40px; padding: 0 10px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <img src="../brand/logo-symbole.png" alt="">
+    <h1>Le quiz en direct</h1>
+    <span class="badge" id="demoBadge" hidden>Données d’exemple</span>
+    <label class="live" id="live"><i></i><span id="liveText">Connexion…</span></label>
+    <select id="sourceSel" aria-label="Filtrer par source"></select>
+  </header>
+
+  <div class="layout">
+    <aside class="side">
+      <div class="card qr">
+        <div id="qrcode" aria-hidden="true"></div>
+        <p>Scanne et réponds&nbsp;!</p>
+        <small id="quizUrl"></small>
+      </div>
+      <div class="kpis">
+        <div class="card kpi"><div class="n" id="completed">–</div><div class="l">réponses complètes</div></div>
+        <div class="card kpi"><div class="n" id="avgScore">–</div><div class="l">score santé moyen /100</div></div>
+        <div class="card kpi"><div class="n" id="avgDormant">–</div><div class="l">de pièces qui dorment (moyenne)</div></div>
+        <div class="card kpi"><div class="n" id="started">–</div><div class="l">quiz commencés</div></div>
+      </div>
+    </aside>
+
+    <main class="charts" id="charts">
+      <p class="msg wide" id="msg"></p>
+    </main>
+  </div>
+  <footer>Mise à jour automatique toutes les 5 secondes. Réponses anonymes, résultats indicatifs.</footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="config.js"></script>
+<script src="questions.js"></script>
+<script>
+(function () {
+  'use strict'
+  var CFG = window.QUIZ_CONFIG || {}
+  var params = new URLSearchParams(location.search)
+  var DEMO = params.get('demo') === '1'
+  var source = params.has('src') ? params.get('src') : 'presentation'
+  var QUESTIONS = window.QUIZ_QUESTIONS, INTEREST = window.QUIZ_INTEREST
+
+  function $(id) { return document.getElementById(id) }
+  function el(tag, cls, text) { var n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n }
+
+  // ---------- QR code vers le quiz ----------
+  var quizUrl = new URL('./', location.href)
+  quizUrl.search = ''
+  quizUrl.searchParams.set('src', source || 'presentation')
+  $('quizUrl').textContent = quizUrl.href
+  if (window.QRCode) {
+    new QRCode($('qrcode'), { text: quizUrl.href, width: 480, height: 480, colorDark: '#2B1029', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M })
+  }
+
+  // ---------- Filtre par source ----------
+  function fillSources(sources) {
+    var sel = $('sourceSel'), cur = source
+    var names = Object.keys(sources || {})
+    if (cur && names.indexOf(cur) < 0) names.push(cur)
+    var opts = [['', 'Toutes les sources']].concat(names.sort().map(function (n) { return [n, n + (sources && sources[n] ? ' (' + sources[n] + ')' : '')] }))
+    var sig = JSON.stringify(opts)
+    if (sel.dataset.sig === sig) return
+    sel.dataset.sig = sig; sel.textContent = ''
+    opts.forEach(function (o) { var op = el('option', null, o[1]); op.value = o[0]; op.selected = o[0] === cur; sel.appendChild(op) })
+  }
+  $('sourceSel').addEventListener('change', function (e) {
+    var u = new URL(location.href); u.searchParams.set('src', e.target.value); location.href = u.href
+  })
+
+  // ---------- Rendu ----------
+  var built = false
+  function build() {
+    var charts = $('charts')
+    QUESTIONS.concat([INTEREST]).forEach(function (q) {
+      var card = el('section', 'card')
+      card.appendChild(el('h2', null, q.short))
+      if (q.type === 'counters') {
+        var h = el('div', 'habits')
+        q.items.forEach(function (it) {
+          var d = el('div', 'habit')
+          var n = el('div', 'n', '–'); n.id = 'h-' + it[0]
+          d.appendChild(n); d.appendChild(el('div', 'l', it[1]))
+          h.appendChild(d)
+        })
+        card.appendChild(h)
+      } else {
+        var bars = el('div', 'bars')
+        q.options.forEach(function (opt, i) {
+          var b = el('div', 'bar' + (q === INTEREST && i === 0 ? ' alt' : ''))
+          var top = el('div', 'top')
+          top.appendChild(el('span', null, opt))
+          var v = el('b', null, '0'); v.dataset.key = q.key + '|' + opt
+          top.appendChild(v)
+          var tr = el('div', 'track'), f = el('div', 'fill'); f.dataset.key = q.key + '|' + opt
+          tr.appendChild(f); b.appendChild(top); b.appendChild(tr); bars.appendChild(b)
+        })
+        card.appendChild(bars)
+      }
+      if (q.key === 'raisons' || q.key === 'interet') card.classList.add('wide')
+      charts.appendChild(card)
+    })
+    built = true
+  }
+
+  function render(s) {
+    if (!built) build()
+    $('msg').textContent = s.completed ? '' : 'En attente des premières réponses…'
+    $('msg').hidden = !!s.completed
+    $('completed').textContent = s.completed
+    $('started').textContent = s.started
+    $('avgScore').textContent = s.avgScore == null ? '–' : Math.round(s.avgScore)
+    $('avgDormant').textContent = s.avgPctDormant == null ? '–' : Math.round(s.avgPctDormant) + ' %'
+    fillSources(s.sources)
+    QUESTIONS.concat([INTEREST]).forEach(function (q) {
+      if (q.type === 'counters') {
+        q.items.forEach(function (it) {
+          var v = s.habits && s.habits[it[0]]
+          $('h-' + it[0]).textContent = v == null ? '–' : String(v).replace('.', ',')
+        })
+        return
+      }
+      var counts = (s.questions && s.questions[q.key]) || {}
+      var total = q.type === 'multi' ? s.completed : q.options.reduce(function (a, o) { return a + (counts[o] || 0) }, 0)
+      q.options.forEach(function (opt) {
+        var n = counts[opt] || 0, pct = total ? Math.round(n / total * 100) : 0
+        var key = q.key + '|' + opt
+        document.querySelector('b[data-key="' + CSS.escape(key) + '"]').textContent = n + (total ? '  ·  ' + pct + ' %' : '')
+        document.querySelector('.fill[data-key="' + CSS.escape(key) + '"]').style.width = pct + '%'
+      })
+    })
+  }
+
+  function setLive(ok, text) {
+    $('live').classList.toggle('off', !ok)
+    $('liveText').textContent = text
+  }
+
+  // ---------- Données d'exemple (?demo=1), pour répéter la présentation ----------
+  var demoState = null
+  function demoStats() {
+    if (!demoState) demoState = { completed: 0, started: 0, q: {}, score: 0, dormant: 0, h: { achats_neufs: 0, echanges_prets: 0, reparations: 0, dons: 0 } }
+    var d = demoState, add = 1 + Math.floor(Math.random() * 3)
+    function pick(a) { return a[Math.floor(Math.random() * a.length)] }
+    for (var i = 0; i < add; i++) {
+      d.started++; d.completed++
+      QUESTIONS.concat([INTEREST]).forEach(function (q) {
+        if (q.type === 'counters') return
+        d.q[q.key] = d.q[q.key] || {}
+        var picks = q.type === 'multi' ? q.options.filter(function () { return Math.random() < .4 }) : [pick(q.options)]
+        picks.forEach(function (p) { d.q[q.key][p] = (d.q[q.key][p] || 0) + 1 })
+      })
+      d.score += 40 + Math.random() * 45; d.dormant += 15 + Math.random() * 50
+      for (var k in d.h) d.h[k] += Math.floor(Math.random() * 4)
+    }
+    d.started += Math.random() < .3 ? 1 : 0
+    var hb = {}; for (var k2 in d.h) hb[k2] = Math.round(d.h[k2] / d.completed * 10) / 10
+    return { completed: d.completed, started: d.started, avgScore: d.score / d.completed, avgPctDormant: d.dormant / d.completed, questions: d.q, habits: hb, sources: { presentation: d.started } }
+  }
+
+  // ---------- Récupération ----------
+  function poll() {
+    if (DEMO) { render(demoStats()); setLive(true, 'Démo'); return }
+    if (!CFG.endpoint) { setLive(false, 'Non branché'); $('msg').textContent = 'Ajoute l’adresse du script Google dans quiz/config.js (voir docs/quiz/README.md), ou ouvre cette page avec ?demo=1 pour voir un exemple.'; return }
+    var u = new URL(CFG.endpoint)
+    if (source) u.searchParams.set('source', source)
+    fetch(u.href).then(function (r) { return r.json() }).then(function (s) {
+      render(s)
+      setLive(true, 'En direct · ' + new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }))
+    }).catch(function () { setLive(false, 'Hors ligne, nouvel essai…') })
+  }
+  if (DEMO) $('demoBadge').hidden = false
+  fillSources({})
+  poll()
+  setInterval(poll, 5000)
+})()
+</script>
+</body>
+</html>

@@ -61,6 +61,8 @@ export default defineConfig({
         ],
       },
       workbox: {
+        // Le quiz de présentation (public/quiz/) vit à part : jamais mis en cache par l'appli.
+        globIgnores: ['**/node_modules/**/*', 'quiz/**'],
         navigateFallback: `${base}app/index.html`,
         // Seules les adresses de l'appli retombent sur l'appli ; la vitrine reste la vitrine.
         navigateFallbackAllowlist: [new RegExp(`^${base}app(/|$)`)],

@@ -23,6 +23,7 @@ Ce fichier est lu automatiquement par Claude Code. Il résume le projet et fixe 
 | `docs/07-feuille-de-route.md` | Les étapes de développement, avec le prompt à donner pour chacune |
 | `docs/08-decisions-ouvertes.md` | Ce que l'équipe doit encore trancher |
 | `docs/mvp-whatsapp.md` | Le test de la bourse d'échange sur WhatsApp : mode d'emploi, textes, mesures |
+| `docs/quiz/README.md` | Le quiz de présentation (page à part `public/quiz/`) : Google Sheet, mise en ligne, résultats en direct |
 | `reference/prototype-e-mirror.html` | Le prototype interactif (à ouvrir dans un navigateur) : référence visuelle et logique |
 
 ## Règles de travail
