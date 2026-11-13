@@ -146,7 +146,7 @@
       <li>Des idées simples pour les faire vivre plus longtemps</li>
     </ul>
     <button class="cta" id="start" type="button">Faire le quiz (2 min) <span aria-hidden="true">→</span></button>
-    <div class="meta"><span>5 questions</span>·<span>Anonyme</span>·<span>Résultat immédiat</span></div>
+    <div class="meta"><span id="qCount">6 questions</span>·<span>Anonyme</span>·<span>Résultat immédiat</span></div>
   </section>
 
   <section class="screen q" id="question" aria-live="polite"></section>
@@ -268,12 +268,14 @@
     var n = QUESTIONS.length
     $('bar').style.width = (done / n * 100) + '%'
     document.querySelector('.progress').setAttribute('aria-valuenow', done)
+    document.querySelector('.progress').setAttribute('aria-valuemax', n)
     $('stepLabel').textContent = done >= n ? '' : (state.index + 1) + '/' + n
   }
 
   // ---------- Questions ----------
   function renderQuestion() {
     var q = QUESTIONS[state.index]
+    var nextLabel = state.index === QUESTIONS.length - 1 ? 'Voir mon résultat' : 'Continuer'
     var box = $('question')
     box.textContent = ''
     $('back').disabled = false
@@ -302,16 +304,29 @@
     if (q.type === 'multi') {
       var picked = state.answers[q.key]
       var mlist = el('div', { class: 'choices', role: 'group', 'aria-labelledby': 'qtitle' })
-      var go = el('button', { type: 'button', class: 'cta' }, 'Continuer')
-      function sync() { go.disabled = picked.length === 0 }
+      var go = el('button', { type: 'button', class: 'cta' }, nextLabel)
+      function sync() {
+        go.disabled = picked.length === 0
+        mlist.querySelectorAll('.choice').forEach(function (c) {
+          c.setAttribute('aria-pressed', String(picked.indexOf(c.dataset.opt) >= 0))
+        })
+      }
       q.options.forEach(function (opt) {
-        var b = el('button', { type: 'button', class: 'choice multi', 'aria-pressed': String(picked.indexOf(opt) >= 0) })
+        var b = el('button', { type: 'button', class: 'choice multi', 'aria-pressed': 'false', 'data-opt': opt })
         b.appendChild(el('span', { class: 'mark', 'aria-hidden': 'true' }))
         b.appendChild(el('span', null, opt))
         b.addEventListener('click', function () {
           var i = picked.indexOf(opt)
-          if (i >= 0) picked.splice(i, 1); else picked.push(opt)
-          b.setAttribute('aria-pressed', String(i < 0))
+          if (i >= 0) { picked.splice(i, 1) }
+          else {
+            // Une réponse « exclusive » (ex. : « Rien de tout ça ») ne se combine pas avec les autres.
+            if (q.exclusive) {
+              var keep = opt === q.exclusive ? [] : picked.filter(function (p) { return p !== q.exclusive })
+              picked.length = 0
+              keep.forEach(function (p) { picked.push(p) })
+            }
+            picked.push(opt)
+          }
           sync()
         })
         mlist.appendChild(b)
@@ -347,7 +362,7 @@
         clist.appendChild(row)
       })
       box.appendChild(clist)
-      var see = el('button', { type: 'button', class: 'cta' }, 'Voir mon résultat')
+      var see = el('button', { type: 'button', class: 'cta' }, nextLabel)
       see.addEventListener('click', next)
       box.appendChild(see)
     }
@@ -395,9 +410,19 @@
     hanger: '<path d="M12 7a2 2 0 1 1 2-2c0 1-2 1.5-2 3l8.5 6.2a1.5 1.5 0 0 1-.9 2.8H4.4a1.5 1.5 0 0 1-.9-2.8L12 8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>',
     leaf: '<path d="M5 19c0-8 5-13 14-14 0 9-5 14-13 14zM5 19l7-7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>',
   }
+  // La première recommandation reprend ce que la personne veut faire en communauté (question 6).
+  var COMMUNITY_RECO = {
+    'Les échanger contre d’autres pièces': ['swap', 'Échanger', 'Tu veux troquer : choisis 3 pièces qui dorment, elles sont ta monnaie d’échange.'],
+    'Les prêter ou en emprunter pour une occasion': ['heart', 'Prêter', 'Tes tenues d’occasion peuvent sortir plus souvent en passant d’une armoire à l’autre.'],
+    'Les donner à quelqu’un près de chez moi': ['heart', 'Donner', 'Tes pièces peuvent faire le bonheur de quelqu’un de ton quartier.'],
+    'Les faire réparer ou retoucher par un artisan local': ['repair', 'Réparer', 'Une retouche chez un artisan près de chez toi peut remettre une pièce dans ta rotation.'],
+    'Les vendre à d’autres membres': ['leaf', 'Remettre en jeu', 'Vendre ou échanger entre membres : tes pièces restent en circulation près de chez toi.'],
+  }
   function recommendations(r) {
     var why = state.answers.raisons, h = state.answers.habitudes, out = []
+    var wish = state.answers.communaute || []
     function has(s) { return why.indexOf(s) >= 0 }
+    for (var w = 0; w < wish.length; w++) if (COMMUNITY_RECO[wish[w]]) { out.push(COMMUNITY_RECO[wish[w]]); break }
     if (has('Pas visibles / oubliées')) out.push(['bulb', 'Réorganiser', 'Sors tes pièces oubliées sur le devant : une rangée « à porter cette semaine ».'])
     if (has('À réparer')) out.push(['repair', 'Réparer', 'Choisis une pièce abîmée et confie-la à une retoucherie ou un cordonnier ce mois-ci.'])
     if (has('Je veux les donner / les échanger') || has('Plus à mon goût ou à ma taille')) out.push(['swap', 'Échanger', 'Les pièces qui ne te vont plus peuvent faire le bonheur de quelqu’un près de chez toi.'])
@@ -405,7 +430,9 @@
     if (has('Valeur sentimentale (je veux les garder)')) out.push(['hanger', 'Faire revivre', 'Une retouche peut rendre portable une pièce à laquelle tu tiens.'])
     if (h.achats_neufs > r.circular) out.push(['leaf', 'Défi', 'Avant ton prochain achat neuf, cherche d’abord dans ton armoire : un mois sans achat ?'])
     if (!out.length) out.push(['heart', 'Continuer', 'Tu fais déjà vivre ton armoire : partage tes astuces autour de toi.'])
-    return out.slice(0, 3)
+    // Pas deux fois la même idée (même titre).
+    var seen = {}
+    return out.filter(function (o) { if (seen[o[1]]) return false; seen[o[1]] = 1; return true }).slice(0, 3)
   }
 
   function showResult() {
@@ -449,6 +476,7 @@
       echanges_prets: h.echanges_prets,
       reparations: h.reparations,
       dons: h.dons,
+      communaute: state.answers.communaute.join(' ; '),
       score: r.score,
       pct_dormant: r.pct_dormant,
       pieces_dormantes: r.pieces_dormantes,
@@ -471,6 +499,8 @@
       box.appendChild(b)
     })
   }
+
+  $('qCount').textContent = QUESTIONS.length + ' questions'
 
   // ---------- Branchements ----------
   $('start').addEventListener('click', function () {

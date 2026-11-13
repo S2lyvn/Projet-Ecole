@@ -14,6 +14,8 @@ var COLUMNS = [
   'taille', 'part_portee', 'raisons', 'valeur',
   'achats_neufs', 'echanges_prets', 'reparations', 'dons',
   'score', 'pct_dormant', 'pieces_dormantes', 'interet',
+  // Ajouté le 13/11/2026 : toujours ajouter les nouvelles colonnes à la fin.
+  'communaute',
 ]
 var MAX_LEN = 300 // longueur maximale d'une valeur texte
 
@@ -104,6 +106,7 @@ function stats_(rows, source) {
       taille: count('taille'),
       part_portee: count('part_portee'),
       raisons: count('raisons', true),
+      communaute: count('communaute', true),
       valeur: count('valeur'),
       interet: count('interet'),
     },
@@ -124,6 +127,9 @@ function sheet_() {
     sheet.appendRow(COLUMNS)
     sheet.setFrozenRows(1)
     sheet.getRange(1, 1, 1, COLUMNS.length).setFontWeight('bold')
+  } else if (sheet.getLastColumn() < COLUMNS.length) {
+    // Nouvelle colonne ajoutée au script : on complète l'en-tête.
+    sheet.getRange(1, 1, 1, COLUMNS.length).setValues([COLUMNS]).setFontWeight('bold')
   }
   return sheet
 }

@@ -1,6 +1,6 @@
 # Quiz de présentation : mode d'emploi
 
-Une page à part, seulement pour le quiz (les 5 questions du document du groupe « Quizz et questions »), pour mesurer en direct pendant la présentation. Elle n'est reliée ni à la vitrine ni à l'appli.
+Une page à part, seulement pour le quiz (les 5 questions du document du groupe « Quizz et questions », plus une 6ᵉ sur la communauté), pour mesurer en direct pendant la présentation. Elle n'est reliée ni à la vitrine ni à l'appli.
 
 | Page | Adresse (une fois en ligne) | Pour qui |
 |---|---|---|
@@ -75,13 +75,14 @@ Une autre occasion (salon, cours, réseaux sociaux) ? Change la source dans le l
 | `maj` | Date et heure de la dernière mise à jour |
 | `source` | D'où vient la personne (`presentation`, `test`, `direct`…) |
 | `etape` | `debut` (a commencé), `termine` (a vu son résultat), `interet` (a aussi répondu à la question finale) |
-| `taille` … `dons` | Les réponses aux 5 questions (`raisons` : choix séparés par « ; ») |
+| `taille` … `dons` | Les réponses aux questions 1 à 5 (`raisons` : choix séparés par « ; ») |
 | `score`, `pct_dormant`, `pieces_dormantes` | Le résultat affiché à la personne |
 | `interet` | Réponse à « Une appli qui t'aide à faire tout ça, tu l'utiliserais ? » |
+| `communaute` | Question 6 : comment la personne voudrait revaloriser ses vêtements en communauté (échanger, prêter, donner, faire réparer, vendre, ou rien). Choix séparés par « ; ». Colonne ajoutée à la fin le 13 novembre 2026 |
 
 Pour des graphiques : *Insertion › Graphique* dans le Sheet, ou *Données › Tableau croisé dynamique*. Pour un fichier : *Fichier › Télécharger › Microsoft Excel* ou *CSV*.
 
-Mesures utiles pour la soutenance : taux de complétion (`termine` + `interet`) ÷ toutes les lignes ; part de « Oui, carrément » ; part de personnes qui portent moins de 60 % de leurs pièces.
+Mesures utiles pour la soutenance : taux de complétion (`termine` + `interet`) ÷ toutes les lignes ; part de « Oui, carrément » ; part de personnes qui portent moins de 60 % de leurs pièces ; et pour la bourse d'échange : part de personnes qui cochent « Les échanger contre d'autres pièces » à la question 6.
 
 ## Le calcul du résultat (indicatif)
 

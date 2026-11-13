@@ -51,6 +51,23 @@ window.QUIZ_QUESTIONS = [
       ['dons', 'Dons / transmissions'],
     ],
   },
+  {
+    key: 'communaute',
+    type: 'multi',
+    title: 'Et demain, au sein d’une communauté, comment aimerais-tu redonner de la valeur à tes vêtements ?',
+    short: 'Revaloriser ses vêtements en communauté',
+    hint: 'Plusieurs choix possibles',
+    options: [
+      'Les échanger contre d’autres pièces',
+      'Les prêter ou en emprunter pour une occasion',
+      'Les donner à quelqu’un près de chez moi',
+      'Les faire réparer ou retoucher par un artisan local',
+      'Les vendre à d’autres membres',
+      'Rien de tout ça, je préfère les garder',
+    ],
+    // Cette réponse décoche les autres (et inversement).
+    exclusive: 'Rien de tout ça, je préfère les garder',
+  },
 ]
 
 window.QUIZ_INTEREST = {
